@@ -98,33 +98,241 @@ Question 1
 \end_layout
 
 \begin_layout Description
-(a) Due to simmetry, for any pair 
-\begin_inset Formula $i,j$
+(a) For a set of 3 variables we must look at 3 kinds of conditional independenci
+es, w.l.o.g (all other permutations are symmetrical):
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2}|X_{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2},X_{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Type 1 CI - hold
+\end_layout
+
+\begin_layout Standard
+Starting with the first kind of CI, for any values for 
+\begin_inset Formula $x_{1},x_{2}$
 \end_inset
 
  it holds that 
-\begin_inset Formula $q(x_{i},x_{j})=\frac{1}{6}+\frac{1}{12}=\frac{1}{4}$
+\begin_inset Formula $q(x_{1},x_{2})=\frac{1}{6}+\frac{1}{12}=\frac{1}{4}$
 \end_inset
 
  and for any 
 \begin_inset Formula $k\in[3]$
 \end_inset
 
+, and any value for 
+\begin_inset Formula $x_{k}$
+\end_inset
+
  
-\begin_inset Formula $q(x_{k})=\frac{1}{2}$
+\begin_inset Formula $q(x_{k})=\frac{1}{6}+\frac{1}{12}+\frac{1}{6}+\frac{1}{12}=\frac{1}{2}$
 \end_inset
 
 .
  Therefore 
-\begin_inset Formula $q(x_{i},x_{j})=q(x_{i})q(x_{j})$
+\begin_inset Formula $q(x_{1},x_{2})=q(x_{1})q(x_{2})$
 \end_inset
 
- which implies 
+ which implies that for all 
+\begin_inset Formula $i,j$
+\end_inset
+
+: 
 \begin_inset Formula $X_{i}\perp X_{j}\in I(q)$
 \end_inset
 
 .
- Moreover, it is now clear that for any permutation 
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Type 2 CI - don't hold
+\end_layout
+
+\begin_layout Standard
+We shall show an example for which this CI doesn't hold:
+\end_layout
+
+\begin_layout Standard
+We will show 
+\begin_inset Formula $p(x_{1}|x_{3})p(x_{2}|x_{3})\neq p(x_{1},x_{2}|x_{3})$
+\end_inset
+
+ for the case: 
+\begin_inset Formula $x_{1},x_{2},x_{3}=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+p(x_{1},x_{2}|x_{3})=\frac{p(x_{1}=0,x_{2}=0,x_{3}=0)}{p(x_{3}=0)}=\frac{\frac{1}{12}}{\frac{1}{2}}=\frac{1}{6}\\
+p(x_{1}|x_{3})=p(x_{2}|x_{3})=\frac{\frac{1}{12}+\frac{1}{6}}{\frac{1}{2}}=\frac{1}{2}\\
+\frac{1}{4}=p(x_{1}|x_{3})p(x_{2}|x_{3})\neq p(x_{1},x_{2}|x_{3})=\frac{1}{6}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Type 3 CI - don't hold
+\end_layout
+
+\begin_layout Standard
+We shall show an example for which this CI doesn't hold:
+\end_layout
+
+\begin_layout Standard
+We will show 
+\begin_inset Formula $p(x_{1},x_{2},x_{3})\neq p(x_{1})p(x_{2},x_{3})$
+\end_inset
+
+ for the case: 
+\begin_inset Formula $x_{1},x_{2},x_{3}=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+p(x_{1}=0,x_{2}=0,x_{3}=0)=\frac{1}{12}\\
+p(x_{1}=0)=\frac{1}{2}\\
+p(x_{2}=0,x_{3}=0)=\frac{1}{12}+\frac{1}{6}=\frac{1}{4}\\
+\frac{1}{12}=p(x_{1}=0,x_{2}=0,x_{3}=0)\neq p(x_{1}=0)p(x_{2}=0,x_{3}=0)=\frac{1}{8}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Overall: 
+\begin_inset Formula $I(q)=\{(X_{1}\perp X_{2}),(X_{2}\perp X_{3}),(X_{3}\perp X_{1})\}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+(b) No, proof by contradiction.
+ Let us assume there exists a DAG 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{LM}(G)=I(q)$
+\end_inset
+
+, so 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{LM}(G)$
+\end_inset
+
+ which means 
+\begin_inset Formula $Pa(i)=\emptyset$
+\end_inset
+
+ and 
+\begin_inset Formula $ND(i)=\{X_{j}\}$
+\end_inset
+
+ but this is true for any 
+\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,1)\}$
+\end_inset
+
+ and hence the contradiction is obvious (there are no parents but every
+ node has one decendant for example).
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(c) No, proof by contradiction.
+ Let us assume there exists an undirected graph 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{sep}(G)=I(q)$
+\end_inset
+
+, so because for all 
+\begin_inset Formula $i,j$
+\end_inset
+
+: 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{sep}(G)$
+\end_inset
+
+ there are no edges in 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ because there are no routes from 
+\begin_inset Formula $X_{1}$
+\end_inset
+
+ to 
+\begin_inset Formula $X_{2},X_{3}$
+\end_inset
+
+ at all it holds that 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\in I_{sep}(G)$
+\end_inset
+
+.
+ But we know that 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\notin I(q)$
+\end_inset
+
+ a contradiction to 
+\begin_inset Formula $I_{sep}(G)=I(q)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Old Question 1
+\end_layout
+
+\begin_layout Standard
+For the second type of CI: it is clear that for any permutation 
 \begin_inset Formula $(i,j,k)$
 \end_inset
 
@@ -148,7 +356,8 @@ q(x_{i}|x_{k})q(x_{j}|x_{k}) & =\frac{1}{4}\\
 \begin_inset Formula $X_{i}\perp X_{j}|X_{k}\notin I(q)$
 \end_inset
 
-, and 
+.
+ For the Third kind of CI: 
 \begin_inset Formula 
 \begin{align*}
 q(x_{i}) & =\frac{1}{2}\\
@@ -495,40 +704,81 @@ We define
 \end_inset
 
 .
- Let 
-\begin_inset Formula $k\in X_{\bar{S}\backslash i}$
+ 
+\end_layout
+
+\begin_layout Standard
+More specifically we will show that: 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ is d-separated from 
+\begin_inset Formula $X_{\bar{S}\backslash i}$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ by showing that there is no active trail from 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ to some node 
+\begin_inset Formula $j\in X_{\bar{S}\backslash i}$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ (definition 6).
+ 
+\end_layout
+
+\begin_layout Standard
+There are 3 possible cases for an undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Itemize
+An undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ via 
+\begin_inset Formula $k\in Ch(i)$
+\end_inset
+
+ and some 
+\begin_inset Formula $l\in Pa(k)$
 \end_inset
 
 .
- We have 3 cases:
-\end_layout
-
-\begin_layout Itemize
-If there is an undirected path between 
-\begin_inset Formula $i$
-\end_inset
-
- and 
-\begin_inset Formula $j$
-\end_inset
-
- via 
-\begin_inset Formula $k\in Ch(i)$
-\end_inset
-
- and 
-\begin_inset Formula $l\in Pa(j)$
-\end_inset
-
-, then 
+ Then because 
 \begin_inset Formula $l\in S$
 \end_inset
 
- is not the child in this v-stracture.
+ and 
+\begin_inset Formula $l$
+\end_inset
+
+ is not the descendent of the child in a v-structure the path is not active.
 \end_layout
 
 \begin_layout Itemize
-If there is an undirected path between 
+An undirected path between 
 \begin_inset Formula $i$
 \end_inset
 
@@ -540,8 +790,8 @@ If there is an undirected path between
 \begin_inset Formula $k\in Ch(i)$
 \end_inset
 
- but not via 
-\begin_inset Formula $Pa(j)$
+ but not via some 
+\begin_inset Formula $l\in Pa(k)$
 \end_inset
 
 , then 
@@ -552,11 +802,12 @@ If there is an undirected path between
 \begin_inset Formula $k$
 \end_inset
 
- is not in a v-stracture in the path.
+ is not the child in a v-structure in the path or a descendent of one so
+ the path is not active.
 \end_layout
 
 \begin_layout Itemize
-If there is an undirected path between 
+An undirected path between 
 \begin_inset Formula $i$
 \end_inset
 
@@ -568,11 +819,17 @@ If there is an undirected path between
 \begin_inset Formula $k\in Pa(i)$
 \end_inset
 
-, then
-\begin_inset Formula $k\in S$
+.
+ In this case 
+\begin_inset Formula $k$
 \end_inset
 
- is not in a v-stracture.
+ which is in 
+\begin_inset Formula $S$
+\end_inset
+
+ cannot be the child in a v-structure or a descendent of one so the path
+ is not active.
 \end_layout
 
 \begin_layout Standard
@@ -592,7 +849,7 @@ Overall, there is no active trail between
 \begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\in I_{d-sep}(G)\subseteq I(p)$
 \end_inset
 
- by definition and Proposition 2.3.1.
+ by definition 6 and Proposition 2.3.1.
  We now have left to show the minimalism of 
 \begin_inset Formula $S$
 \end_inset
@@ -606,11 +863,11 @@ Overall, there is no active trail between
 \begin_inset Formula $X_{i}$
 \end_inset
 
-and 
+ and 
 \begin_inset Formula $X_{k}$
 \end_inset
 
-are dependant given 
+ are dependant given 
 \begin_inset Formula $X_{S}$
 \end_inset
 
