@@ -315,7 +315,7 @@ From 1,2 we have:
 \begin_inset Formula $p(x|z,w)=p(x|z,y)$
 \end_inset
 
- (*) 
+ (*)
 \end_layout
 
 \begin_layout Subsubsection*
@@ -331,139 +331,23 @@ We will prove that
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align*}     
-\end_layout
-
-\begin_layout Plain Layout
-
-p(x|y,z,w)=p(x|z,w) && 
-\backslash
-text{from 1}
-\backslash
-
-\backslash
-     
-\end_layout
-
-\begin_layout Plain Layout
-
-p(y|z,w)p(x|y,z,w)=p(y|z,w)p(x|z,w) && 
-\backslash
-text{multiply both sides by: }p(y|z,w)
-\backslash
-
-\backslash
-     
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align*} 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{align*}
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-shortintertext{from 1:}     
-\end_layout
-
-\begin_layout Plain Layout
-
-	p(x|y,z,w)&=p(x|z,w)
-\backslash
-
-\backslash
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-shortintertext{Multiply both sides by $p(y|z,w)$ :}     
-\end_layout
-
-\begin_layout Plain Layout
-
-	p(y|z,w)p(x|y,z,w)&=p(y|z,w)p(x|z,w)
-\backslash
-
-\backslash
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{align*} 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection*
-Old Question 2:
-\end_layout
-
-\begin_layout Standard
-From 
-\begin_inset Formula $X\perp Y|Z,W$
-\end_inset
-
-, we have 
+From 1, we have 
 \begin_inset Formula $p(x|y,z,w)=p(x|z,w)$
 \end_inset
 
 .
- From 
-\begin_inset Formula $X\perp W|Z,Y$
+ Multiplying both sides by 
+\begin_inset Formula $p(y|z,w)$
 \end_inset
 
-, we have 
-\begin_inset Formula $p(x|y,z,w)=p(x|w,z,y)=p(x|z,y)$
-\end_inset
+ gives:
+\end_layout
 
-.
- By combining the equations we get 
-\begin_inset Formula $p(x|w,z)=p(x|y,z)$
-\end_inset
-
-.
- We now inspect each side:
+\begin_layout Standard
 \begin_inset Formula 
-\begin{gather*}
-p(x|w,z)=\frac{p(x,w,z)}{p(w,z)}=\frac{p(x,w|z)p(z)}{p(w|z)p(z)}=\frac{p(x,w|z)}{p(w|z)}\\
-p(x|y,z)=\frac{p(x,y,z)}{p(y,z)}=\frac{p(x,y|z)p(z)}{p(y|z)p(z)}=\frac{p(x,y|z)}{p(y|z)}
-\end{gather*}
+\[
+p(y|z,w)p(x|y,z,w)=p(y|z,w)p(x|z,w)
+\]
 
 \end_inset
 
@@ -471,45 +355,86 @@ p(x|y,z)=\frac{p(x,y,z)}{p(y,z)}=\frac{p(x,y|z)p(z)}{p(y|z)p(z)}=\frac{p(x,y|z)}
 \end_layout
 
 \begin_layout Standard
-\noindent
-Hence we get 
-\begin_inset Formula $p(x,w|z)p(y|z)=p(x,y|z)p(w|z)$
+Equivalently:
+\begin_inset Formula 
+\[
+p(x,y|w,z)=p(y|w,z)p(x|w,z)
+\]
+
 \end_inset
 
-.
- Now, by summing each side by 
+
+\end_layout
+
+\begin_layout Standard
+Multiplying both sides by 
+\begin_inset Formula $p(w|z)$
+\end_inset
+
+ gives:
+\begin_inset Formula 
+\[
+p(w|z)p(x,y|w,z)=p(w|z)p(y|w,z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Summing over 
+\begin_inset Formula $y$
+\end_inset
+
+ gives:
+\begin_inset Formula 
+\[
+p(x,w|z)=p(w|z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From (*):
+\begin_inset Formula 
+\[
+p(x,w|z)=p(w|z)p(x|y,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Summing over 
 \begin_inset Formula $w$
 \end_inset
 
- we get 
-\begin_inset Formula $p(x|z)p(y|z)=p(x,y|z)$
+ gives:
+\begin_inset Formula 
+\[
+p(x|z)=p(x|y,z)
+\]
+
 \end_inset
 
- and therefore 
-\begin_inset Formula $X\perp Y|Z$
-\end_inset
 
-.
- Now, from 
-\begin_inset Formula $X\perp W|Z,Y$
-\end_inset
+\end_layout
 
- we also have 
-\begin_inset Formula $p(x,w|y,z)=p(x|y,z)p(w|y,z)$
-\end_inset
-
-.
- Again, we inspect each side:
+\begin_layout Standard
+From 2:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{gather*}
-p(x,w|y,z)=\frac{p(x,w,y,z)}{p(y,z)}=\frac{p(x,w,y|z)p(z)}{p(y,z)}\\
-p(w|y,z)=\frac{p(w,y,z)}{p(y,z)}=\frac{p(y,w|z)p(z)}{p(y,z)}\\
-\Rightarrow\frac{p(x,w,y|z)p(z)}{p(y,z)}=p(x|y,z)\frac{p(y,w|z)p(z)}{p(y,z)}\\
-\Rightarrow p(x,w,y|z)=p(y,w|z)p(x|y,z)
-\end{gather*}
+\[
+p(x|z)=p(x|w,z,y)\Rightarrow X\perp Y,W|Z
+\]
 
 \end_inset
 
@@ -517,29 +442,14 @@ p(w|y,z)=\frac{p(w,y,z)}{p(y,z)}=\frac{p(y,w|z)p(z)}{p(y,z)}\\
 \end_layout
 
 \begin_layout Standard
-\noindent
-From 
-\begin_inset Formula $X\perp Y|Z$
-\end_inset
-
- we have 
-\begin_inset Formula $p(x|y,z)=p(x|z)$
-\end_inset
-
- and by putting it in the last equation we get 
-\begin_inset Formula $p(x,w,y|z)=p(y,w|z)p(x|z)$
-\end_inset
-
- and by definition 
-\begin_inset Formula $X\perp Y,W|Z$
-\end_inset
-
-.
- 
 \begin_inset Formula $\Box$
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\noindent
 \begin_inset Newpage newpage
 \end_inset
 
