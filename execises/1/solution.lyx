@@ -83,7 +83,7 @@ Jonathan Somer [jonathan.somer@gmail.com] [307923383]
 \begin_inset Newline newline
 \end_inset
 
-Matan Harel [matan.harel.mh@gmail.com] []
+Matan Harel [matan.harel.mh@gmail.com] [302695721]
 \end_layout
 
 \begin_layout Section*
@@ -103,7 +103,7 @@ Question 1
 \end_inset
 
  it holds that 
-\begin_inset Formula $q(x_{i},x_{j})=1/6+1/12=1/4$
+\begin_inset Formula $q(x_{i},x_{j})=\frac{1}{6}+\frac{1}{12}=\frac{1}{4}$
 \end_inset
 
  and for any 
@@ -111,12 +111,16 @@ Question 1
 \end_inset
 
  
-\begin_inset Formula $q(x_{k})=1/2$
+\begin_inset Formula $q(x_{k})=\frac{1}{2}$
 \end_inset
 
 .
  Therefore 
 \begin_inset Formula $q(x_{i},x_{j})=q(x_{i})q(x_{j})$
+\end_inset
+
+ which implies 
+\begin_inset Formula $X_{i}\perp X_{j}\in I(q)$
 \end_inset
 
 .
@@ -130,28 +134,39 @@ Question 1
 
  it holds that
 \begin_inset Formula 
-\[
-q(x_{i}|x_{j})q(x_{i}|x_{j})=\frac{1}{4}\neq\begin{cases}
+\begin{align*}
+q(x_{i}|x_{k})q(x_{j}|x_{k}) & =\frac{1}{4}\\
+ & \neq\begin{cases}
 \frac{1}{6} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
 \frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
-\end{cases}=2q(x_{1},x_{2},x_{3})=q(x_{1},x_{2}|x_{3})
-\]
+\end{cases}=2q(x_{1},x_{2},x_{3})=q(x_{i},x_{j}|x_{k})
+\end{align*}
 
 \end_inset
 
- and 
+ which implies 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{k}\notin I(q)$
+\end_inset
+
+, and 
 \begin_inset Formula 
-\[
-q(x_{i}|x_{j},x_{k})=4q(x_{1},x_{2},x_{3})=\begin{cases}
-1/3 & x_{1}\oplus x_{2}\oplus x_{3}=0\\
-2/3 & x_{1}\oplus x_{2}\oplus x_{3}=1
-\end{cases}\neq1/2=q(x_{i})
-\]
+\begin{align*}
+q(x_{i}) & =\frac{1}{2}\\
+ & \neq\begin{cases}
+\frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
+\frac{2}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
+\end{cases}=4q(x_{1},x_{2},x_{3})=q(x_{i}|x_{j},x_{k})
+\end{align*}
 
 \end_inset
 
-so overall we get that 
-\begin_inset Formula $I(q)=\{X_{1}\perp X_{2},X_{2}\perp X_{3},X_{3}\perp X_{4},X_{4}\perp X_{1}\}$
+which implies 
+\begin_inset Formula $X_{i}\perp X_{j},X_{k}\notin I(q)$
+\end_inset
+
+.
+ so overall we get 
+\begin_inset Formula $I(q)=\{X_{1}\perp X_{2},X_{2}\perp X_{3},X_{3}\perp X_{1}\}$
 \end_inset
 
 .
@@ -180,7 +195,7 @@ so overall we get that
 \end_inset
 
  but this is true for any 
-\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,4),(4,1)\}$
+\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,1)\}$
 \end_inset
 
  and hence the contradiction is obvious (there are no parents but every
