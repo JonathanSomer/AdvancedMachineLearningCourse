@@ -383,6 +383,18 @@ p(w|z)p(x,y|w,z)=p(w|z)p(y|w,z)p(x|w,z)
 \end_layout
 
 \begin_layout Standard
+Equivalently:
+\begin_inset Formula 
+\[
+p(x,y,w|z)=p(w|z)p(y|w,z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Summing over 
 \begin_inset Formula $y$
 \end_inset
@@ -1377,6 +1389,361 @@ Question 6
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula $G=(E,V)$
+\end_inset
+
+ is a tree graph.
+ 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ is a markov network on 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ We will show that for any assignment 
+\begin_inset Formula $x_{1},..,x_{n}$
+\end_inset
+
+ it holds that: 
+\begin_inset Formula 
+\[
+p(x_{[n]})=\prod_{i=1}^{n}p(x_{i})\prod_{ij\in E}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ Note: we use the notation 
+\begin_inset Formula $x_{[n]}$
+\end_inset
+
+ to denote: 
+\begin_inset Formula $x_{1},..,x_{n}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection*
+Proof:
+\end_layout
+
+\begin_layout Standard
+We will prove the claim by induction over the size of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Base case 
+\begin_inset Formula $|V|=1$
+\end_inset
+
+ trivially holds:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p(x_{1})=\prod_{i=1}^{1}p(x_{i})\prod_{ij\in\emptyset}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ The case for 
+\begin_inset Formula $|V|=2$
+\end_inset
+
+ is similar (and will enable us to assume 
+\begin_inset Formula $n\geq3$
+\end_inset
+
+ in all cases henceforth):
+\begin_inset Formula 
+\[
+p(x_{1},x_{2})=\prod_{i=1}^{2}p(x_{i})\prod_{ij\in{(1,2)}}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ Let us assume that the claim holds for any graph where 
+\begin_inset Formula $|V|<n$
+\end_inset
+
+, and we now prove for 
+\begin_inset Formula $|V|=n$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $G=(V,E)$
+\end_inset
+
+ be some tree graph where 
+\begin_inset Formula $|V|=n$
+\end_inset
+
+, and 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ a markov network on this graph.
+ It holds for any distribution that:
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n]})=p(x_{n}|x_{[n-1]})p(x_{[n-1]})
+\end{equation}
+
+\end_inset
+
+ In any tree graph there exists a leaf.
+ Assume w.l.o.g that 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ is a leaf.
+ That is 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ has only one neighbour.
+ Assume w.l.o.g that this neihbour is 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+By Theorem 4.1 (if 
+\begin_inset Formula $p$
+\end_inset
+
+ factorizes according to G then 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+) and the fact that 
+\begin_inset Formula $I_{LM}(G)\subseteq I_{sep}(G)$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+p(x_{n}|x_{[n-1]})=p(x_{n}|x_{n-1})
+\]
+
+\end_inset
+
+ Replacing this in (5) we arrive at:
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n]})=p(x_{n}|x_{n-1})p(x_{[n-1]})
+\end{equation}
+
+\end_inset
+
+ Note that the sub-graph resulting from removing 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ from 
+\begin_inset Formula $G$
+\end_inset
+
+ is also a tree as 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ was a leaf so the remaining graph is still connected and has no cycles.
+\end_layout
+
+\begin_layout Subsubsection*
+\noindent
+Claim: 
+\begin_inset Formula $p(x_{[n-1]})$
+\end_inset
+
+ is a markov network on the tree graph 
+\begin_inset Formula $G'$
+\end_inset
+
+ resulting from 
+\begin_inset Formula $G$
+\end_inset
+
+ by removing the leaf 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+.
+ Proof:
+\end_layout
+
+\begin_layout Standard
+By definition of markov network and the fact that all cliques in a tree
+ are of size 2 (or else we will have cycles), corresponding exactly to edges:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n-1]})=\sum_{x_{n}}p(x_{[n-1]},x_{n})=\sum_{x_{n}}\frac{1}{Z}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})
+\end{equation}
+
+\end_inset
+
+In the last equality we used the fact that all 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ where 
+\begin_inset Formula $i\neq n$
+\end_inset
+
+ are constants within the sum.
+ We would like to arrange the expression as a product of 
+\begin_inset Formula $\text{\phi}_{ij}(x_{i},x_{j})$
+\end_inset
+
+ for 
+\begin_inset Formula $ij\in E\backslash{(n,n-1)}$
+\end_inset
+
+.
+ To acheive this we will 
+\begin_inset Quotes eld
+\end_inset
+
+push
+\begin_inset Quotes erd
+\end_inset
+
+ the value of 
+\begin_inset Formula $\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})$
+\end_inset
+
+ into one of the 
+\begin_inset Formula $\phi_{ij}$
+\end_inset
+
+.
+ We need all functions to depend only on their 2 paramaters so we have to
+ choose one where 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+ is one.
+ Recognize that because 
+\begin_inset Formula $n\geq3$
+\end_inset
+
+ and 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+ is connected to the rest of the graph, there exists some variable, w.l.o.g
+ 
+\begin_inset Formula $x_{n-2}$
+\end_inset
+
+, s.t: 
+\begin_inset Formula $(x_{n-1,}x_{n-2})\in E$
+\end_inset
+
+.
+ Now we define:
+\begin_inset Formula 
+\[
+\phi'_{n-1,n-2}(x_{n-1},x_{n-2})=\phi_{n-1,n-2}(x_{n-1},x_{n-2})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})
+\]
+
+\end_inset
+
+ For ease of notation, for all other pairs denote 
+\begin_inset Formula $\phi'_{ij}=\phi_{ij}$
+\end_inset
+
+ We arrive at: 
+\begin_inset Formula 
+\begin{gather*}
+\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
+\prod_{ij\in E\backslash{(n,n-1),(n-1,n-2)}}\phi_{ij}(x_{i}x_{j})\cdot(\phi_{n-1.n-2}(x_{n-1,}x_{n-2})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1}))=\\
+\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+\end{gather*}
+
+\end_inset
+
+ And for Z
+\begin_inset Formula 
+\begin{multline*}
+Z=\sum_{x_{[n]}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\sum_{x_{[n-1]}}\sum_{x_{n}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\\
+\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi_{ij}(x_{i,}x_{j})\sum_{x_{n}}\phi_{n-1,n}(x_{n-1,}x_{n})=\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})
+\end{multline*}
+
+\end_inset
+
+ Finally arriving at:
+\begin_inset Formula 
+\begin{multline*}
+p(x_{[n-1]})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
+\frac{1}{\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})}\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+\end{multline*}
+
+\end_inset
+
+So 
+\begin_inset Formula $p(x_{[n-1]})$
+\end_inset
+
+ is a markov network on the resulting tree!
+\end_layout
+
+\begin_layout Subsubsection*
+We continue with the induction:
+\end_layout
+
+\begin_layout Standard
+By the induction hypothesis, on the Tree resulting from removing 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ from 
+\begin_inset Formula $G$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{gather*}
+p(x_{[n]})=p(x_{n}|x_{n-1})p(x_{[n-1]})=\\
+p(x_{n}|x_{n-1})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
+\frac{p(x_{n},x_{n-1})}{p(x_{n-1})}\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
+p(x_{n})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\cdot\frac{p(x_{n},x_{n-1})}{p(x_{n})p(x_{n-1})}=\\
+\prod_{i\in[n]}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\square$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Old Question 6
+\end_layout
+
+\begin_layout Standard
 First, w.l.o.g we assume that 
 \begin_inset Formula $\forall ij\in E$
 \end_inset
@@ -1395,7 +1762,12 @@ First, w.l.o.g we assume that
 \begin_inset Formula $|V|=1$
 \end_inset
 
- the claim holds trivially.
+ the claim holds trivially (as there are no edges in the graph, the markov
+ network 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ is in the required form).
  Let us assume the claim holds 
 \begin_inset Formula $\forall k\in[n-1]$
 \end_inset
@@ -1405,7 +1777,12 @@ First, w.l.o.g we assume that
 \end_inset
 
 .
- We know that:
+ Let there be G, some graph with n nodes, and 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ a markov network on this graph.
+ We know that for any distribution:
 \end_layout
 
 \begin_layout Standard
@@ -1441,7 +1818,7 @@ By Theorem 4.1 (if
 \begin_inset Formula $p$
 \end_inset
 
- factorizes according to G the 
+ factorizes according to G then 
 \begin_inset Formula $I_{sep}(G)\subseteq I(p)$
 \end_inset
 
