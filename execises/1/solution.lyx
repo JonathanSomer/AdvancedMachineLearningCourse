@@ -926,7 +926,7 @@ Question 4
 \end_layout
 
 \begin_layout Description
-(a) By Theorem 4, it's suffices to show that 
+(a) By Theorem 4: as p is positive it suffices to show that 
 \begin_inset Formula $I_{pair}(G)\subseteq I(p)$
 \end_inset
 
