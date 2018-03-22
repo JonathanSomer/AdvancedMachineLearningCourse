@@ -239,6 +239,187 @@ Question 2
 \end_layout
 
 \begin_layout Standard
+We are given a positive distribution 
+\begin_inset Formula $p(w,x,y,z)$
+\end_inset
+
+.
+ It is known that: 
+\end_layout
+
+\begin_layout Enumerate
+We are given - 
+\begin_inset Formula $(X\perp Y|Z,W)$
+\end_inset
+
+, equivalently: 
+\begin_inset Formula $p(x|y,z,w)=p(x|z,w)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+We are given - (
+\begin_inset Formula $X\perp W|Z,Y$
+\end_inset
+
+), equivalently:
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $p(x|w,z,y)=p(x|z,y)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From 1,2 we have: 
+\begin_inset Formula $p(x|z,w)=p(x|z,y)$
+\end_inset
+
+ (*) 
+\end_layout
+
+\begin_layout Subsubsection*
+We will prove that 
+\begin_inset Formula $(X\bot Y,W|Z)$
+\end_inset
+
+, that is: 
+\begin_inset Formula $p(x|y,w,z)=p(x|z)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align*}     
+\end_layout
+
+\begin_layout Plain Layout
+
+p(x|y,z,w)=p(x|z,w) && 
+\backslash
+text{from 1}
+\backslash
+
+\backslash
+     
+\end_layout
+
+\begin_layout Plain Layout
+
+p(y|z,w)p(x|y,z,w)=p(y|z,w)p(x|z,w) && 
+\backslash
+text{multiply both sides by: }p(y|z,w)
+\backslash
+
+\backslash
+     
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align*} 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{align*}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+shortintertext{from 1:}     
+\end_layout
+
+\begin_layout Plain Layout
+
+	p(x|y,z,w)&=p(x|z,w)
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+shortintertext{Multiply both sides by $p(y|z,w)$ :}     
+\end_layout
+
+\begin_layout Plain Layout
+
+	p(y|z,w)p(x|y,z,w)&=p(y|z,w)p(x|z,w)
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{align*} 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Old Question 2:
+\end_layout
+
+\begin_layout Standard
 From 
 \begin_inset Formula $X\perp Y|Z,W$
 \end_inset
