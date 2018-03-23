@@ -166,11 +166,11 @@ Starting with the first kind of CI, for any values for
 \end_layout
 
 \begin_layout Subsubsection*
-Type 2 CI - don't hold
+Type 2 CI - does not hold
 \end_layout
 
 \begin_layout Standard
-We shall show an example for which this CI doesn't hold:
+We shall show an example for which this CI does not hold:
 \end_layout
 
 \begin_layout Standard
@@ -199,11 +199,11 @@ p(x_{1}|x_{3})=p(x_{2}|x_{3})=\frac{\frac{1}{12}+\frac{1}{6}}{\frac{1}{2}}=\frac
 \end_layout
 
 \begin_layout Subsubsection*
-Type 3 CI - don't hold
+Type 3 CI - does not hold
 \end_layout
 
 \begin_layout Standard
-We shall show an example for which this CI doesn't hold:
+We shall show an example for which this CI does not hold:
 \end_layout
 
 \begin_layout Standard
@@ -320,133 +320,6 @@ Overall:
 \end_inset
 
 .
- 
-\begin_inset Formula $\Box$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-Old Question 1
-\end_layout
-
-\begin_layout Standard
-For the second type of CI: it is clear that for any permutation 
-\begin_inset Formula $(i,j,k)$
-\end_inset
-
- of 
-\begin_inset Formula $[3]$
-\end_inset
-
- it holds that
-\begin_inset Formula 
-\begin{align*}
-q(x_{i}|x_{k})q(x_{j}|x_{k}) & =\frac{1}{4}\\
- & \neq\begin{cases}
-\frac{1}{6} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
-\frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
-\end{cases}=2q(x_{1},x_{2},x_{3})=q(x_{i},x_{j}|x_{k})
-\end{align*}
-
-\end_inset
-
- which implies 
-\begin_inset Formula $X_{i}\perp X_{j}|X_{k}\notin I(q)$
-\end_inset
-
-.
- For the Third kind of CI: 
-\begin_inset Formula 
-\begin{align*}
-q(x_{i}) & =\frac{1}{2}\\
- & \neq\begin{cases}
-\frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
-\frac{2}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
-\end{cases}=4q(x_{1},x_{2},x_{3})=q(x_{i}|x_{j},x_{k})
-\end{align*}
-
-\end_inset
-
-which implies 
-\begin_inset Formula $X_{i}\perp X_{j},X_{k}\notin I(q)$
-\end_inset
-
-.
- so overall we get 
-\begin_inset Formula $I(q)=\{X_{1}\perp X_{2},X_{2}\perp X_{3},X_{3}\perp X_{1}\}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Description
-(b) No, proof by contradiction.
- Let us assume there exists a DAG 
-\begin_inset Formula $G$
-\end_inset
-
- where 
-\begin_inset Formula $I_{LM}(G)=I(q)$
-\end_inset
-
-, so 
-\begin_inset Formula $X_{i}\perp X_{j}\in I_{LM}(G)$
-\end_inset
-
- which means 
-\begin_inset Formula $Pa(i)=\emptyset$
-\end_inset
-
- and 
-\begin_inset Formula $ND(i)=\{X_{j}\}$
-\end_inset
-
- but this is true for any 
-\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,1)\}$
-\end_inset
-
- and hence the contradiction is obvious (there are no parents but every
- node has one decendant for example).
- 
-\begin_inset Formula $\Box$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Description
-(c) No, proof by contradiction.
- Let us assume there exists an undirected graph 
-\begin_inset Formula $G$
-\end_inset
-
- where 
-\begin_inset Formula $I_{sep}(G)=I(q)$
-\end_inset
-
-, so 
-\begin_inset Formula $X_{i}\perp X_{j}\in I_{sep}(G)$
-\end_inset
-
- which means there are no edges in 
-\begin_inset Formula $G$
-\end_inset
-
- but in this case for example 
-\begin_inset Formula $X_{1}\perp X_{2},X_{3}\in I_{sep}(G)$
-\end_inset
-
- where 
-\begin_inset Formula $X_{1}\perp X_{2},X_{3}\notin I_{sep}(G)$
-\end_inset
-
- and hence 
-\begin_inset Formula $I_{sep}(G)\neq I(q),$
-\end_inset
-
- a contradiction.
  
 \begin_inset Formula $\Box$
 \end_inset
@@ -1565,7 +1438,7 @@ status open
 
 .
  We know that 
-\begin_inset Formula $\mathcal{C}(G)=\{\{X_{1},X_{4}\},\{X_{1},X_{2}\},\{X_{3},X_{4}\},\{X_{2},X_{3}\}\}$
+\begin_inset Formula $\mathcal{C}(G)=\{\{X_{1},X_{2}\},\{X_{2},X_{3}\},\{X_{3},X_{4}\},\{X_{4},X_{1}\}\}$
 \end_inset
 
 .
@@ -1768,7 +1641,7 @@ p(x_{[n]})=p(x_{n}|x_{[n-1]})p(x_{[n-1]})
 \end_inset
 
  has only one neighbour.
- Assume w.l.o.g that this neihbour is 
+ Assume w.l.o.g that this neighbour is 
 \begin_inset Formula $x_{n-1}$
 \end_inset
 
@@ -1849,9 +1722,11 @@ By definition of markov network and the fact that all cliques in a tree
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{equation}
-p(x_{[n-1]})=\sum_{x_{n}}p(x_{[n-1]},x_{n})=\sum_{x_{n}}\frac{1}{Z}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})
-\end{equation}
+\begin{align}
+p(x_{[n-1]}) & =\sum_{x_{n}}p(x_{[n-1]},x_{n})\nonumber \\
+ & =\sum_{x_{n}}\frac{1}{Z}\prod_{ij\in E}\phi_{i,j}(x_{i,}x_{j})\nonumber \\
+ & =\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{i,j}(x_{i}x_{j})\sum_{x_{n}}\phi_{n,n-1}(x_{n},x_{n-1})
+\end{align}
 
 \end_inset
 
@@ -1929,18 +1804,22 @@ push
  We arrive at: 
 \begin_inset Formula 
 \begin{gather*}
-\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
-\prod_{ij\in E\backslash{(n,n-1),(n-1,n-2)}}\phi_{ij}(x_{i}x_{j})\cdot(\phi_{n-1.n-2}(x_{n-1,}x_{n-2})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1}))=\\
-\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+\prod_{ij\in E\backslash\{(n,n-1)\}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n,n-1}(x_{n},x_{n-1})\\
+=\prod_{ij\in E\backslash\{(n,n-1),(n-1,n-2)\}}\phi_{i,j}(x_{i}x_{j})\cdot(\phi_{n-1.n-2}(x_{n-1,}x_{n-2})\sum_{x_{n}}\phi_{n,n-1}(x_{n},x_{n-1}))\\
+=\prod_{ij\in E\backslash\{(n,n-1)\}}\phi'_{i,j}(x_{i},x_{j})
 \end{gather*}
 
 \end_inset
 
- And for Z
+ And for 
+\begin_inset Formula $Z$
+\end_inset
+
+:
 \begin_inset Formula 
 \begin{multline*}
-Z=\sum_{x_{[n]}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\sum_{x_{[n-1]}}\sum_{x_{n}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\\
-\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi_{ij}(x_{i,}x_{j})\sum_{x_{n}}\phi_{n-1,n}(x_{n-1,}x_{n})=\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})
+Z=\sum_{x_{[n]}}\prod_{ij\in E}\phi_{i,j}(x_{i,}x_{j})=\sum_{x_{[n-1]}}\sum_{x_{n}}\prod_{ij\in E}\phi_{i,j}(x_{i,}x_{j})=\\
+\sum_{x_{[n-1]}}\prod_{ij\in E\backslash\{(x_{n-1,}x_{n})\}}\phi_{i,j}(x_{i,}x_{j})\sum_{x_{n}}\phi_{n-1,n}(x_{n-1,}x_{n})=\sum_{x_{[n-1]}}\prod_{ij\in E\backslash\{(x_{n-1,}x_{n})\}}\phi'_{i,j}(x_{i,}x_{j})
 \end{multline*}
 
 \end_inset
@@ -1948,8 +1827,8 @@ Z=\sum_{x_{[n]}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\sum_{x_{[n-1]}}\sum_{x_{n
  Finally arriving at:
 \begin_inset Formula 
 \begin{multline*}
-p(x_{[n-1]})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
-\frac{1}{\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})}\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+p(x_{[n-1]})=\frac{1}{Z}\prod_{ij\in E\backslash\{(n,n-1)\}}\phi_{i,j}(x_{i}x_{j})\sum_{x_{n}}\phi_{n,n-1}(x_{n},x_{n-1})=\\
+\frac{1}{\sum_{x_{[n-1]}}\prod_{ij\in E\backslash\{(x_{n-1,}x_{n})\}}\phi'_{ij}(x_{i,}x_{j})}\prod_{ij\in E\backslash\{(n,n-1)\}}\phi'_{i,j}(x_{i},x_{j})
 \end{multline*}
 
 \end_inset
@@ -1966,7 +1845,7 @@ We continue with the induction:
 \end_layout
 
 \begin_layout Standard
-By the induction hypothesis, on the Tree resulting from removing 
+By the induction hypothesis, on the tree resulting from removing 
 \begin_inset Formula $x_{n}$
 \end_inset
 
@@ -1976,13 +1855,13 @@ By the induction hypothesis, on the Tree resulting from removing
 
 :
 \begin_inset Formula 
-\begin{gather*}
-p(x_{[n]})=p(x_{n}|x_{n-1})p(x_{[n-1]})=\\
-p(x_{n}|x_{n-1})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
-\frac{p(x_{n},x_{n-1})}{p(x_{n-1})}\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
-p(x_{n})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\cdot\frac{p(x_{n},x_{n-1})}{p(x_{n})p(x_{n-1})}=\\
-\prod_{i\in[n]}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
-\end{gather*}
+\begin{align*}
+p(x_{[n]}) & =p(x_{n}|x_{n-1})p(x_{[n-1]})\\
+ & =p(x_{n}|x_{n-1})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash\{(n,n-1)\}}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\\
+ & =\frac{p(x_{n},x_{n-1})}{p(x_{n-1})}\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash\{(n,n-1)\}}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\\
+ & =p(x_{n})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash\{(n,n-1)\}}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\cdot\frac{p(x_{n},x_{n-1})}{p(x_{n})p(x_{n-1})}\\
+ & =\prod_{i\in[n]}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{align*}
 
 \end_inset
 
@@ -1991,167 +1870,6 @@ p(x_{n})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x
 
 \begin_layout Standard
 \begin_inset Formula $\square$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-Old Question 6
-\end_layout
-
-\begin_layout Standard
-First, w.l.o.g we assume that 
-\begin_inset Formula $\forall ij\in E$
-\end_inset
-
-, 
-\begin_inset Formula $i<j$
-\end_inset
-
-.
- Proof by induction on the size of 
-\begin_inset Formula $V$
-\end_inset
-
-.
- For 
-\begin_inset Formula $|V|=1$
-\end_inset
-
- the claim holds trivially (as there are no edges in the graph, the markov
- network 
-\begin_inset Formula $p(x)$
-\end_inset
-
- is in the required form).
- Let us assume the claim holds 
-\begin_inset Formula $\forall k\in[n-1]$
-\end_inset
-
- and we now prove for 
-\begin_inset Formula $n$
-\end_inset
-
-.
- Let there be G, some graph with n nodes, and 
-\begin_inset Formula $p(x)$
-\end_inset
-
- a markov network on this graph.
- We know that for any distribution:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-p(x_{[n]})=p(x_{n}|x_{[n-1]})p(x_{[n-1]})
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-From the inductive hypothesis:
-\begin_inset Formula 
-\begin{equation}
-p(x_{[n-1]})=\prod_{i=1}^{n-1}p(x_{i})\prod_{\substack{ij\in E\\
-i,j\in[n-1]
-}
-}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-By Theorem 4.1 (if 
-\begin_inset Formula $p$
-\end_inset
-
- factorizes according to G then 
-\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
-\end_inset
-
-) and the fact that 
-\begin_inset Formula $I_{LM}(G)\subseteq I_{sep}(G)$
-\end_inset
-
-:
-\begin_inset Formula 
-\[
-p(x_{n}|x_{[n-1]})=p(x_{n}|x_{Nbr(n)})=\frac{p(x_{n},x_{Nbr(n)})}{p(x_{Nbr(n)})}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-\begin_inset Formula $G$
-\end_inset
-
- is a tree a graph, hence there are no circles and therefore, w.l.o.g 
-\begin_inset Formula $Nbr(n)<n-1$
-\end_inset
-
-.
- So, again by the inductive hypothesis:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{gather*}
-p(x_{n},x_{Nbr(n)})=\prod_{i\in Nbr(n)\cup\{n\}}p(x_{i})\prod_{\substack{ij\in E\\
-i,j\in Nbr(n)\cup\{n\}
-}
-}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\\
-p(x_{Nbr(n)})=\prod_{i\in Nbr(n)}p(x_{i})\prod_{\substack{ij\in E\\
-i,j\in Nbr(n)
-}
-}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
-\end{gather*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-\Rightarrow p(x_{n}|x_{[n-1]})=p(x_{n})\prod_{in\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-By (5), (6), (7) we get:
-\begin_inset Formula 
-\[
-p(x_{n})=\prod_{i=1}^{n}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-\begin_inset Formula $\Box$
 \end_inset
 
 
