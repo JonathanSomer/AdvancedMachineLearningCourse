@@ -1,0 +1,2161 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+ADVANCED MACHINE LEARNING EXERCISE #1 SOLUTION
+\end_layout
+
+\begin_layout Author
+Uri Avron [uriavron@gmail.com] [308046994]
+\begin_inset Newline newline
+\end_inset
+
+Jonathan Somer [jonathan.somer@gmail.com] [307923383]
+\begin_inset Newline newline
+\end_inset
+
+Matan Harel [matan.harel.mh@gmail.com] [302695721]
+\end_layout
+
+\begin_layout Section*
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 1
+\end_layout
+
+\begin_layout Description
+(a) For a set of 3 variables we must look at 3 kinds of conditional independenci
+es, w.l.o.g (all other permutations are symmetrical):
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2}|X_{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $X_{1}\bot X_{2},X_{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Type 1 CI - hold
+\end_layout
+
+\begin_layout Standard
+Starting with the first kind of CI, for any values for 
+\begin_inset Formula $x_{1},x_{2}$
+\end_inset
+
+ it holds that 
+\begin_inset Formula $q(x_{1},x_{2})=\frac{1}{6}+\frac{1}{12}=\frac{1}{4}$
+\end_inset
+
+ and for any 
+\begin_inset Formula $k\in[3]$
+\end_inset
+
+, and any value for 
+\begin_inset Formula $x_{k}$
+\end_inset
+
+ 
+\begin_inset Formula $q(x_{k})=\frac{1}{6}+\frac{1}{12}+\frac{1}{6}+\frac{1}{12}=\frac{1}{2}$
+\end_inset
+
+.
+ Therefore 
+\begin_inset Formula $q(x_{1},x_{2})=q(x_{1})q(x_{2})$
+\end_inset
+
+ which implies that for all 
+\begin_inset Formula $i,j$
+\end_inset
+
+: 
+\begin_inset Formula $X_{i}\perp X_{j}\in I(q)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Type 2 CI - don't hold
+\end_layout
+
+\begin_layout Standard
+We shall show an example for which this CI doesn't hold:
+\end_layout
+
+\begin_layout Standard
+We will show 
+\begin_inset Formula $p(x_{1}|x_{3})p(x_{2}|x_{3})\neq p(x_{1},x_{2}|x_{3})$
+\end_inset
+
+ for the case: 
+\begin_inset Formula $x_{1},x_{2},x_{3}=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+p(x_{1},x_{2}|x_{3})=\frac{p(x_{1}=0,x_{2}=0,x_{3}=0)}{p(x_{3}=0)}=\frac{\frac{1}{12}}{\frac{1}{2}}=\frac{1}{6}\\
+p(x_{1}|x_{3})=p(x_{2}|x_{3})=\frac{\frac{1}{12}+\frac{1}{6}}{\frac{1}{2}}=\frac{1}{2}\\
+\frac{1}{4}=p(x_{1}|x_{3})p(x_{2}|x_{3})\neq p(x_{1},x_{2}|x_{3})=\frac{1}{6}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Type 3 CI - don't hold
+\end_layout
+
+\begin_layout Standard
+We shall show an example for which this CI doesn't hold:
+\end_layout
+
+\begin_layout Standard
+We will show 
+\begin_inset Formula $p(x_{1},x_{2},x_{3})\neq p(x_{1})p(x_{2},x_{3})$
+\end_inset
+
+ for the case: 
+\begin_inset Formula $x_{1},x_{2},x_{3}=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+p(x_{1}=0,x_{2}=0,x_{3}=0)=\frac{1}{12}\\
+p(x_{1}=0)=\frac{1}{2}\\
+p(x_{2}=0,x_{3}=0)=\frac{1}{12}+\frac{1}{6}=\frac{1}{4}\\
+\frac{1}{12}=p(x_{1}=0,x_{2}=0,x_{3}=0)\neq p(x_{1}=0)p(x_{2}=0,x_{3}=0)=\frac{1}{8}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Overall: 
+\begin_inset Formula $I(q)=\{(X_{1}\perp X_{2}),(X_{2}\perp X_{3}),(X_{3}\perp X_{1})\}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+(b) No, proof by contradiction.
+ Let us assume there exists a DAG 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{LM}(G)=I(q)$
+\end_inset
+
+, so 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{LM}(G)$
+\end_inset
+
+ which means 
+\begin_inset Formula $Pa(i)=\emptyset$
+\end_inset
+
+ and 
+\begin_inset Formula $ND(i)=\{X_{j}\}$
+\end_inset
+
+ but this is true for any 
+\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,1)\}$
+\end_inset
+
+ and hence the contradiction is obvious (there are no parents but every
+ node has one decendant for example).
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(c) No, proof by contradiction.
+ Let us assume there exists an undirected graph 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{sep}(G)=I(q)$
+\end_inset
+
+, so because for all 
+\begin_inset Formula $i,j$
+\end_inset
+
+: 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{sep}(G)$
+\end_inset
+
+ there are no edges in 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ because there are no routes from 
+\begin_inset Formula $X_{1}$
+\end_inset
+
+ to 
+\begin_inset Formula $X_{2},X_{3}$
+\end_inset
+
+ at all it holds that 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\in I_{sep}(G)$
+\end_inset
+
+.
+ But we know that 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\notin I(q)$
+\end_inset
+
+ a contradiction to 
+\begin_inset Formula $I_{sep}(G)=I(q)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Old Question 1
+\end_layout
+
+\begin_layout Standard
+For the second type of CI: it is clear that for any permutation 
+\begin_inset Formula $(i,j,k)$
+\end_inset
+
+ of 
+\begin_inset Formula $[3]$
+\end_inset
+
+ it holds that
+\begin_inset Formula 
+\begin{align*}
+q(x_{i}|x_{k})q(x_{j}|x_{k}) & =\frac{1}{4}\\
+ & \neq\begin{cases}
+\frac{1}{6} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
+\frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
+\end{cases}=2q(x_{1},x_{2},x_{3})=q(x_{i},x_{j}|x_{k})
+\end{align*}
+
+\end_inset
+
+ which implies 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{k}\notin I(q)$
+\end_inset
+
+.
+ For the Third kind of CI: 
+\begin_inset Formula 
+\begin{align*}
+q(x_{i}) & =\frac{1}{2}\\
+ & \neq\begin{cases}
+\frac{1}{3} & x_{1}\oplus x_{2}\oplus x_{3}=0\\
+\frac{2}{3} & x_{1}\oplus x_{2}\oplus x_{3}=1
+\end{cases}=4q(x_{1},x_{2},x_{3})=q(x_{i}|x_{j},x_{k})
+\end{align*}
+
+\end_inset
+
+which implies 
+\begin_inset Formula $X_{i}\perp X_{j},X_{k}\notin I(q)$
+\end_inset
+
+.
+ so overall we get 
+\begin_inset Formula $I(q)=\{X_{1}\perp X_{2},X_{2}\perp X_{3},X_{3}\perp X_{1}\}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+(b) No, proof by contradiction.
+ Let us assume there exists a DAG 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{LM}(G)=I(q)$
+\end_inset
+
+, so 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{LM}(G)$
+\end_inset
+
+ which means 
+\begin_inset Formula $Pa(i)=\emptyset$
+\end_inset
+
+ and 
+\begin_inset Formula $ND(i)=\{X_{j}\}$
+\end_inset
+
+ but this is true for any 
+\begin_inset Formula $i,j\in\{(1,2),(2,3),(3,1)\}$
+\end_inset
+
+ and hence the contradiction is obvious (there are no parents but every
+ node has one decendant for example).
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(c) No, proof by contradiction.
+ Let us assume there exists an undirected graph 
+\begin_inset Formula $G$
+\end_inset
+
+ where 
+\begin_inset Formula $I_{sep}(G)=I(q)$
+\end_inset
+
+, so 
+\begin_inset Formula $X_{i}\perp X_{j}\in I_{sep}(G)$
+\end_inset
+
+ which means there are no edges in 
+\begin_inset Formula $G$
+\end_inset
+
+ but in this case for example 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\in I_{sep}(G)$
+\end_inset
+
+ where 
+\begin_inset Formula $X_{1}\perp X_{2},X_{3}\notin I_{sep}(G)$
+\end_inset
+
+ and hence 
+\begin_inset Formula $I_{sep}(G)\neq I(q),$
+\end_inset
+
+ a contradiction.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 2
+\end_layout
+
+\begin_layout Standard
+We are given a positive distribution 
+\begin_inset Formula $p(w,x,y,z)$
+\end_inset
+
+.
+ It is known that: 
+\end_layout
+
+\begin_layout Enumerate
+We are given - 
+\begin_inset Formula $(X\perp Y|Z,W)$
+\end_inset
+
+, equivalently: 
+\begin_inset Formula $p(x|y,z,w)=p(x|z,w)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+We are given - (
+\begin_inset Formula $X\perp W|Z,Y$
+\end_inset
+
+), equivalently:
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $p(x|w,z,y)=p(x|z,y)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From 1,2 we have: 
+\begin_inset Formula $p(x|z,w)=p(x|z,y)$
+\end_inset
+
+ (*)
+\end_layout
+
+\begin_layout Subsubsection*
+We will prove that 
+\begin_inset Formula $(X\bot Y,W|Z)$
+\end_inset
+
+, that is: 
+\begin_inset Formula $p(x|y,w,z)=p(x|z)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+From 1, we have 
+\begin_inset Formula $p(x|y,z,w)=p(x|z,w)$
+\end_inset
+
+.
+ Multiplying both sides by 
+\begin_inset Formula $p(y|z,w)$
+\end_inset
+
+ gives:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p(y|z,w)p(x|y,z,w)=p(y|z,w)p(x|z,w)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Equivalently:
+\begin_inset Formula 
+\[
+p(x,y|w,z)=p(y|w,z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Multiplying both sides by 
+\begin_inset Formula $p(w|z)$
+\end_inset
+
+ gives:
+\begin_inset Formula 
+\[
+p(w|z)p(x,y|w,z)=p(w|z)p(y|w,z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Equivalently:
+\begin_inset Formula 
+\[
+p(x,y,w|z)=p(w|z)p(y|w,z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Summing over 
+\begin_inset Formula $y$
+\end_inset
+
+ gives:
+\begin_inset Formula 
+\[
+p(x,w|z)=p(w|z)p(x|w,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From (*):
+\begin_inset Formula 
+\[
+p(x,w|z)=p(w|z)p(x|y,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Summing over 
+\begin_inset Formula $w$
+\end_inset
+
+ gives:
+\begin_inset Formula 
+\[
+p(x|z)=p(x|y,z)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From 2:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p(x|z)=p(x|w,z,y)\Rightarrow X\perp Y,W|Z
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 3
+\end_layout
+
+\begin_layout Standard
+We define 
+\begin_inset Formula $S=Pa(i)\cup Ch(i)\cup{\displaystyle \bigcup_{j\in Ch(i)}}Pa(j)$
+\end_inset
+
+ and argue that 
+\begin_inset Formula $S$
+\end_inset
+
+ is the Markov Blanket for some Bayesian network 
+\begin_inset Formula $p$
+\end_inset
+
+ on 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ We first show that 
+\begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\in I_{d-sep}(G)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+More specifically we will show that: 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ is d-separated from 
+\begin_inset Formula $X_{\bar{S}\backslash i}$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ by showing that there is no active trail from 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ to some node 
+\begin_inset Formula $j\in X_{\bar{S}\backslash i}$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ (definition 6).
+ 
+\end_layout
+
+\begin_layout Standard
+There are 3 possible cases for an undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Itemize
+An undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ via 
+\begin_inset Formula $k\in Ch(i)$
+\end_inset
+
+ and some 
+\begin_inset Formula $l\in Pa(k)$
+\end_inset
+
+.
+ Then because 
+\begin_inset Formula $l\in S$
+\end_inset
+
+ and 
+\begin_inset Formula $l$
+\end_inset
+
+ is not the descendent of the child in a v-structure the path is not active.
+\end_layout
+
+\begin_layout Itemize
+An undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ via 
+\begin_inset Formula $k\in Ch(i)$
+\end_inset
+
+ but not via some 
+\begin_inset Formula $l\in Pa(k)$
+\end_inset
+
+, then 
+\begin_inset Formula $k\in S$
+\end_inset
+
+ and 
+\begin_inset Formula $k$
+\end_inset
+
+ is not the child in a v-structure in the path or a descendent of one so
+ the path is not active.
+\end_layout
+
+\begin_layout Itemize
+An undirected path between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+ via 
+\begin_inset Formula $k\in Pa(i)$
+\end_inset
+
+.
+ In this case 
+\begin_inset Formula $k$
+\end_inset
+
+ which is in 
+\begin_inset Formula $S$
+\end_inset
+
+ cannot be the child in a v-structure or a descendent of one so the path
+ is not active.
+\end_layout
+
+\begin_layout Standard
+Overall, there is no active trail between 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $X_{\bar{S}\backslash i}$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ and we get 
+\begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\in I_{d-sep}(G)\subseteq I(p)$
+\end_inset
+
+ by definition 6 and Proposition 2.3.1.
+ We now have left to show the minimalism of 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ If we remove 
+\begin_inset Formula $k\in Pa(i)\cup Ch(i)$
+\end_inset
+
+, it is clear that 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $X_{k}$
+\end_inset
+
+ are dependant given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ and hence 
+\begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\notin I(p)$
+\end_inset
+
+.
+ If we remove 
+\begin_inset Formula $k\in{\displaystyle \bigcup_{j\in Ch(i)}Pa(j)}$
+\end_inset
+
+, we have an active trail 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $k$
+\end_inset
+
+ given 
+\begin_inset Formula $X_{S}$
+\end_inset
+
+ (via the mutual child) and hence 
+\begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\notin I_{d-sep}(G)$
+\end_inset
+
+.
+ We know that except for measure zero set, all Baseyian networks on 
+\begin_inset Formula $G$
+\end_inset
+
+ will hold 
+\begin_inset Formula $I(p)=I_{d-sep}(G)$
+\end_inset
+
+, and therefore in any case of removal we get
+\begin_inset Formula $X_{i}\perp X_{\bar{S}\backslash i}|X_{S}\notin I(p)$
+\end_inset
+
+ so 
+\begin_inset Formula $S$
+\end_inset
+
+ is indeed minimal.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 4
+\end_layout
+
+\begin_layout Description
+(a) By Theorem 4: as p is positive it suffices to show that 
+\begin_inset Formula $I_{pair}(G)\subseteq I(p)$
+\end_inset
+
+.
+ Indeed, if 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{V\backslash\{i,j\}}\in I_{pair}(G)$
+\end_inset
+
+ then by definition of 
+\begin_inset Formula $G$
+\end_inset
+
+ we get 
+\begin_inset Formula $ij\notin E$
+\end_inset
+
+ and hence 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{V\backslash\{i,j\}}\in I(p)$
+\end_inset
+
+ since otherwise edge 
+\begin_inset Formula $ij$
+\end_inset
+
+ was supposed to be added to 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Therefore 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(b) Towards contradiction, let us assume that 
+\begin_inset Formula $G$
+\end_inset
+
+ is not a minimal I-map for 
+\begin_inset Formula $p$
+\end_inset
+
+.
+ Therefore, there exists edge 
+\begin_inset Formula $ij$
+\end_inset
+
+ such that it can be removed and still 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+.
+ On one hand, be the definition of 
+\begin_inset Formula $G$
+\end_inset
+
+, we have 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{V\backslash\{i,j\}}\notin I(p)$
+\end_inset
+
+.
+ On the other hand, since now 
+\begin_inset Formula $ij\notin E$
+\end_inset
+
+, we get 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{V\backslash\{i,j\}}\in I_{pair}(G)$
+\end_inset
+
+, and hence 
+\begin_inset Formula $X_{i}\perp X_{j}|X_{V\backslash\{i,j\}}\in I_{sep}(G)$
+\end_inset
+
+ so therefore 
+\begin_inset Formula $I_{sep}(G)\nsubseteq I(p)$
+\end_inset
+
+, a contradiction.
+ We thus conclude 
+\begin_inset Formula $G$
+\end_inset
+
+ is indeed minimal I-map for 
+\begin_inset Formula $p$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 5
+\end_layout
+
+\begin_layout Standard
+Obviously, 
+\begin_inset Formula $I_{sep}(G)=\{X_{1}\perp X_{3}|X_{2,4},\,X_{2}\perp X_{4}|X_{1,3}\}$
+\end_inset
+
+.
+ First, we show that 
+\begin_inset Formula $X_{1}\perp X_{3}|X_{2,4}\in I(p)$
+\end_inset
+
+.
+ Becuase 
+\begin_inset Formula $p(x_{3}=0)=1/2$
+\end_inset
+
+, the following tables show 
+\begin_inset Formula $p(x_{1}|x_{2,3,4})=p(x_{1}|x_{2,4})$
+\end_inset
+
+ and hence 
+\begin_inset Formula $X_{1}\perp X_{3}|X_{2,4}\in I(p)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each cell is the probability of 
+\begin_inset Formula $p(x_{1}|x_{2,3,4})$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="9">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $x_{1}|x_{2,3,4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,0,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,0,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,1,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,1,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,0,1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,0,1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,1,1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,1,1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+undefined
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+unedfined
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+undefined
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+undefined
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace bigskip
+\end_inset
+
+Each cell is the probability of 
+\begin_inset Formula $p(x_{1}|x_{2,4})$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $x_{1}|x_{2,4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1/2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Phantom VPhantom
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Formula $X_{2}\perp X_{4}|X_{1,3}\in I(p)$
+\end_inset
+
+ is showed in the same way.
+ Therefore we have 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+.
+ To end our proof, we now show that 
+\begin_inset Formula $p$
+\end_inset
+
+ is not a Markov network with respect to 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ Towards a contradiction, let us assume that 
+\begin_inset Formula $p$
+\end_inset
+
+ is indeed a Markov network with respect to 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ We know that 
+\begin_inset Formula $\mathcal{C}(G)=\{\{X_{1},X_{4}\},\{X_{1},X_{2}\},\{X_{3},X_{4}\},\{X_{2},X_{3}\}\}$
+\end_inset
+
+.
+ Hence, by the definition of Markov network, 
+\begin_inset Formula $p(\textbf{x})$
+\end_inset
+
+ can be written as:
+\begin_inset Formula 
+\[
+p(\textbf{{x}})=Z^{-1}\prod_{c\in\mathcal{C}(G)}\phi_{c}(x_{c})=Z^{-1}\phi_{12}(x_{1,2})\phi_{23}(x_{2,3})\phi_{34}(x_{3,4})\phi_{41}(x_{4,1})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let us inspect the following equations:
+\begin_inset Formula 
+\begin{gather}
+p(0,0,0,0)=\phi_{12}(0,0)\phi_{23}(0,0)\phi_{34}(0,0)\phi_{41}(0,0)=Z/8\\
+p(0,0,1,1)=\phi_{12}(0,0)\phi_{23}(0,1)\phi_{34}(1,1)\phi_{41}(1,0)=Z/8\\
+p(1,1,1,0)=\phi_{12}(1,1)\phi_{23}(1,1)\phi_{34}(1,0)\phi_{41}(0,1)=Z/8\\
+p(0,0,1,0)=\phi_{12}(0,0)\phi_{23}(0,1)\phi_{34}(1,0)\phi_{41}(0,0)=0
+\end{gather}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+From 
+\begin_inset Formula $(4)$
+\end_inset
+
+, we know that 
+\begin_inset Formula $\phi_{12}(0,0)=0\lor\phi_{23}(0,1)=0\lor\phi_{34}(1,0)=0\lor\phi_{41}(0,0)=0$
+\end_inset
+
+, but if any one of those is true, at least one out of 
+\begin_inset Formula $(1),(2),(3)$
+\end_inset
+
+ will be equal to 
+\begin_inset Formula $0\neq Z/8$
+\end_inset
+
+, a contradiction.
+ We therefore conclude that 
+\begin_inset Formula $p$
+\end_inset
+
+ is not a Markov network with respect to 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 6
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $G=(E,V)$
+\end_inset
+
+ is a tree graph.
+ 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ is a markov network on 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ We will show that for any assignment 
+\begin_inset Formula $x_{1},..,x_{n}$
+\end_inset
+
+ it holds that: 
+\begin_inset Formula 
+\[
+p(x_{[n]})=\prod_{i=1}^{n}p(x_{i})\prod_{ij\in E}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ Note: we use the notation 
+\begin_inset Formula $x_{[n]}$
+\end_inset
+
+ to denote: 
+\begin_inset Formula $x_{1},..,x_{n}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection*
+Proof:
+\end_layout
+
+\begin_layout Standard
+We will prove the claim by induction over the size of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Base case 
+\begin_inset Formula $|V|=1$
+\end_inset
+
+ trivially holds:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p(x_{1})=\prod_{i=1}^{1}p(x_{i})\prod_{ij\in\emptyset}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ The case for 
+\begin_inset Formula $|V|=2$
+\end_inset
+
+ is similar (and will enable us to assume 
+\begin_inset Formula $n\geq3$
+\end_inset
+
+ in all cases henceforth):
+\begin_inset Formula 
+\[
+p(x_{1},x_{2})=\prod_{i=1}^{2}p(x_{i})\prod_{ij\in{(1,2)}}\frac{p(x_{i}x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+ Let us assume that the claim holds for any graph where 
+\begin_inset Formula $|V|<n$
+\end_inset
+
+, and we now prove for 
+\begin_inset Formula $|V|=n$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $G=(V,E)$
+\end_inset
+
+ be some tree graph where 
+\begin_inset Formula $|V|=n$
+\end_inset
+
+, and 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ a markov network on this graph.
+ It holds for any distribution that:
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n]})=p(x_{n}|x_{[n-1]})p(x_{[n-1]})
+\end{equation}
+
+\end_inset
+
+ In any tree graph there exists a leaf.
+ Assume w.l.o.g that 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ is a leaf.
+ That is 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ has only one neighbour.
+ Assume w.l.o.g that this neihbour is 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\noindent
+By Theorem 4.1 (if 
+\begin_inset Formula $p$
+\end_inset
+
+ factorizes according to G then 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+) and the fact that 
+\begin_inset Formula $I_{LM}(G)\subseteq I_{sep}(G)$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+p(x_{n}|x_{[n-1]})=p(x_{n}|x_{n-1})
+\]
+
+\end_inset
+
+ Replacing this in (5) we arrive at:
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n]})=p(x_{n}|x_{n-1})p(x_{[n-1]})
+\end{equation}
+
+\end_inset
+
+ Note that the sub-graph resulting from removing 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ from 
+\begin_inset Formula $G$
+\end_inset
+
+ is also a tree as 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ was a leaf so the remaining graph is still connected and has no cycles.
+\end_layout
+
+\begin_layout Subsubsection*
+\noindent
+Claim: 
+\begin_inset Formula $p(x_{[n-1]})$
+\end_inset
+
+ is a markov network on the tree graph 
+\begin_inset Formula $G'$
+\end_inset
+
+ resulting from 
+\begin_inset Formula $G$
+\end_inset
+
+ by removing the leaf 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+.
+ Proof:
+\end_layout
+
+\begin_layout Standard
+By definition of markov network and the fact that all cliques in a tree
+ are of size 2 (or else we will have cycles), corresponding exactly to edges:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n-1]})=\sum_{x_{n}}p(x_{[n-1]},x_{n})=\sum_{x_{n}}\frac{1}{Z}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})
+\end{equation}
+
+\end_inset
+
+In the last equality we used the fact that all 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ where 
+\begin_inset Formula $i\neq n$
+\end_inset
+
+ are constants within the sum.
+ We would like to arrange the expression as a product of 
+\begin_inset Formula $\text{\phi}_{ij}(x_{i},x_{j})$
+\end_inset
+
+ for 
+\begin_inset Formula $ij\in E\backslash{(n,n-1)}$
+\end_inset
+
+.
+ To acheive this we will 
+\begin_inset Quotes eld
+\end_inset
+
+push
+\begin_inset Quotes erd
+\end_inset
+
+ the value of 
+\begin_inset Formula $\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})$
+\end_inset
+
+ into one of the 
+\begin_inset Formula $\phi_{ij}$
+\end_inset
+
+.
+ We need all functions to depend only on their 2 paramaters so we have to
+ choose one where 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+ is one.
+ Recognize that because 
+\begin_inset Formula $n\geq3$
+\end_inset
+
+ and 
+\begin_inset Formula $x_{n-1}$
+\end_inset
+
+ is connected to the rest of the graph, there exists some variable, w.l.o.g
+ 
+\begin_inset Formula $x_{n-2}$
+\end_inset
+
+, s.t: 
+\begin_inset Formula $(x_{n-1,}x_{n-2})\in E$
+\end_inset
+
+.
+ Now we define:
+\begin_inset Formula 
+\[
+\phi'_{n-1,n-2}(x_{n-1},x_{n-2})=\phi_{n-1,n-2}(x_{n-1},x_{n-2})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})
+\]
+
+\end_inset
+
+ For ease of notation, for all other pairs denote 
+\begin_inset Formula $\phi'_{ij}=\phi_{ij}$
+\end_inset
+
+ We arrive at: 
+\begin_inset Formula 
+\begin{gather*}
+\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
+\prod_{ij\in E\backslash{(n,n-1),(n-1,n-2)}}\phi_{ij}(x_{i}x_{j})\cdot(\phi_{n-1.n-2}(x_{n-1,}x_{n-2})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1}))=\\
+\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+\end{gather*}
+
+\end_inset
+
+ And for Z
+\begin_inset Formula 
+\begin{multline*}
+Z=\sum_{x_{[n]}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\sum_{x_{[n-1]}}\sum_{x_{n}}\prod_{ij\in E}\phi_{ij}(x_{i,}x_{j})=\\
+\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi_{ij}(x_{i,}x_{j})\sum_{x_{n}}\phi_{n-1,n}(x_{n-1,}x_{n})=\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})
+\end{multline*}
+
+\end_inset
+
+ Finally arriving at:
+\begin_inset Formula 
+\begin{multline*}
+p(x_{[n-1]})=\frac{1}{Z}\prod_{ij\in E\backslash{(n,n-1)}}\phi_{ij}(x_{i}x_{j})\sum_{x_{n}}\phi_{n.n-1}(x_{n},x_{n-1})=\\
+\frac{1}{\sum_{x_{[n-1]}}\prod_{ij\in E\backslash(x_{n-1,}x_{n})}\phi'_{ij}(x_{i,}x_{j})}\prod_{ij\in E\backslash(n.n-1)}\phi'_{ij}(x_{i},x_{j})
+\end{multline*}
+
+\end_inset
+
+So 
+\begin_inset Formula $p(x_{[n-1]})$
+\end_inset
+
+ is a markov network on the resulting tree!
+\end_layout
+
+\begin_layout Subsubsection*
+We continue with the induction:
+\end_layout
+
+\begin_layout Standard
+By the induction hypothesis, on the Tree resulting from removing 
+\begin_inset Formula $x_{n}$
+\end_inset
+
+ from 
+\begin_inset Formula $G$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{gather*}
+p(x_{[n]})=p(x_{n}|x_{n-1})p(x_{[n-1]})=\\
+p(x_{n}|x_{n-1})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
+\frac{p(x_{n},x_{n-1})}{p(x_{n-1})}\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}=\\
+p(x_{n})\prod_{i\in[n-1]}p(x_{i})\prod_{ij\in E\backslash(n,n-1)}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\cdot\frac{p(x_{n},x_{n-1})}{p(x_{n})p(x_{n-1})}=\\
+\prod_{i\in[n]}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\square$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Old Question 6
+\end_layout
+
+\begin_layout Standard
+First, w.l.o.g we assume that 
+\begin_inset Formula $\forall ij\in E$
+\end_inset
+
+, 
+\begin_inset Formula $i<j$
+\end_inset
+
+.
+ Proof by induction on the size of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ For 
+\begin_inset Formula $|V|=1$
+\end_inset
+
+ the claim holds trivially (as there are no edges in the graph, the markov
+ network 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ is in the required form).
+ Let us assume the claim holds 
+\begin_inset Formula $\forall k\in[n-1]$
+\end_inset
+
+ and we now prove for 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ Let there be G, some graph with n nodes, and 
+\begin_inset Formula $p(x)$
+\end_inset
+
+ a markov network on this graph.
+ We know that for any distribution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n]})=p(x_{n}|x_{[n-1]})p(x_{[n-1]})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+From the inductive hypothesis:
+\begin_inset Formula 
+\begin{equation}
+p(x_{[n-1]})=\prod_{i=1}^{n-1}p(x_{i})\prod_{\substack{ij\in E\\
+i,j\in[n-1]
+}
+}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+By Theorem 4.1 (if 
+\begin_inset Formula $p$
+\end_inset
+
+ factorizes according to G then 
+\begin_inset Formula $I_{sep}(G)\subseteq I(p)$
+\end_inset
+
+) and the fact that 
+\begin_inset Formula $I_{LM}(G)\subseteq I_{sep}(G)$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+p(x_{n}|x_{[n-1]})=p(x_{n}|x_{Nbr(n)})=\frac{p(x_{n},x_{Nbr(n)})}{p(x_{Nbr(n)})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Formula $G$
+\end_inset
+
+ is a tree a graph, hence there are no circles and therefore, w.l.o.g 
+\begin_inset Formula $Nbr(n)<n-1$
+\end_inset
+
+.
+ So, again by the inductive hypothesis:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+p(x_{n},x_{Nbr(n)})=\prod_{i\in Nbr(n)\cup\{n\}}p(x_{i})\prod_{\substack{ij\in E\\
+i,j\in Nbr(n)\cup\{n\}
+}
+}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}\\
+p(x_{Nbr(n)})=\prod_{i\in Nbr(n)}p(x_{i})\prod_{\substack{ij\in E\\
+i,j\in Nbr(n)
+}
+}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Rightarrow p(x_{n}|x_{[n-1]})=p(x_{n})\prod_{in\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+By (5), (6), (7) we get:
+\begin_inset Formula 
+\[
+p(x_{n})=\prod_{i=1}^{n}p(x_{i})\prod_{ij\in E}\frac{p(x_{i},x_{j})}{p(x_{i})p(x_{j})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
