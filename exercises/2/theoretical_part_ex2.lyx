@@ -1,0 +1,325 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Advanced Machine Learning - HW #2 
+\end_layout
+
+\begin_layout Section*
+Exercise 2
+\end_layout
+
+\begin_layout Subsection*
+Show that the tree-width of of a 2D graph of size (m,m) is at most m
+\end_layout
+
+\begin_layout Standard
+Recal tree-width is defined as: 
+\end_layout
+
+\begin_layout Quote
+\begin_inset Quotes eld
+\end_inset
+
+The minimum size of the maximum clique [in the induced graph], over all
+ elimination orders, minus one
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, our strategy will be to show an elimination order which has a maximal
+ clique of size 
+\begin_inset Formula $m$
+\end_inset
+
+.
+ The minimum over all elimination orders cannot exceed this value so the
+ tree-width of the grid will be at most 
+\begin_inset Formula $m$
+\end_inset
+
+ (well, 
+\begin_inset Formula $m-1$
+\end_inset
+
+, but 
+\begin_inset Quotes eld
+\end_inset
+
+at most 
+\begin_inset Formula $m$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ holds too).
+ We shall show that eliminating columns of the grid, top to bottom, sequentially
+ results in a maximal clique of size 
+\begin_inset Formula $m$
+\end_inset
+
+ over the entire elimination.
+ 
+\begin_inset Newline newline
+\end_inset
+
+Denote the variables of column 
+\begin_inset Formula $i$
+\end_inset
+
+ as 
+\begin_inset Formula $\{x_{1}^{i},..,x_{m}^{i}\}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Removing the first column:
+\end_layout
+
+\begin_layout Standard
+After removing 
+\begin_inset Formula $x_{1}^{1}$
+\end_inset
+
+ we end up with: 
+\begin_inset Formula 
+\[
+\tau(x_{2}^{1},x_{1}^{2})\prod_{i,j\in E\backslash\{\text{edges involving \ensuremath{x_{1}^{1}}}\}}\phi(x_{i},x_{j})
+\]
+
+\end_inset
+
+After removal of 
+\begin_inset Formula $x_{k}^{1}$
+\end_inset
+
+ for 
+\begin_inset Formula $k<m$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\tau(x_{k+1}^{1},x_{k}^{2},...,x{}_{1}^{2})\prod_{i,j\in E\backslash\{\text{edges involving \{\ensuremath{x_{1}^{1},..,x_{k}^{1}\}}}\}}\phi(x_{i},x_{j})
+\]
+
+\end_inset
+
+Removing 
+\begin_inset Formula $x_{m-1}^{1}$
+\end_inset
+
+, we get a factor of size 
+\begin_inset Formula $m$
+\end_inset
+
+, and will thus have a clique of size 
+\begin_inset Formula $m$
+\end_inset
+
+.
+ We will show that during the rest of the process no factor larger than
+ 
+\begin_inset Formula $m$
+\end_inset
+
+ will appear.
+ Continuing:
+\begin_inset Newline newline
+\end_inset
+
+After removal of 
+\begin_inset Formula $x_{m}^{1}$
+\end_inset
+
+ we have: 
+\begin_inset Formula 
+\begin{equation}
+\tau(x_{m}^{2},...,x{}_{1}^{2})\prod_{i,j\in E\backslash\{\text{edges involving \{\ensuremath{x_{1}^{1},..,x_{m}^{1}\}}}\}}\phi(x_{i},x_{j})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Removing columns 2 to m-1:
+\end_layout
+
+\begin_layout Standard
+second column, removing 
+\begin_inset Formula $x_{1}^{2}$
+\end_inset
+
+ we arrive at: 
+\begin_inset Formula 
+\[
+\tau(x_{m}^{2},...,x{}_{1}^{3})\prod_{i,j\in E\backslash\{\text{edges involving \{\ensuremath{x_{1}^{1},..,x_{m}^{1},x_{1}^{2}\}}}\}}\phi(x_{i},x_{j})
+\]
+
+\end_inset
+
+ Removing 
+\begin_inset Formula $x_{k}^{2}$
+\end_inset
+
+ for 
+\begin_inset Formula $k<m:$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\tau(x_{m}^{2},..,x_{k+1}^{2},x_{k}^{3},.,x{}_{1}^{3})\prod_{i,j\in E\backslash\{\text{edges involving \{\ensuremath{x_{1}^{1},..,x_{m}^{1},x_{1}^{2},...,x_{k}^{2}\}}}\}}\phi(x_{i},x_{j})
+\]
+
+\end_inset
+
+ Removing 
+\begin_inset Formula $x_{m}^{2}$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\tau(x_{m}^{3},..,x{}_{1}^{3})\prod_{i,j\in E\backslash\{\text{edges involving \{\ensuremath{x_{1}^{1},..,x_{m}^{1},x_{1}^{2},...,x_{k}^{2}\}}}\}}\phi(x_{i},x_{j})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: at this point we arrive at a structure similar to (1).
+ We continue this way, repeating the same steps as in removing the second
+ column untill we arrive at the last column.
+\end_layout
+
+\begin_layout Subsubsection*
+Removing the last column:
+\end_layout
+
+\begin_layout Standard
+At this point we have: 
+\begin_inset Formula 
+\[
+\tau(x_{m}^{m},..,x{}_{1}^{m})
+\]
+
+\end_inset
+
+The last column is removed one by one as the single remaining factor is
+ replaced by one with one variable less at each stage.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+In total we have seen a maximal factor of size 
+\begin_inset Formula $m$
+\end_inset
+
+.
+ As we know this corresponds with a maximal clique size of size 
+\begin_inset Formula $m$
+\end_inset
+
+.
+ Thus, the tree-width cannot exceed 
+\begin_inset Formula $m$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Exercise 3
+\end_layout
+
+\end_body
+\end_document
