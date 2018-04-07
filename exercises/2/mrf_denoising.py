@@ -95,7 +95,7 @@ class Graph(object):
 
     def edges(self):
         """ returns the edges of a graph """
-        return self._generate_edges()
+        return self.generate_edges()
 
     def add_vertex(self, vertex):
         """ If the vertex "vertex" is not in
