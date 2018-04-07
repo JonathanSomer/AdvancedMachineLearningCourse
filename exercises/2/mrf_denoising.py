@@ -11,13 +11,17 @@ import numpy as np
 
 PLOT = False
 
-X = (-1, 1)
+# This is all the values that a variable/pixel (x) can have
+# In our case it's black/white
+DOMAIN = (-1, 1)
 
-# TODO: figure out what are the values of alpha and beta...
+# ALPHA is for the pairwise interaction between variable and it's prediction
+# BETA is for the pairwise interaction between variable and it's neighbours
 ALPHA = 1.4
 BETA = 0.8
 
 
+# phi is the pairwise interaction function
 def phi(z1, z2, c=1):
     return np.exp(c * z1 * z2)
 
@@ -42,8 +46,8 @@ class Vertex(object):
         self._neighs.remove(vertex)
 
     def get_belief(self):
-        i = np.argmax([phi(xi, self._y, ALPHA) * np.prod(self._in_msgs[xi].values()) for xi in X])
-        return X[i]
+        i = np.argmax([phi(xi, self._y, ALPHA) * np.prod(self._in_msgs[xi].values()) for xi in DOMAIN])
+        return DOMAIN[i]
 
     def snd_msg(self, neigh):
         """ Combines messages from all other neighbours
@@ -52,19 +56,19 @@ class Vertex(object):
 
         # calculate m'(xj) := in_msgs[xj]
         in_msgs = {}
-        for xj in X:
+        for xj in DOMAIN:
             in_msgs[xj] = np.max([
                 phi(xi, self._y, ALPHA) *
                 phi(xi, xj, BETA) *
                 np.prod([self._in_msgs.get(xi, {}).get(n._name, 1) for n in self._neighs if n != neigh._name])
-            for xi in X])
+                for xi in DOMAIN
+            ])
 
         # set the msg with normalization
-        for xj in X:
+        for xj in DOMAIN:
             if xj not in neigh._in_msgs:
                 neigh._in_msgs[xj] = {}
-            neigh._in_msgs[xj][self._name] = in_msgs[xj] / np.sum([in_msgs[xjbar] for xjbar in X])
-
+            neigh._in_msgs[xj][self._name] = in_msgs[xj] / np.sum([in_msgs[xjbar] for xjbar in DOMAIN])
 
     def __str__(self):
         ret = "Name: " + self._name
@@ -134,7 +138,7 @@ class Graph(object):
         for k in self._graph_dict:
             res += str(k) + " "
         res += "\nE: "
-        for edge in self._generate_edges():
+        for edge in self.generate_edges():
             res += str(edge) + " "
         return res
 
@@ -202,18 +206,16 @@ def main():
     g = build_grid_graph(n, m, image)
 
     # process grid:
-    # TODO: change the for loop to while with some convergence criterion
-
-    # n_iter = 10 * m * n
-    # for _ in xrange(n_iter):
     new_mat = image
     while True:
         mat = new_mat
 
+        # update all msgs:
         for v in g.vertices():
             for neigh in v._neighs:
                 v.snd_msg(neigh)
 
+        # convergence criterion:
         new_mat = grid2mat(g, n, m)
         snr = np.sum(np.abs(mat - new_mat)) / mat.size
         if snr <= 0.01:
