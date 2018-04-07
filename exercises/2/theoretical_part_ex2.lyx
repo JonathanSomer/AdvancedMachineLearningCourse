@@ -75,10 +75,10 @@ Advanced Machine Learning - HW #2
 \end_layout
 
 \begin_layout Section*
-Exercise 2
+Question 2
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection*
 Show that the tree-width of of a 2D graph of size (m,m) is at most m
 \end_layout
 
@@ -318,7 +318,238 @@ In total we have seen a maximal factor of size
 \end_layout
 
 \begin_layout Section*
-Exercise 3
+Question 3
+\end_layout
+
+\begin_layout Subsubsection*
+\begin_inset Quotes eld
+\end_inset
+
+Consider the sum-product message update on a tree graph.
+ But, consider the case where all messages are updated simultaneously.
+ Namely: 
+\begin_inset Formula 
+\[
+m_{ij}^{t+1}=\sum_{x_{i}}\phi(x_{i},x_{j})\prod_{k\in N(i)\backslash\{j\}}m_{ki}^{t}(x_{i})
+\]
+
+\end_inset
+
+ Show that this converges to the true marginals at iteration t = n.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Initialization: 
+\begin_inset Formula 
+\[
+\forall ij\in E:m_{ij}^{0}=\begin{cases}
+\sum_{x_{i}}\phi(x_{i},x_{j}) & \text{i is a leaf}\\
+0 & \text{else}
+\end{cases}
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+
+\series bold
+Claim:
+\series default
+ 
+\end_layout
+
+\begin_layout Standard
+At iteration 
+\begin_inset Formula $t$
+\end_inset
+
+: 
+\begin_inset Formula $m_{ij}^{t}$
+\end_inset
+
+ holds the true message value (a function) for all nodes whose longest path
+ to any descendent is at most 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ For all other nodes 
+\begin_inset Formula $m_{ij}^{t}=0$
+\end_inset
+
+ (0 as a constant function).
+\end_layout
+
+\begin_layout Standard
+[ Note: the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+children of a node
+\begin_inset Quotes erd
+\end_inset
+
+ is on a per-message basis.
+ For message 
+\begin_inset Formula $m_{ij}^{t}$
+\end_inset
+
+ from node 
+\begin_inset Formula $i$
+\end_inset
+
+ to node 
+\begin_inset Formula $j$
+\end_inset
+
+, we 
+\begin_inset Quotes eld
+\end_inset
+
+treat
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $j$
+\end_inset
+
+ as the root and the descendents of node 
+\begin_inset Formula $i$
+\end_inset
+
+ are defined as such.
+ ]
+\end_layout
+
+\begin_layout Subsubsection*
+
+\series bold
+Proof of claim - by induction:
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Base case 
+\begin_inset Formula $t=0$
+\end_inset
+
+.
+
+\series default
+ Leaves are the only nodes 
+\begin_inset Quotes eld
+\end_inset
+
+whose longest path to any child is at most 0
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Because leaves have only one neighbour - their parent, they do not receive
+ any messages and the value we have computed for leaves upon initialization
+ is the true value of their message.
+ For all non-leaf nodes, initialization was to 0 and the claim holds.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+Assume for 
+\begin_inset Formula $k-1.$
+\end_inset
+
+
+\series default
+ We now calculate 
+\begin_inset Formula $m_{ij}^{k}$
+\end_inset
+
+ as defined.
+ Let 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ be some node whose longest path to any descendent is at most 
+\begin_inset Formula $k$
+\end_inset
+
+, the longest path from any of 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+'s children to any of their descendents is at most 
+\begin_inset Formula $k-1$
+\end_inset
+
+.
+ By the inductive hypothesis their mesasages have been calculated correctly.
+ Thus the update has placed the correct value in 
+\begin_inset Formula $m_{ij}^{k}$
+\end_inset
+
+.
+ For all other nodes, some child of theirs holds 
+\begin_inset Formula $0$
+\end_inset
+
+ and the product will be have a 0 factor for any value of 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\square$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Main proof:
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $p(x_{i})$
+\end_inset
+
+ be some marginal we wish to compute.
+ From the claim above and the fact that for any tree of size 
+\begin_inset Formula $n$
+\end_inset
+
+ the distance from root to any of its descendents is at most 
+\begin_inset Formula $n$
+\end_inset
+
+, it follows that all messages have been computed correctly.
+ Thus, the process has converged to the true marginals and 
+\begin_inset Formula $p(x_{i})$
+\end_inset
+
+ is given by: 
+\begin_inset Formula 
+\[
+p(x_{i})=\prod_{k\in N(i)}m_{ki}^{n}(x_{i})
+\]
+
+\end_inset
+
+ 
+\begin_inset Formula $\square$
+\end_inset
+
+
 \end_layout
 
 \end_body
