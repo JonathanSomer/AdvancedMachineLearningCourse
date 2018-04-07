@@ -14,8 +14,8 @@ PLOT = False
 X = (-1, 1)
 
 # TODO: figure out what are the values of alpha and beta...
-ALPHA = 1.0
-BETA = 1.0
+ALPHA = 1.4
+BETA = 0.8
 
 
 def phi(z1, z2, c=1):
@@ -203,21 +203,31 @@ def main():
 
     # process grid:
     # TODO: change the for loop to while with some convergence criterion
-    for _ in xrange(100):
+
+    # n_iter = 10 * m * n
+    # for _ in xrange(n_iter):
+    new_mat = image
+    while True:
+        mat = new_mat
+
         for v in g.vertices():
             for neigh in v._neighs:
                 v.snd_msg(neigh)
 
+        new_mat = grid2mat(g, n, m)
+        snr = np.sum(np.abs(mat - new_mat)) / mat.size
+        if snr <= 0.01:
+            break
 
     # convert grid to image: 
-    infered_img = grid2mat(g, n, m)
+    inferred_img = grid2mat(g, n, m)
     if PLOT:
-        plt.imshow(infered_img)
+        plt.imshow(inferred_img)
         plt.show()
 
     # save result to output file
     out_file_name = sys.argv[2]
-    misc.toimage(infered_img).save(out_file_name + '.png')
+    misc.toimage(inferred_img).save(out_file_name + '.png')
 
 
 if __name__ == "__main__":
