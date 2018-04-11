@@ -330,7 +330,7 @@ Consider the sum-product message update on a tree graph.
  Namely: 
 \begin_inset Formula 
 \[
-m_{ij}^{t+1}=\sum_{x_{i}}\phi(x_{i},x_{j})\prod_{k\in N(i)\backslash\{j\}}m_{ki}^{t}(x_{i})
+m_{ij}^{t+1}(x_{j})=\sum_{x_{i}}\phi(x_{i},x_{j})\prod_{k\in N(i)\backslash\{j\}}m_{ki}^{t}(x_{i})
 \]
 
 \end_inset
@@ -354,7 +354,23 @@ Initialization:
 
 \end_inset
 
- 
+ Recall our definition for a message between 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $j$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{equation}
+m_{ij}(x_{j})=\sum_{x_{i}}\phi(x_{i},x_{j})\prod_{k\in N(i)\backslash\{j\}}m_{ki}(x_{i})
+\end{equation}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
@@ -374,8 +390,12 @@ At iteration
 \begin_inset Formula $m_{ij}^{t}$
 \end_inset
 
- holds the true message value (a function) for all nodes whose longest path
- to any descendent is at most 
+ holds the correct message value, function 
+\begin_inset Formula $(2)$
+\end_inset
+
+ we defined above, for all nodes whose longest path to any descendent is
+ at most 
 \begin_inset Formula $t$
 \end_inset
 
@@ -456,7 +476,7 @@ whose longest path to any child is at most 0
 .
  Because leaves have only one neighbour - their parent, they do not receive
  any messages and the value we have computed for leaves upon initialization
- is the true value of their message.
+ is the correct value of their message.
  For all non-leaf nodes, initialization was to 0 and the claim holds.
  
 \begin_inset Newline newline
@@ -547,6 +567,44 @@ p(x_{i})=\prod_{k\in N(i)}m_{ki}^{n}(x_{i})
 
  
 \begin_inset Formula $\square$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Question 4
+\end_layout
+
+\begin_layout Standard
+Define:
+\begin_inset Formula 
+\begin{align*}
+\mu_{i}(x_{i}) & =\prod_{k\in N(i)}m_{ki}(x_{i})\\
+\mu_{ij}(x_{i},x_{j}) & =\phi(x_{i},x_{j})\prod_{k\in N(i)\backslash j}m_{ki}(x_{i})\prod_{k\in N(j)\backslash j}m_{kj}(x_{j})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+(a) 
+\end_layout
+
+\begin_layout Subsubsection*
+\begin_inset Quotes eld
+\end_inset
+
+Show that for tree graphs the above pairwise pseudo-marginals 
+\begin_inset Formula $\mu_{ij}(x_{i},x_{j})$
+\end_inset
+
+ are indeed the correct marginals of the MRF (you can use the fact that
+ the messages are in that case the correct sum of assignments in the correspondi
+ng sub-tree).
+\begin_inset Quotes erd
 \end_inset
 
 
