@@ -1,0 +1,4 @@
+.gitignore.swp
+*.lyx#
+*.lyx.emergency
+*.lyx~
