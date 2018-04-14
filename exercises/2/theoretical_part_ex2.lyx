@@ -74,6 +74,18 @@
 Advanced Machine Learning - HW #2 
 \end_layout
 
+\begin_layout Author
+Uri Avron [uriavron@gmail.com] [308046994]
+\begin_inset Newline newline
+\end_inset
+
+Jonathan Somer [jonathan.somer@gmail.com] [307923383]
+\begin_inset Newline newline
+\end_inset
+
+Matan Harel [matan.harel.mh@gmail.com] [302695721]
+\end_layout
+
 \begin_layout Section*
 Question 2
 \end_layout
@@ -609,23 +621,27 @@ We should show that
 \begin_inset Newline newline
 \end_inset
 
-The definition of 
+The marginal of 
 \begin_inset Formula $p(x_{i},x_{j})$
 \end_inset
 
- of an edge in a graph G is:
+ of an edge 
+\begin_inset Formula $(i,j)\in E(G)$
+\end_inset
+
+ is:
 \begin_inset Formula 
 \begin{align*}
-p(x_{i},x_{j}) & =\sum_{x[n]\backslash\{x_{i},x_{j}\}}p(x)=\frac{\sum\limits _{x[n]\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E}}\phi_{kl}(X_{k},X_{l})}{Z}
+p(x_{i},x_{j}) & =\sum_{x\backslash\{x_{i},x_{j}\}}p(x)=\frac{\sum\limits _{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E}}\phi_{kl}(X_{k},X_{l})}{Z}
 \end{align*}
 
 \end_inset
 
-Because G is a tree if we remove the edge 
+Since G is a tree, if we remove the edge 
 \begin_inset Formula $(x_{i},x_{j})$
 \end_inset
 
- two sub trees created with no path between 
+ two sub trees will be created with no path between 
 \begin_inset Formula $x_{i}$
 \end_inset
 
@@ -660,14 +676,14 @@ as
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-p(x_{i},x_{j}) & =\frac{1}{Z}\sum_{x[n]\backslash\{x_{i},x_{j}\}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l}){\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})=\\
-= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x[n]\backslash\{x_{i},x_{j}\}}({\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l}))=\\
-= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x[n]\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times\sum_{x[n]\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})
+p(x_{i},x_{j}) & =\frac{1}{Z}\sum_{x\backslash\{x_{i},x_{j}\}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l}){\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})=\\
+= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}({\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l}))=\\
+= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})
 \end{align*}
 
 \end_inset
 
-Let divide each subtree 
+Lets divide each subtree 
 \begin_inset Formula $G_{i}$
 \end_inset
 
@@ -680,8 +696,8 @@ Let divide each subtree
 \begin{multline*}
 \begin{aligned}\begin{aligned}p(x_{i},x_{j})\end{aligned}
 =\end{aligned}
-\frac{1}{Z}\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \frac{1}{Z}\prod_{d\in N(i)\backslash\{j\}}}{\displaystyle \sum_{s\in N(d)\backslash\{i\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})\\
-\times\frac{1}{Z}{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}{\displaystyle \sum_{s\in N(d)\backslash\{j\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})
+\frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}{\displaystyle \sum_{s\in N(d)\backslash\{i\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})\\
+\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}{\displaystyle \sum_{s\in N(d)\backslash\{j\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})
 \end{multline*}
 
 \end_inset
@@ -726,7 +742,7 @@ On Markov net
 
 \end_inset
 
-Let develop the right expression:
+Lets develop the right expression:
 \begin_inset Formula 
 \begin{multline*}
 \prod_{(i,j)\in E}\frac{\mu_{i,j}(x_{i},x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}={\displaystyle \prod_{(i,j)\in E}}\frac{\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}=\\
@@ -746,7 +762,7 @@ Place the new form in the first equation to get the result we are looking
 \end_inset
 
 Therefore 
-\begin_inset Formula $p(x_{1,...,n})\propto{\displaystyle \prod_{i}}\mu_{i}(x_{i})\times{\displaystyle \prod_{(i,j)\in E}}\frac{\mu_{i,j}(x_{i},x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}$
+\begin_inset Formula $p(x_{1}...x_{n})\propto{\displaystyle \prod_{i}}\mu_{i}(x_{i})\times{\displaystyle \prod_{(i,j)\in E}}\frac{\mu_{i,j}(x_{i},x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}$
 \end_inset
 
 
@@ -757,7 +773,7 @@ Therefore
 \end_layout
 
 \begin_layout Standard
-We will prove that in a fixed point of LBP we get
+We will prove that at a fixed point of LBP we get
 \end_layout
 
 \begin_layout Standard
@@ -768,7 +784,7 @@ We will prove that in a fixed point of LBP we get
 
 \end_inset
 
-Let start with the upper expression, let say that the normalization factor
+Lets start with the upper expression, lets say that the normalization factor
  of 
 \begin_inset Formula $\mu_{ij}$
 \end_inset
@@ -794,7 +810,7 @@ is
 \begin_inset Newline newline
 \end_inset
 
-On the other hand, let open the lower expression according to the definition
+On the other hand, lets open the lower expression according to the definition
  of 
 \begin_inset Formula $\mu_{i}(x_{i})$
 \end_inset
@@ -834,11 +850,11 @@ Combine it together we get:
 \begin_inset Newline newline
 \end_inset
 
-Now let open the 
+Now lets open the 
 \begin_inset Formula $m_{ji}(x_{i})$
 \end_inset
 
- expression, and supposed the normalization factor is 
+ expression, and suppose the normalization factor is 
 \begin_inset Formula $D_{3}$
 \end_inset
 
@@ -857,7 +873,7 @@ Now let open the
 \begin_inset Newline newline
 \end_inset
 
-We got that the value of this expression depends just of the normalization
+We've got that the value of this expression depends just on the normalization
  factors, but the normalization factors sum to 1 over all values.
  therefore
 \end_layout
