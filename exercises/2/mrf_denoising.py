@@ -13,11 +13,11 @@ PLOT = False
 
 # This is all the values that a variable/pixel (x) can have
 # In our case it's black/white
-DOMAIN = (-1, 1)
+DOMAIN = np.array((-1, 1))
 
 # ALPHA is for the pairwise interaction between variable and it's prediction
 # BETA is for the pairwise interaction between variable and it's neighbours
-ALPHA = 1.4
+ALPHA = 1.3
 BETA = 0.8
 
 
