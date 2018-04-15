@@ -71,7 +71,7 @@
 \begin_body
 
 \begin_layout Title
-Advanced Machine Learning - HW #2 
+ADVANCED MACHINE LEARNING EXERCISE #2 SOLUTION 
 \end_layout
 
 \begin_layout Author
@@ -632,7 +632,7 @@ The marginal of
  is:
 \begin_inset Formula 
 \begin{align*}
-p(x_{i},x_{j}) & =\sum_{x\backslash\{x_{i},x_{j}\}}p(x)=\frac{\sum\limits _{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E}}\phi_{kl}(X_{k},X_{l})}{Z}
+p(x_{i},x_{j}) & =\sum_{x\backslash\{x_{i},x_{j}\}}p(x)=\frac{1}{Z}\sum\limits _{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E}}\phi_{kl}(X_{k},X_{l})
 \end{align*}
 
 \end_inset
@@ -676,13 +676,17 @@ as
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-p(x_{i},x_{j}) & =\frac{1}{Z}\sum_{x\backslash\{x_{i},x_{j}\}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l}){\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})=\\
-= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}({\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l}))=\\
-= & \frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})
+p(x_{i},x_{j}) & =\frac{1}{Z}\sum_{x\backslash\{x_{i},x_{j}\}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l}){\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})\\
+ & =\frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}\left({\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})\right)\\
+ & =\frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{i})}}\phi_{k,l}(x_{k},x_{l})\times\sum_{x\backslash\{x_{i},x_{j}\}}{\displaystyle \prod_{(k,l)\in E(G_{j})}}\phi_{k,l}(x_{k},x_{l})
 \end{align*}
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 Lets divide each subtree 
 \begin_inset Formula $G_{i}$
 \end_inset
@@ -692,13 +696,15 @@ Lets divide each subtree
 \end_inset
 
  once more to its neighbors sub-trees
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
-\begin{multline*}
-\begin{aligned}\begin{aligned}p(x_{i},x_{j})\end{aligned}
-=\end{aligned}
-\frac{1}{Z}\times\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}{\displaystyle \sum_{s\in N(d)\backslash\{i\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})\\
-\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}{\displaystyle \sum_{s\in N(d)\backslash\{j\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})
-\end{multline*}
+\begin{align*}
+p(x_{i},x_{j})=\frac{1}{Z} & \times\phi_{i,j}(x_{i},x_{j})\\
+ & \times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}{\displaystyle \sum_{s\in N(d)\backslash\{i\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})\\
+ & \times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}{\displaystyle \sum_{s\in N(d)\backslash\{j\}}}{\displaystyle \prod_{(k,l)\in E(G_{s})}}\phi_{k,l}(x_{k},x_{l})
+\end{align*}
 
 \end_inset
 
@@ -715,11 +721,19 @@ Since
 \end_inset
 
 :
+\begin_inset Formula 
+\begin{align*}
+p(x_{i},x_{j}) & =\frac{1}{Z}\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}|}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}|}}m_{dj}(x_{j})=\mu_{i,j}(x_{i},x_{j})\\
+\end{align*}
+
+\end_inset
+
+
 \begin_inset Newline newline
 \end_inset
 
 
-\begin_inset Formula $p(x_{i},x_{j})=\frac{1}{Z}\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}|}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}|}}m_{dj}(x_{j})=\mu_{i,j}(x_{i},x_{j})$
+\begin_inset Formula $\Box$
 \end_inset
 
 
@@ -731,7 +745,7 @@ Since
 
 \begin_layout Standard
 On Markov net 
-\begin_inset Formula $p(x_{1,...,n})\propto{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})$
+\begin_inset Formula $p(x_{[n]})\propto{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})$
 \end_inset
 
  so we will show that
@@ -744,11 +758,13 @@ On Markov net
 
 Lets develop the right expression:
 \begin_inset Formula 
-\begin{multline*}
-\prod_{(i,j)\in E}\frac{\mu_{i,j}(x_{i},x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}={\displaystyle \prod_{(i,j)\in E}}\frac{\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}=\\
-=\prod_{(i,j)\in E}\frac{\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{j})}{_{{\displaystyle \prod_{d\in N(i)}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)}}m_{dj}(x_{j})}}=\\
-=\prod_{(i,j)\in E}\frac{\phi_{i,j}(x_{i},x_{j})}{_{m_{ij}(x_{j})\times m_{ji}(x_{i})}}=\frac{{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})}{{\displaystyle \prod_{i}}{\displaystyle \prod_{j\in N(i)}}m_{ji}(x_{i})}=\frac{{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})}{{\displaystyle \prod_{i}}\mu_{i}(x_{i})}
-\end{multline*}
+\begin{align*}
+\prod_{(i,j)\in E}\frac{\mu_{i,j}(x_{i},x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}} & ={\displaystyle \prod_{(i,j)\in E}}\frac{\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{j})}{_{\mu_{i}(x_{i})\mu_{j}(x_{j})}}\\
+ & =\prod_{(i,j)\in E}\frac{\phi_{i,j}(x_{i},x_{j})\times{\displaystyle \prod_{d\in N(i)\backslash\{j\}}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{j})}{_{{\displaystyle \prod_{d\in N(i)}}m_{di}(x_{i})\times{\displaystyle \prod_{d\in N(j)}}m_{dj}(x_{j})}}\\
+ & =\prod_{(i,j)\in E}\frac{\phi_{i,j}(x_{i},x_{j})}{_{m_{ij}(x_{j})\times m_{ji}(x_{i})}}\\
+ & =\frac{{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})}{{\displaystyle \prod_{i}}{\displaystyle \prod_{j\in N(i)}}m_{ji}(x_{i})}\\
+ & =\frac{{\displaystyle \prod_{(i,j)\in E}}\phi_{i,j}(x_{i},x_{j})}{{\displaystyle \prod_{i}}\mu_{i}(x_{i})}
+\end{align*}
 
 \end_inset
 
@@ -766,6 +782,14 @@ Therefore
 \end_inset
 
 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula $\Box$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
@@ -774,16 +798,17 @@ Therefore
 
 \begin_layout Standard
 We will prove that at a fixed point of LBP we get
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula 
-\begin{multline*}
+\[
 \frac{{\displaystyle \sum_{x_{j}}\mu_{i,j}(x_{i},x_{j})}}{\mu_{i}(x_{i})}=1
-\end{multline*}
+\]
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 Lets start with the upper expression, lets say that the normalization factor
  of 
 \begin_inset Formula $\mu_{ij}$
@@ -795,21 +820,18 @@ is
 
 .
  so we can rewrite the expression:
+\begin_inset Formula 
+\begin{align*}
+\sum_{x_{j}}\mu_{ij}(x_{i},x_{j}) & =D_{1}\times\sum_{x_{j}}\phi_{i,j}(x_{i},x_{j})\times\prod_{d\in N(i)\backslash\{j\}}m_{di}(x_{i})\times\prod_{d\in N(j)\backslash\{i\}}m_{dj}(x_{j})\\
+ & =D_{1}\times\prod_{d\in N(i)\backslash\{j\}}m_{di}(x_{i})\times(\sum_{x_{j}}\phi_{i,j}(x_{i},x_{j})\prod_{d\in N(j)\backslash\{i\}}m_{dj}(x_{j})
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\begin{multline*}
-{\displaystyle \sum_{x_{j}}\mu_{ij}(x_{i},x_{j})=D_{1}\times\sum_{x_{j}}\phi_{i,j}(x_{i},x_{j})\times\prod_{d\in N(i)\backslash\{j\}}m_{di}(x_{i})\times\prod_{d\in N(j)\backslash\{i\}}m_{dj}(x_{j})}\\
-=D_{1}\times\prod_{d\in N(i)\backslash\{j\}}m_{di}(x_{i})\times(\sum_{x_{j}}\phi_{i,j}(x_{i},x_{j})\prod_{d\in N(j)\backslash\{i\}}m_{dj}(x_{j})
-\end{multline*}
-
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
 On the other hand, lets open the lower expression according to the definition
  of 
 \begin_inset Formula $\mu_{i}(x_{i})$
@@ -835,21 +857,18 @@ On the other hand, lets open the lower expression according to the definition
 \end_inset
 
 Combine it together we get:
+\begin_inset Formula 
+\begin{align*}
+\frac{{\displaystyle \sum_{x_{j}}\mu_{i,j}(x_{i},x_{j})}}{\mu_{i}(x_{i})} & =\frac{D_{1}\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{i})\times({\displaystyle \sum_{x_{j}}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{dj}(x_{j}))}{D_{2}\times{\displaystyle \prod_{d\in N(i)}}m_{di}(x_{i})}\\
+ & =\frac{D_{1}}{D_{2}}\times\frac{{\displaystyle \sum_{x_{j}}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{dj}(x_{j})}{m_{ji}(x_{i})}
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\begin{multline*}
-\frac{{\displaystyle \sum_{x_{j}}\mu_{i,j}(x_{i},x_{j})}}{\mu_{i}(x_{i})}=\frac{D_{1}\times{\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{di}(x_{i})\times({\displaystyle \sum_{x_{j}}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{dj}(x_{j}))}{D_{2}\times{\displaystyle \prod_{d\in N(i)}}m_{di}(x_{i})}=\\
-=\frac{D_{1}}{D_{2}}\times\frac{{\displaystyle \sum_{x_{j}}}\phi_{i,j}(x_{i},x_{j}){\displaystyle \prod_{d\in N(j)\backslash\{i\}}}m_{dj}(x_{j})}{m_{ji}(x_{i})}
-\end{multline*}
-
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
 Now lets open the 
 \begin_inset Formula $m_{ji}(x_{i})$
 \end_inset
@@ -880,13 +899,17 @@ We've got that the value of this expression depends just on the normalization
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{multline*}
+\[
 \frac{{\displaystyle \sum_{x_{j}}\mu_{i,j}(x_{i},x_{j})}}{\mu_{i}(x_{i})}=1\Rightarrow{\displaystyle \sum_{x_{j}}\mu_{i,j}(x_{i},x_{j})}=\mu_{i}(x_{i})
-\end{multline*}
+\]
 
 \end_inset
 
-.
+
+\begin_inset Formula $\text{\Box}$
+\end_inset
+
+
 \end_layout
 
 \end_body
