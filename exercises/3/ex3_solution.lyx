@@ -663,11 +663,47 @@ Subtract
 \begin_inset Newline newline
 \end_inset
 
+
+\series bold
+Claim: 
+\begin_inset Formula $\forall i:\tau_{i}\le1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assume by contradiction that 
+\begin_inset Formula $\tau_{i}>1$
+\end_inset
+
+.
+ Then:
+\begin_inset Formula 
+\[
+\tau_{ij}\geq\tau_{i}+\tau_{j}-1=1+\epsilon+\tau_{j}-1=\epsilon+\tau_{j}
+\]
+
+\end_inset
+
+ In contradiction to 
+\begin_inset Formula $LP(4)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 So we now can assume that 
 \begin_inset Formula $\forall ij\in E:0\leq\tau_{ij}\leq1$
 \end_inset
 
 .
+ and 
+\begin_inset Formula $\text{\forall i:0\leq\tau}_{i}\leq1$
+\end_inset
+
+
 \begin_inset Newline newline
 \end_inset
 
@@ -713,6 +749,73 @@ Let there be some
 \begin_layout Standard
 We will now satisfy 
 \begin_inset Formula $LMP(\{4,5\})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu_{j}(1)=\tau_{j}=\sum_{x_{i}}\mu_{ij}(x_{i},1)=\mu_{ij}(0,1)+\tau_{ij}$
+\end_inset
+
+.
+ We know that 
+\begin_inset Formula $\tau_{ij}\leq\tau_{j}$
+\end_inset
+
+ so we can assign a non-negative value smaller than 1 to 
+\begin_inset Formula $\mu_{ij}(0,1)$
+\end_inset
+
+ s.t the equality holds.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu_{j}(0)=1-\tau_{j}=\sum_{x_{i}}\mu_{ij}(x_{i},0)=\mu_{ij}(0,0)+\mu_{ij}(1,0)$
+\end_inset
+
+.
+ We shall assign the value 
+\begin_inset Formula $1-\tau_{j}$
+\end_inset
+
+ to 
+\begin_inset Formula $\mu_{ij}(0,0)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $LMP(3)$
+\end_inset
+
+ is satisfied by these assignments:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\sum_{x_{i},x_{j}}\mu_{ij}(x_{i},x_{j})=\sum_{x_{i}}\mu_{ij}(x_{i},0)+\sum_{x_{i}}\mu_{ij}(x_{i},1)=\tau_{j}+(1-\tau_{j})=1$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This extends with no contradicting assignments to all other 
+\begin_inset Formula $\mu$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+So...
+ We are done!
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\square$
 \end_inset
 
 
