@@ -86,7 +86,635 @@ Jonathan Somer [jonathan.somer@gmail.com] [307923383]
 Matan Harel [matan.harel.mh@gmail.com] [302695721]
 \end_layout
 
+\begin_layout Section*
+1.
+ Exact Solution Using The Local Marginal Polytope Approximation
+\end_layout
+
+\begin_layout Subsection*
+Setting:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $n$
+\end_inset
+
+ random variables 
+\begin_inset Formula $X_{1},..,X_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Graph 
+\begin_inset Formula $E$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+MRF defined by: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+\begin_inset Formula $\forall ij\in E:\theta_{ij}(x_{i},x_{j})=\left[\begin{array}{cc}
+0 & 0\\
+0 & s_{ij}
+\end{array}\right]$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{ij}>0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\forall ij\in E:\theta_{i}(x_{i})=\left[\begin{array}{c}
+0\\
+s_{i}
+\end{array}\right]$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{i}\neq0$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Subsection*
+(a) Show that 
+\begin_inset Formula $max_{\bm{\mu}\in M_{L}}\mathbb{\bm{\mu}\cdot\bm{\theta}}$
+\end_inset
+
+ is equivalent to the following LP:
+\end_layout
+
 \begin_layout Standard
+\begin_inset Formula 
+\[
+\text{Maximize: }f(\mathbb{\bm{\tau}})=\sum_{i}s_{i}\tau_{i}+\sum_{ij}s_{ij}\tau_{ij}
+\]
+
+\end_inset
+
+ With respect to constraints:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\forall ij\in E:\tau_{ij} & \geq0\\
+\forall i:\tau_{i} & \geq0\\
+\forall ij\in E:\tau_{ij} & \leq\tau_{i}\\
+\forall ij\in E:\tau_{ij} & \leq\tau_{j}\\
+\forall ij\in E:\tau_{ij} & \geq\tau_{i}+\tau_{j}-1
+\end{align}
+
+\end_inset
+
+We shall start with the local marginal polytope (LMP) relaxation: 
+\begin_inset Formula 
+\[
+max_{\bm{\mu}\in M_{L}}\bm{\mu\cdot\theta}=max_{\bm{\mu}}\sum_{ij}\sum_{x_{i},x_{j}}\mu_{ij}(x_{i},x_{j})\theta_{ij}(x_{i},x_{j})+\sum_{i}\sum_{x_{i}}\mu_{i}(x_{i})\theta_{i}(x_{i})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With constraints: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\bm{\mu} & \geq0\\
+\sum_{x_{i}}\mu_{i}(x_{i}) & =1\\
+\sum_{x_{i},x_{j}}\mu_{ij}(x_{i},x_{j}) & =1\\
+\forall ij\in E,x_{j}:\sum_{x_{i}}\mu_{ij}(x_{i},x_{j}) & =\mu_{j}(x_{j})\\
+\forall ij\in E,x_{i}:\sum_{x_{j}}\mu_{ij}(x_{i},x_{j}) & =\mu_{i}(x_{i})
+\end{align}
+
+\end_inset
+
+ First of all we shall assign 
+\begin_inset Formula $\bm{\theta}$
+\end_inset
+
+ its values in our case, noting that its value is 
+\begin_inset Formula $0$
+\end_inset
+
+ in all cases but 
+\begin_inset Formula $(1,1),(1)$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+max_{\bm{\mu}\in M_{L}}\bm{\mu\cdot\theta}=max_{\bm{\mu}}\sum_{ij}\mu_{ij}(1,1)\theta_{ij}(1,1)+\sum_{i}\mu_{i}(1)\theta_{i}(1)
+\]
+
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+=max_{\bm{\mu}}\sum_{ij}\mu_{ij}(1,1)s_{ij}+\sum_{i}\mu_{i}(1)s_{i}
+\]
+
+\end_inset
+
+ We now rename 
+\begin_inset Formula $\forall i:\mu_{i}(1):=\tau_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $\forall ij:\mu_{ij}(1,1)=\tau_{ij}$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+max_{\bm{\tau}}\sum_{ij}\tau_{ij}s_{ij}+\sum_{i}\tau_{i}s_{i}
+\]
+
+\end_inset
+
+This is the exact function we are maximizing in the LP.
+ That is, an optimal solution for the 
+\begin_inset Formula $LP$
+\end_inset
+
+ problem is also an optimal solution for the 
+\begin_inset Formula $LMP$
+\end_inset
+
+ problem.
+ Thus it is enough to find optimal values for the 
+\begin_inset Formula $\tau$
+\end_inset
+
+ that appear in the new formulation.
+ But we must take into consideration that: 
+\end_layout
+
+\begin_layout Enumerate
+We must be sure that the new 
+\begin_inset Formula $LP$
+\end_inset
+
+ constraints are not 
+\begin_inset Quotes eld
+\end_inset
+
+too tight
+\begin_inset Quotes erd
+\end_inset
+
+ so that we are not missing any optimal assignment to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ We will show this by showing that the new 
+\begin_inset Formula $LP$
+\end_inset
+
+ constraints can be derived from the 
+\begin_inset Formula $LMP$
+\end_inset
+
+ constraints.
+\end_layout
+
+\begin_layout Enumerate
+We must also be sure that the constraints are not 
+\begin_inset Quotes eld
+\end_inset
+
+too loose
+\begin_inset Quotes erd
+\end_inset
+
+, that is: that we find some optimal 
+\begin_inset Formula $\tau$
+\end_inset
+
+ that can satisfy the original constraints on 
+\begin_inset Formula $\mu$
+\end_inset
+
+.
+ We will prove this by showing that any optimal assignment to 
+\begin_inset Formula $\tau$
+\end_inset
+
+ which satisfies 
+\begin_inset Formula $LP$
+\end_inset
+
+ can be extended to a valid assignment to 
+\begin_inset Formula $\mu$
+\end_inset
+
+ according to 
+\begin_inset Formula $LMP$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+We will now show that the 5 constraints in the new problem, denoted by 
+\begin_inset Formula $LP$
+\end_inset
+
+,can be derived from the 5 constraints in the LMP relaxation, denoted by
+ 
+\begin_inset Formula $LMP$
+\end_inset
+
+.
+ Denote the 
+\begin_inset Formula $i^{th}$
+\end_inset
+
+ rule in 
+\begin_inset Formula $LP$
+\end_inset
+
+ by: 
+\begin_inset Formula $LP(i)$
+\end_inset
+
+, and similarly with 
+\begin_inset Formula $LMP$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+(1) 
+\begin_inset Formula $LP$
+\end_inset
+
+ can be derived from 
+\begin_inset Formula $LMP$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $LP(1),LP(2)$
+\end_inset
+
+ directly result from 
+\begin_inset Formula $LMP(1)$
+\end_inset
+
+ and the way we defined 
+\begin_inset Formula $\bm{\tau}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $LP(3),LP(4)$
+\end_inset
+
+ result from 
+\begin_inset Formula $LMP(1),LMP(4),LMP(5)$
+\end_inset
+
+.
+ To show this we will assume by contradiction and w.l.o.g that 
+\begin_inset Formula $LP(3)$
+\end_inset
+
+ does not hold for some 
+\begin_inset Formula $ij\in E$
+\end_inset
+
+, that is: 
+\begin_inset Formula $\tau_{ij}>\tau_{i}$
+\end_inset
+
+.
+ Note that from the way we defined 
+\begin_inset Formula $\tau_{ij},\tau_{i}$
+\end_inset
+
+ we have 
+\begin_inset Formula $\mu_{ij}(1,1)>\mu_{i}(1)$
+\end_inset
+
+ From 
+\begin_inset Formula $LMP(1)$
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+\sum_{x_{j}}\mu_{ij}(1,x_{j})\geq\tau_{ij}>\tau_{i}=\mu_{i}(1)
+\]
+
+\end_inset
+
+In contradiction to 
+\begin_inset Formula $LMP(5)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+We will now show 
+\begin_inset Formula $LP(5)$
+\end_inset
+
+ results from 
+\begin_inset Formula $LMP(1),LMP(3),LMP(4),LMP(5)$
+\end_inset
+
+.
+ Let there be some 
+\begin_inset Formula $ij\in E$
+\end_inset
+
+.
+ By definition: 
+\begin_inset Formula 
+\[
+\tau_{i}+\tau_{j}=\mu_{i}(1)+\mu_{j}(1)
+\]
+
+\end_inset
+
+ From 
+\begin_inset Formula $LMP(4),LMP(5):$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+=\sum_{x_{j}}\mu_{ij}(1,x_{j})+\sum_{x_{i}}\mu_{ij}(x_{i},1)
+\]
+
+\end_inset
+
+ Add 
+\begin_inset Formula $\text{ \ensuremath{\mu_{ij}(0,0)}}$
+\end_inset
+
+, 
+\begin_inset Formula $LMP(1)$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\le\sum_{x_{i}x_{j}}\mu_{ij}(x_{i},x_{j})+\mu_{ij}(1,1)
+\]
+
+\end_inset
+
+ Definition + 
+\begin_inset Formula $LMP(3):$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+=1+\tau_{ij}
+\]
+
+\end_inset
+
+ Subtracting 
+\begin_inset Formula $1$
+\end_inset
+
+ from both sides of the inequality we arrive at: 
+\begin_inset Formula 
+\[
+\tau_{i}+\tau_{j}-1\leq\tau_{ij}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+(2) Any optimal 
+\begin_inset Formula $LP$
+\end_inset
+
+-valid assignment to 
+\begin_inset Formula $\tau$
+\end_inset
+
+ can be extended to a 
+\begin_inset Formula $LMP$
+\end_inset
+
+-valid assignment to 
+\begin_inset Formula $\mu$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+Let there be some optimal 
+\begin_inset Formula $LP$
+\end_inset
+
+-valid assignment to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Extending the optimal solution:
+\end_layout
+
+\begin_layout Standard
+First of all, note that any change to the values of 
+\begin_inset Formula $\mu$
+\end_inset
+
+ who do not correspond to 
+\begin_inset Formula $\tau$
+\end_inset
+
+ (denote by 
+\begin_inset Formula $\mu_{-\tau}$
+\end_inset
+
+) do not change the value of the tartget function.
+ Start by assigning 
+\begin_inset Formula $0's$
+\end_inset
+
+ to all 
+\begin_inset Formula $\mu_{-\tau}$
+\end_inset
+
+.
+ Note that at this point 
+\begin_inset Formula $LMP(1)$
+\end_inset
+
+ holds from 
+\begin_inset Formula $LP(1,2)$
+\end_inset
+
+ and the zero assignment to 
+\begin_inset Formula $\mu_{-\tau}$
+\end_inset
+
+.
+ From this point on we will only increase values of 
+\begin_inset Formula $\mu_{-\tau}$
+\end_inset
+
+ and will not increase to more than 1.
+ So we are done with 
+\begin_inset Formula $LMP(1)$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+Claim: 
+\begin_inset Formula $\forall ij:\tau_{ij}\leq1$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Assume by contradiction that 
+\begin_inset Formula $\tau_{ij}>1$
+\end_inset
+
+ then express 
+\begin_inset Formula $\tau_{ij}$
+\end_inset
+
+ as 
+\begin_inset Formula $1+\epsilon$
+\end_inset
+
+, for some 
+\begin_inset Formula $\epsilon>0$
+\end_inset
+
+ It follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+1+\epsilon=\tau_{ij}\geq\tau_{i}+\tau_{j}-1\geq1+\epsilon+1+\epsilon-1
+\]
+
+\end_inset
+
+Subtract 
+\begin_inset Formula $1+\epsilon$
+\end_inset
+
+ from both sides: 
+\begin_inset Formula 
+\[
+0\geq\epsilon
+\]
+
+\end_inset
+
+ Contradiction to the definition of 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+So we now can assume that 
+\begin_inset Formula $\forall ij\in E:0\leq\tau_{ij}\leq1$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+Let there be some 
+\begin_inset Formula $\tau_{ij},\tau_{i},\tau_{j}$
+\end_inset
+
+ in our optimal solution.
+ We will define 
+\begin_inset Formula $\mu_{ij},\mu_{i},\mu_{j}$
+\end_inset
+
+ in such a way that all constraints of 
+\begin_inset Formula $LMP$
+\end_inset
+
+ hold for these values.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ First of all, in order to satisfy 
+\begin_inset Formula $LMP(2)$
+\end_inset
+
+ we must assign:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu_{i}(0)=1-\mu_{j}(1)=1-\tau_{j}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mu_{j}(0)=1-\mu_{i}(1)=1-\tau_{i}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+We will now satisfy 
+\begin_inset Formula $LMP(\{4,5\})$
+\end_inset
+
 
 \end_layout
 
