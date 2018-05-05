@@ -1,0 +1,181 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Description
+(a) Let us inspect 
+\begin_inset Formula $\mathbb{E}_{q^{n}}\left[Z\right]$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathbb{E}_{q^{n}}\left[Z\right] & =\mathbb{E}_{q^{n}}\left[\frac{1}{n}\sum_{i=1}^{n}\frac{p(X^{(i)})}{q(X^{(i)})}f(X^{(i)})\right]\\
+ & =\frac{1}{n}\sum_{i=1}^{n}\mathbb{E}_{q}\left[\frac{p(X^{(i)})}{q(X^{(i)})}f(X^{(i)})\right]\\
+ & =\frac{1}{n}\sum_{i=1}^{n}\mathbb{E}_{q}\left[\frac{p(X)}{q(X)}f(X)\right]\\
+ & =\mathbb{E}_{q}\left[\frac{p(X)}{q(X)}f(X)\right]\\
+ & =\sum_{x}q(x)\frac{p(x)}{q(x)}f(x)\\
+ & =\sum_{x}p(x)f(x)\\
+ & =\mathbb{E}_{p}\left[f(X)\right]\\
+\end{align*}
+
+\end_inset
+
+when the first two steps uses the linearity of expectation and the fact
+ that we sample 
+\begin_inset Formula $n$
+\end_inset
+
+ IID samples.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+(b) By Jensen's inequality, for 
+\begin_inset Formula $\varphi(Y)=Y^{2}$
+\end_inset
+
+, 
+\begin_inset Formula $Y=|f(X)|\frac{p(X)}{q(X)}$
+\end_inset
+
+, we know that: 
+\begin_inset Formula $\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{q^{2}(X)}\right]\geq\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{2}$
+\end_inset
+
+.
+ Using this, we get a lower bound on the variance:
+\begin_inset Formula 
+\begin{align*}
+\mathbb{V}_{q^{n}}\left[Z\right] & =\mathbb{E}_{q^{n}}\left[Z^{2}\right]-\mathbb{E}_{q^{n}}^{2}\left[Z\right]\\
+ & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{q^{2}(X)}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & \geq\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{2}-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+\end{align*}
+
+\end_inset
+
+Let 
+\begin_inset Formula $q(x)\propto|f(x)|p(x)$
+\end_inset
+
+ with constant 
+\begin_inset Formula $c$
+\end_inset
+
+.
+ For that 
+\begin_inset Formula $q$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\mathbb{V}_{q^{n}}\left[Z\right] & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{q^{2}(X)}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{\left(c|f(X)|p(X)\right)^{2}}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{c|f(X)|p(X)}\right]\right)^{2}\\
+ & =\mathbb{E}_{p}\left[\frac{1}{c^{2}}\right]-\left(\mathbb{E}_{p}\left[\frac{1}{c}\mathrm{sign}\left(f(X)\right)\right]\right)^{2}\\
+ & =\frac{1}{c^{2}}-\frac{1}{c^{2}}\left(\mathbb{E}_{p}\left[\mathrm{sign}\left(f(X)\right)\right]\right)^{2}
+\end{align*}
+
+\end_inset
+
+Hence, for 
+\begin_inset Formula $c=\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{-1}$
+\end_inset
+
+, the lower bound is attained with 
+\begin_inset Formula $q$
+\end_inset
+
+, which means that 
+\begin_inset Formula $q$
+\end_inset
+
+ minimizes the variance.
+ 
+\begin_inset Formula $\Box$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
