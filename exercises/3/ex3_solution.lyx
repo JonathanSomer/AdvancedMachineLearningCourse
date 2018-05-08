@@ -1728,7 +1728,8 @@ We can ignore the constrains
 \begin_inset Formula $q(x)=e^{\sum_{i}\lambda_{i}f_{i}(x)+c-1}=e^{c-1}\times e^{\sum_{i}\lambda_{i}f_{i}(x)}>0$
 \end_inset
 
- for all x 
+ for all x.
+ 
 \begin_inset Newline newline
 \end_inset
 
@@ -1768,7 +1769,7 @@ Now we'll require that
 \begin_inset Formula $\mathbb{E}_{p}[f_{i,j}(x_{i},x_{j})]=\mu_{i,j}(x_{i},x_{j})$
 \end_inset
 
- and we'll use what we have just proved to get:
+ and by that we get:
 \begin_inset Formula 
 \begin{align*}
  & \mathbb{E}_{p}[f_{i,j}(x_{i},x_{j})]=\sum_{x_{k},x_{l}}p(x_{k},x_{l})\times f_{i,j}(x_{k},x_{l})=p(x_{i},x_{j})=\mu_{i,j}(x_{i,},x_{j})
@@ -1788,7 +1789,7 @@ Let's define
  we get:
 \begin_inset Formula 
 \begin{align*}
-p(x)\wasypropto & e^{\sum_{i,j}\lambda_{i,j}\times f_{i,j}(x_{i},x_{j})}=e^{\sum_{i,j}\theta_{i,j}(x_{i},x_{j})\times f_{i,j}(x_{i},x_{j})}
+p(x)\wasypropto & e^{\sum_{i,j}\lambda_{i,j}\times f_{i,j}(x_{i},x_{j})}=e^{\sum_{i,j}\theta_{i,j}(x_{i},x_{j})}
 \end{align*}
 
 \end_inset
