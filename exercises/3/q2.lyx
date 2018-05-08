@@ -70,6 +70,10 @@
 
 \begin_body
 
+\begin_layout Subsection*
+Question 2
+\end_layout
+
 \begin_layout Description
 (a) Let us inspect 
 \begin_inset Formula $\mathbb{E}_{q^{n}}\left[Z\right]$
@@ -118,7 +122,7 @@ when the first two steps uses the linearity of expectation and the fact
 \begin_inset Formula $Y=|f(X)|\frac{p(X)}{q(X)}$
 \end_inset
 
-, we know that: 
+, it holds that 
 \begin_inset Formula $\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{q^{2}(X)}\right]\geq\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{2}$
 \end_inset
 
@@ -150,22 +154,21 @@ Let
 \begin_inset Formula 
 \begin{align*}
 \mathbb{V}_{q^{n}}\left[Z\right] & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{q^{2}(X)}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
- & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{\left(c|f(X)|p(X)\right)^{2}}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{c|f(X)|p(X)}\right]\right)^{2}\\
- & =\mathbb{E}_{p}\left[\frac{1}{c^{2}}\right]-\left(\mathbb{E}_{p}\left[\frac{1}{c}\mathrm{sign}\left(f(X)\right)\right]\right)^{2}\\
- & =\frac{1}{c^{2}}-\frac{1}{c^{2}}\left(\mathbb{E}_{p}\left[\mathrm{sign}\left(f(X)\right)\right]\right)^{2}
+ & =\mathbb{E}_{p}\left[f^{2}(X)\frac{p^{2}(X)}{\left(c|f(X)|p(X)\right)^{2}}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\mathbb{E}_{p}\left[\frac{1}{c^{2}}\right]-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\left(\mathbb{E}_{p}\left[\frac{1}{c}\right]\right)^{2}-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\left(\mathbb{E}_{p}\left[\frac{1}{c}\frac{|f(X)|}{|f(X)|}\frac{p(X)}{p(X)}\right]\right)^{2}-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{c|f(X)|p(X)}\right]\right)^{2}-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}\\
+ & =\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{2}-\left(\mathbb{E}_{p}\left[f(X)\frac{p(X)}{q(X)}\right]\right)^{2}
 \end{align*}
 
 \end_inset
 
-Hence, for 
-\begin_inset Formula $c=\left(\mathbb{E}_{p}\left[|f(X)|\frac{p(X)}{q(X)}\right]\right)^{-1}$
-\end_inset
-
-, the lower bound is attained with 
+Hence, the lower bound is attained with 
 \begin_inset Formula $q$
 \end_inset
 
-, which means that 
+, which means 
 \begin_inset Formula $q$
 \end_inset
 

@@ -108,7 +108,7 @@ Consider the quadruplets
 :
 \begin_inset Formula 
 \[
-\left(f(x')\right)_{k}=I\left[x'_{i}=x_{i}\wedge x'_{j}=x_{j}\wedge ij\in E\right]
+\left(f(x')\right)_{k}=I\left[x'_{i}=x_{i}\wedge x'_{j}=x_{j}\land ij\in E\right]
 \]
 
 \end_inset
@@ -194,7 +194,7 @@ v^{T}Hv=v^{T}\left(\sum_{k}z_{k}z_{k}^{T}\right)v=\sum_{k}v^{T}z_{k}z_{k}^{T}v=\
 \end_layout
 
 \begin_layout Standard
-And therefore, by definition, 
+Thus, by definition, 
 \begin_inset Formula $H$
 \end_inset
 
