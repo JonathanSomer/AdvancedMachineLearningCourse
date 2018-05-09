@@ -251,7 +251,7 @@ max_{\bm{\tau}}\sum_{ij}\tau_{ij}s_{ij}+\sum_{i}\tau_{i}s_{i}
 \end_inset
 
 This is the exact function we are maximizing in the LP.
- That is, an optimal solution for the 
+ That is, an optimal solution, over the original constraints, for the 
 \begin_inset Formula $LP$
 \end_inset
 
@@ -264,12 +264,17 @@ This is the exact function we are maximizing in the LP.
 \begin_inset Formula $\tau$
 \end_inset
 
- that appear in the new formulation.
- But we must take into consideration that: 
+ that appear in the new formulation respecting the original constraints
+ on 
+\begin_inset Formula ${\bf \mu}$
+\end_inset
+
+.
+ We must now show that: 
 \end_layout
 
 \begin_layout Enumerate
-We must be sure that the new 
+The new 
 \begin_inset Formula $LP$
 \end_inset
 
@@ -298,7 +303,7 @@ too tight
 \end_layout
 
 \begin_layout Enumerate
-We must also be sure that the constraints are not 
+The constraints are not 
 \begin_inset Quotes eld
 \end_inset
 
@@ -306,7 +311,8 @@ too loose
 \begin_inset Quotes erd
 \end_inset
 
-, that is: that we find some optimal 
+, that is: maximizing the new target function under the new constraints
+ finds some optimal 
 \begin_inset Formula $\tau$
 \end_inset
 
@@ -363,6 +369,12 @@ We will now show that the 5 constraints in the new problem, denoted by
 \end_inset
 
 .
+ We will also us the notation 
+\begin_inset Formula $LMP(\{1,2\})$
+\end_inset
+
+ etc.
+ to denote sets of constraints.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -389,7 +401,7 @@ We will now show that the 5 constraints in the new problem, denoted by
 \begin_inset Formula $\bm{\tau}$
 \end_inset
 
-
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -570,7 +582,7 @@ First of all, note that any change to the values of
 \begin_inset Formula $\mu_{-\tau}$
 \end_inset
 
-) do not change the value of the tartget function so we can alter them as
+) do not change the value of the target function so we can alter them as
  we like as long as they do not violate the constraints.
  Start by assigning 
 \begin_inset Formula $0's$
@@ -598,7 +610,7 @@ First of all, note that any change to the values of
 \begin_inset Formula $\mu_{-\tau}$
 \end_inset
 
- and will not increase to more than 1.
+ (and will not increase to more than 1).
  So we are done with 
 \begin_inset Formula $LMP(1)$
 \end_inset
@@ -890,15 +902,15 @@ We shall show in the next two sections that:
 \end_layout
 
 \begin_layout Standard
-Thus, we can apply this method iteratively, treating 
-\begin_inset Formula $\bm{z}$
-\end_inset
-
- as 
+Thus, we can apply this method iteratively, assigning 
 \begin_inset Formula $\bm{\tau}$
 \end_inset
 
-, until there are no fractional values.
+ to be the 
+\begin_inset Formula $\bm{z}$
+\end_inset
+
+ of the previous iteration, until there are no fractional values.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1364,7 +1376,7 @@ We will show that we can bring this problem to the form from before.
 \begin_inset Formula $\theta_{ij}$
 \end_inset
 
- is constant for all 
+ is the same for all 
 \begin_inset Formula $ij$
 \end_inset
 
@@ -1445,43 +1457,78 @@ Subtracting
 \end_inset
 
  to the respective 
-\begin_inset Formula $\theta_{i}(x_{i})$
+\begin_inset Formula $\theta_{j}(x_{j})$
 \end_inset
 
  (for the case before: 
-\begin_inset Formula $\theta_{i}(0)$
+\begin_inset Formula $\theta_{j}(0)$
 \end_inset
 
 ), does not change the optimal 
 \begin_inset Formula $\bm{\mu}$
 \end_inset
 
-.
- The reason is the preference between the two: 
+(other rows/cols are symmetrical) The reason we can perform this is: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The preference between the two: 
 \begin_inset Formula $\theta_{ij}(0,0)$
 \end_inset
 
- and 
+, 
 \begin_inset Formula $\theta_{ij}(1,0)$
 \end_inset
 
- does not change, and from 
+ does not change as we have subtracted the same size from both.
+\end_layout
+
+\begin_layout Enumerate
+The preference for the two: 
+\begin_inset Formula $\theta_{ij}(0,0)$
+\end_inset
+
+, 
+\begin_inset Formula $\theta_{ij}(1,0)$
+\end_inset
+
+ is decreased from the subtraction.
+ From 
 \begin_inset Formula $LMP(4)$
 \end_inset
 
- increasing 
+ decreasing 
 \begin_inset Formula $\mu$
 \end_inset
 
- for one of the previous two will immediately demand an increase of the
- same size in 
-\begin_inset Formula $\theta_{i}(0)$
+ for one of the previous two will immediately demand a decrease of the same
+ size in 
+\begin_inset Formula $\theta_{j}(0)$
 \end_inset
 
 .
- Other cases are symmetrical.
+ By adding 
+\begin_inset Formula $c$
+\end_inset
+
+ to 
+\begin_inset Formula $\theta_{j}(0)$
+\end_inset
+
+ we de-insentivize the change in 
+\begin_inset Formula ${\bf \mu}$
+\end_inset
+
+ such that altering it will have no effect and thus the optimal 
+\begin_inset Formula $\mu$
+\end_inset
+
+remains the same.
+ 
 \end_layout
 
+\end_deeper
 \begin_layout Enumerate
 Subtracting/adding the same 
 \begin_inset Formula $c$
@@ -1496,7 +1543,7 @@ Subtracting/adding the same
 \end_inset
 
 .
- The optimal solution will not suddenly prefer one over.
+ The preference between the two remains the same.
 \end_layout
 
 \begin_layout Standard
@@ -1571,17 +1618,17 @@ Add
 
 \end_layout
 
-\begin_layout Itemize
-Subtract 
+\begin_layout Standard
+Finall, using rule 2: subtract 
 \begin_inset Formula $c=\theta_{i}(0)$
 \end_inset
 
  from 
-\begin_inset Formula $\theta_{i}$
+\begin_inset Formula $\theta_{i}(0),\theta_{j}(1)$
 \end_inset
 
  
-\begin_inset Formula $\Rightarrow\left[\begin{array}{c}
+\begin_inset Formula $\Rightarrow\theta_{i}=\left[\begin{array}{c}
 0\\
 s_{i}
 \end{array}\right]$
