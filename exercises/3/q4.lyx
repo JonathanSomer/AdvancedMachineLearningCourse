@@ -70,6 +70,10 @@
 
 \begin_body
 
+\begin_layout Section*
+Question 4
+\end_layout
+
 \begin_layout Standard
 Consider the quadruplets 
 \begin_inset Formula $Q=\left\{ (i,j,x_{i},x_{j})|i,j\in[n],x_{i}\in X_{i},x_{j}\in X_{j}\right\} $
@@ -97,10 +101,14 @@ Consider the quadruplets
 \begin_inset Formula $f$
 \end_inset
 
- such that
+ such that for 
+\begin_inset Formula $k=\mathrm{ord}(i,j,x_{i},x_{j})$
+\end_inset
+
+:
 \begin_inset Formula 
 \[
-\left(f(x')\right)_{\mathrm{ord}(i,j,x_{i},x_{j})}=I\left[x'_{i}=x_{i}\wedge x'_{j}=x_{j}\wedge ij\in E\right]
+\left(f(x')\right)_{k}=I\left[x'_{i}=x_{i}\wedge x'_{j}=x_{j}\land ij\in E\right]
 \]
 
 \end_inset
@@ -108,7 +116,7 @@ Consider the quadruplets
 
 \begin_inset Formula 
 \[
-f_{\mathrm{ord}(i,j,x_{i},x_{j})}(x')\coloneqq\left(f(x')\right)_{\mathrm{ord}(i,j,x_{i},x_{j})}
+f_{k}(x')\coloneqq\left(f(x')\right)_{k}
 \]
 
 \end_inset
@@ -123,7 +131,7 @@ It follows that
 \begin_layout Standard
 \begin_inset Formula 
 \[
-Z(\boldsymbol{\theta})=\sum_{x\in X}\exp\left(\boldsymbol{\theta}\cdot f(x)\right)
+\log Z(\boldsymbol{\theta})=\sum_{x\in X}\exp\left(\boldsymbol{\theta}\cdot f(x)\right)
 \]
 
 \end_inset
@@ -137,14 +145,14 @@ Let
 \end_inset
 
  be the hessian of 
-\begin_inset Formula $Z(\boldsymbol{\theta})$
+\begin_inset Formula $\log Z(\boldsymbol{\theta})$
 \end_inset
 
 .
  Therefore (using the chain rule):
 \begin_inset Formula 
 \begin{align*}
-H_{ij} & =\frac{\partial^{2}Z(\boldsymbol{\theta})}{\partial\boldsymbol{\theta}_{i}\partial\boldsymbol{\theta}_{j}}\\
+H_{ij} & =\frac{\partial^{2}\log Z(\boldsymbol{\theta})}{\partial\boldsymbol{\theta}_{i}\partial\boldsymbol{\theta}_{j}}\\
  & =\frac{\partial\sum_{x}\exp\left(\boldsymbol{\theta}\cdot f(x)\right)f_{i}(x)}{\partial\boldsymbol{\theta}_{j}}\\
  & =\sum_{x}\exp\left(\boldsymbol{\theta}\cdot f(x)\right)f_{i}(x)f_{j}(x)\\
  & =\sum_{x}\exp\left(\frac{1}{2}\boldsymbol{\theta}\cdot f(x)\right)\exp\left(\frac{1}{2}\boldsymbol{\theta}\cdot f(x)\right)f_{i}(x)f_{j}(x)\\
@@ -186,12 +194,12 @@ v^{T}Hv=v^{T}\left(\sum_{k}z_{k}z_{k}^{T}\right)v=\sum_{k}v^{T}z_{k}z_{k}^{T}v=\
 \end_layout
 
 \begin_layout Standard
-And therefore, by definition, 
+Thus, by definition, 
 \begin_inset Formula $H$
 \end_inset
 
  is a PSD and hence 
-\begin_inset Formula $Z(\boldsymbol{\theta})$
+\begin_inset Formula $\log Z(\boldsymbol{\theta})$
 \end_inset
 
  is convex.

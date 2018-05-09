@@ -1647,6 +1647,204 @@ Done!
 \end_layout
 
 \begin_layout Section*
+3.
+ Entropy maximization and MRFs
+\end_layout
+
+\begin_layout Subsection*
+(a) 
+\end_layout
+
+\begin_layout Standard
+Assume 
+\begin_inset Formula $f_{1}(x),...,f_{d}(x)$
+\end_inset
+
+ to be d functions, and 
+\begin_inset Formula $a_{1},...,a_{d}$
+\end_inset
+
+ to be d scalars.
+ We're looking for a distribution 
+\begin_inset Formula $q(x)$
+\end_inset
+
+ which maximize the entropy and satisfies that 
+\begin_inset Formula $\mathbb{E\mathrm{[f_{i}(x)]}=}a_{i}$
+\end_inset
+
+ for all 
+\begin_inset Formula $i$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+Let's take a look on the following maximization problem:
+\begin_inset Formula 
+\begin{align*}
+\max_{p} & -\sum_{x}p(x)\times\log(p(x))\\
+\forall_{\mathrm{i}} & \mathbb{E\mathrm{[f_{i}(x)]}=}a_{i}\\
+ & \sum_{x}p(x)=1
+\end{align*}
+
+\end_inset
+
+We will use Lagrange multiplier to find a solution for this problem.
+ 
+\begin_inset Formula $\forall_{i\in[1,d]}$
+\end_inset
+
+ 
+\begin_inset Formula $\lambda_{i}$
+\end_inset
+
+ is the Lagrange multiplier for the constrain 
+\begin_inset Formula $\mathbb{E\mathrm{[f_{i}(x)]}=}a_{i}$
+\end_inset
+
+, and 
+\begin_inset Formula $c$
+\end_inset
+
+ be the Lagrange multiplier to the constrain 
+\begin_inset Formula $\sum_{x}p(x)=1$
+\end_inset
+
+.
+ 
+\begin_inset Newline newline
+\end_inset
+
+In addition by definition 
+\begin_inset Formula $E\mathrm{[f_{i}(x)]}=\sum_{x}p(x)\times f_{i}(x)$
+\end_inset
+
+.
+ Then we get:
+\begin_inset Formula 
+\begin{align*}
+ & \mathfrak{\mathcal{L\mathrm{(p,\lambda,c)}=}-\sum_{\mathrm{x}}\mathrm{p(x)}\times\mathrm{\log(p(x))+\sum_{i}\lambda_{i}(\sum_{x}p(x)\times f_{i}(x)-a_{i})+c(\sum_{x}p(x)-1)}}
+\end{align*}
+
+\end_inset
+
+Let's derivative with respect to p(x) and equal to zero in order to find
+ q(x):
+\begin_inset Formula 
+\begin{align*}
+ & \mathcal{L\mathrm{(p,\lambda,c)'}=}-1\mathrm{-\log(p(x))+\sum_{i}\lambda_{i}f_{i}(x)+c}\\
+ & log(q(x))=\sum_{i}\lambda_{i}f_{i}(x)+c-1\\
+ & q(x)=e^{\sum_{i}\lambda_{i}f_{i}(x)+c-1}=e^{c-1}\times e^{\sum_{i}\lambda_{i}f_{i}(x)}
+\end{align*}
+
+\end_inset
+
+We will use the constrain
+\begin_inset Formula $\sum_{x}p(x)=1$
+\end_inset
+
+ to get
+\begin_inset Formula 
+\begin{align*}
+ & \sum_{x}q(x)=\sum_{x}e^{c-1}\times e^{\sum_{i}\lambda_{i}f_{i}(x)}=1\\
+ & e^{c-1}=\frac{1}{\sum_{x}e^{\sum_{i}\lambda_{i}f_{i}(x)}}
+\end{align*}
+
+\end_inset
+
+So 
+\begin_inset Formula $e^{c-1}$
+\end_inset
+
+ is the normalization factor.
+ Now we'll prove that it's an maximum by derivative once again:
+\begin_inset Formula 
+\begin{align*}
+ & \mathcal{L\mathrm{(p,\lambda,c)''}=}\frac{-1}{q(x)}<0
+\end{align*}
+
+\end_inset
+
+We can ignore the constrains 
+\begin_inset Formula $\forall_{x}p(x)\ge0$
+\end_inset
+
+ because the solution we got is 
+\begin_inset Formula $q(x)=e^{\sum_{i}\lambda_{i}f_{i}(x)+c-1}=e^{c-1}\times e^{\sum_{i}\lambda_{i}f_{i}(x)}>0$
+\end_inset
+
+ for all x.
+ 
+\begin_inset Newline newline
+\end_inset
+
+Therefore 
+\begin_inset Formula $q(x)\wasypropto e^{\sum_{i}\lambda_{i}f_{i}(x)}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+(b)
+\end_layout
+
+\begin_layout Standard
+For each 
+\begin_inset Formula $k,l$
+\end_inset
+
+ we'll define an indicator function 
+\begin_inset Formula $f_{k,l}(x_{i},x_{j})$
+\end_inset
+
+ that is 1 only when 
+\begin_inset Formula $k=i$
+\end_inset
+
+ and 
+\begin_inset Formula $l=j$
+\end_inset
+
+ otherwise 0.
+\begin_inset Newline newline
+\end_inset
+
+Now we'll require that 
+\begin_inset Formula $\mathbb{E}_{p}[f_{i,j}(x_{i},x_{j})]=\mu_{i,j}(x_{i},x_{j})$
+\end_inset
+
+ and by that we get:
+\begin_inset Formula 
+\begin{align*}
+ & \mathbb{E}_{p}[f_{i,j}(x_{i},x_{j})]=\sum_{x_{k},x_{l}}p(x_{k},x_{l})\times f_{i,j}(x_{k},x_{l})=p(x_{i},x_{j})=\mu_{i,j}(x_{i,},x_{j})
+\end{align*}
+
+\end_inset
+
+Let's define 
+\begin_inset Formula $\theta_{i,j}(x_{i},x_{j})=\lambda_{i,j}$
+\end_inset
+
+ where 
+\begin_inset Formula $\lambda_{i,j}$
+\end_inset
+
+ is the Lagrange multiplier that maximizes the maximization problem, then
+ we get:
+\begin_inset Formula 
+\begin{align*}
+p(x)\wasypropto & e^{\sum_{i,j}\lambda_{i,j}\times f_{i,j}(x_{i},x_{j})}=e^{\sum_{i,j}\theta_{i,j}(x_{i},x_{j})}
+\end{align*}
+
+\end_inset
+
+and that is exactly a pairwise MRF and it maximizes entorpy.
+\end_layout
+
+\begin_layout Section*
 4 Log Partition-Function is Convex
 \end_layout
 
