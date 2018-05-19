@@ -18,6 +18,7 @@ from keras import metrics
 from keras.datasets import mnist
 
 import pandas as pd
+import utils as ut
 
 batch_size = 100
 original_dim = 784
@@ -97,19 +98,19 @@ while len(digits) < 10:
 
 print(pd.DataFrame(digits))
 
-
 # (d)
 z_sample = np.array([[-2.5, 0.55]])
 decoded_x = generator.predict(z_sample)
-plt.imshow(np.reshape(decoded_x, (28, 28)), interpolation='nearest')
-plt.savefig('d.png', format='png')
-
+ut.image(decoded_x)
+ut.plt_save('d')
 
 # (e)
-four, nine = digits[4], digits[9]
-(x1, y1), (x2, y2) = four, nine
+source, target = digits[3], digits[5]
+(x1, y1), (x2, y2) = source, target
 a = (y2 - y1) / (x2 - x1)
 b = y1 - (a * x1)
 f = lambda _x_: a * _x_ + b
 x_samples = np.linspace(x1, x2, num=10)
 samples = [np.array([[_x, f(_x)]]) for _x in x_samples]
+ut.images(map(generator.predict, samples), map(str, x_samples), n_cols=3)
+ut.plt_save('e')
