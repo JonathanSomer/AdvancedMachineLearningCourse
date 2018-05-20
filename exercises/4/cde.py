@@ -13,8 +13,8 @@ x_test = x_test.astype('float32') / 255.
 x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
-encoder = load_model('encoder.h5')
-generator = load_model('generator.h5')
+encoder = load_model('models/encoder.h5')
+generator = load_model('models/generator.h5')
 
 
 # (c)
@@ -32,7 +32,7 @@ print(pd.DataFrame(digits))
 z_sample = np.array([[-2.5, 0.55]])
 decoded_x = generator.predict(z_sample)
 ut.image(decoded_x)
-ut.plt_save('d')
+ut.plt_save('outputs/d')
 
 # (e)
 source, target = digits[3], digits[5]
