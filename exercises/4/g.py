@@ -104,8 +104,8 @@ x_decoded_mean = reduce(lambda x, a: a(x), decoding_layers, x_encoded_mean)
 generator = Model(x_encoded_mean, x_decoded_mean)
 
 # save the models
-encoder.save('encoder.h5')
-generator.save('generator.h5')
+encoder.save('g.encoder.h5')
+generator.save('g.generator.h5')
 
 # (c)
 print('\nCorresponding mapping coordinates in the latent space - one image per digit:\n')
