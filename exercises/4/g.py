@@ -23,14 +23,9 @@ import utils as ut
 batch_size = 100
 original_dim = 784
 latent_dim = 2
-intermediate_dim = 256
+intermediate_dim = 16
 epochs = 50
 epsilon_std = 1.0
-
-x = Input(shape=(original_dim,))
-h = Dense(intermediate_dim, activation='relu')(x)
-z_mean = Dense(latent_dim)(h)
-z_log_var = Dense(latent_dim)(h)
 
 
 def sampling(args):
@@ -40,19 +35,44 @@ def sampling(args):
     return _z_mean + K.exp(_z_log_var / 2) * epsilon
 
 
-z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_var])
+input_shape = (28, 28, 1)
+inputs = Input(shape=input_shape, name='encoder_input')
 
-# we instantiate these layers separately so as to reuse them later
-decoder_h = Dense(intermediate_dim, activation='relu')
-decoder_mean = Dense(original_dim, activation='sigmoid')
-h_decoded = decoder_h(z)
-x_decoded_mean = decoder_mean(h_decoded)
+encoding_layers = [Conv2D(16, (3, 3), activation='relu', padding='same'),
+                   MaxPooling2D((2, 2), padding='same'),
+                   Conv2D(8, (3, 3), activation='relu', padding='same'),
+                   MaxPooling2D((2, 2), padding='same')]
+
+x = reduce(lambda x, a: a(x), encoding_layers, inputs)
+
+# shape info needed to build decoder model
+shape = K.int_shape(x)
+
+# generate latent vector Q(z|X)
+x = Flatten()(x)
+h = Dense(intermediate_dim, activation='relu')(x)
+z_mean = Dense(latent_dim, name='z_mean')(h)
+z_log_var = Dense(latent_dim, name='z_log_var')(h)
+
+# use reparameterization trick to push the sampling out as input
+z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
+
+decoding_layers = [Dense(intermediate_dim, activation='relu'),
+                   Dense(shape[1] * shape[2] * shape[3], activation='relu'),
+                   Reshape((shape[1], shape[2], shape[3])),
+                   Conv2D(8, (3, 3), activation='relu', padding='same'),
+                   UpSampling2D((2, 2)),
+                   Conv2D(16, (3, 3), activation='relu', padding='same'),
+                   UpSampling2D((2, 2)),
+                   Conv2D(1, (3, 3), activation='sigmoid', padding='same')]
+
+outputs = reduce(lambda x, a: a(x), decoding_layers, z)
 
 # instantiate VAE model
-vae = Model(x, x_decoded_mean)
+vae = Model(inputs, outputs, name='vae')
 
 # Compute VAE loss
-xent_loss = original_dim * metrics.binary_crossentropy(x, x_decoded_mean)
+xent_loss = original_dim * metrics.binary_crossentropy(K.flatten(inputs), K.flatten(outputs))
 kl_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 vae_loss = K.mean(xent_loss + kl_loss)
 
@@ -65,8 +85,9 @@ vae.summary()
 
 x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
+
+x_train = x_train.reshape((-1,) + input_shape)
+x_test = x_test.reshape((-1,) + input_shape)
 
 vae.fit(x_train,
         shuffle=True,
@@ -74,16 +95,15 @@ vae.fit(x_train,
         batch_size=batch_size,
         validation_data=(x_test, None))
 
-# new code starts here
-encoder = Model(x, z_mean)
+vae.save('g.vae.h5')
+
+encoder = Model(inputs, z_mean)
 
 x_encoded_mean = Input(shape=(latent_dim,))
-_h_decoded = decoder_h(x_encoded_mean)
-_x_decoded_mean = decoder_mean(_h_decoded)
-generator = Model(x_encoded_mean, _x_decoded_mean)
+x_decoded_mean = reduce(lambda x, a: a(x), decoding_layers, x_encoded_mean)
+generator = Model(x_encoded_mean, x_decoded_mean)
 
 # save the models
-vae.save('g.vae.h5')
 encoder.save('encoder.h5')
 generator.save('generator.h5')
 
