@@ -97,7 +97,7 @@ while len(digits) < 10:
     digits[y_test[i]] = encoded_x_test[i]
     i += 1
 
-print(pd.DataFrame(digits))
+ut.output('f.c', pd.DataFrame(digits))
 
 # (d)
 z_sample = np.array([[-2.5, 0.55]])

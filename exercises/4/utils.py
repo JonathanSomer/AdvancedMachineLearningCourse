@@ -9,7 +9,7 @@ import sys
 
 def output(name, s):
     print s
-    path = '{0}.result.txt'.format(name)
+    path = '{0}.txt'.format(name)
     f = open(path, 'w')
     f.write(str(s))
     f.close()

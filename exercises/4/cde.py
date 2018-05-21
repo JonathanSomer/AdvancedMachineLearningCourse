@@ -8,10 +8,17 @@ from keras.datasets import mnist
 # train the VAE on MNIST digits
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
+# for sections c, d, e + f
 x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
 x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
+
+# for section g
+# x_train = x_train.astype('float32') / 255.
+# x_test = x_test.astype('float32') / 255.
+# x_train = x_train.reshape((-1, 28, 28, 1))
+# x_test = x_test.reshape((-1, 28, 28, 1))
 
 encoder = load_model('models/encoder.h5')
 generator = load_model('models/generator.h5')
@@ -26,13 +33,13 @@ while len(digits) < 10:
     digits[y_test[i]] = encoded_x_test[i]
     i += 1
 
-print(pd.DataFrame(digits))
+ut.output('c', pd.DataFrame(digits))
 
 # (d)
 z_sample = np.array([[-2.5, 0.55]])
 decoded_x = generator.predict(z_sample)
 ut.image(decoded_x)
-ut.plt_save('outputs/d')
+ut.plt_save('d')
 
 # (e)
 source, target = digits[3], digits[5]
