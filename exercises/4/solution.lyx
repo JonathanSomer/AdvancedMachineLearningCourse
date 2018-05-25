@@ -71,7 +71,7 @@
 \begin_body
 
 \begin_layout Title
-ADVANCED MACHINE LEARNING EXERCISE #4 SOLUTION
+Advanced Machine Learning: HW-4
 \end_layout
 
 \begin_layout Author
@@ -87,7 +87,94 @@ Matan Harel [matan.harel.mh@gmail.com] [302695721]
 \end_layout
 
 \begin_layout Section*
-\begin_inset Newpage newpage
+2.Kullback–Leibler divergence of normal distrubutions
+\end_layout
+
+\begin_layout Standard
+let's p,q be two normally distributed random variables, 
+\begin_inset Formula $P\sim N(\mu_{1},\sigma_{1}^{2})$
+\end_inset
+
+ and 
+\begin_inset Formula $Q\sim N(\mu_{2},\sigma_{2}^{2})$
+\end_inset
+
+.
+ We will find an expression for 
+\begin_inset Formula $D_{KL}(P||Q)$
+\end_inset
+
+.
+\begin_inset Formula 
+\begin{align*}
+D_{KL}(P||Q) & =\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(\frac{p\left(x\right)}{q\left(x\right)}\right)dx=\intop_{-\infty}^{\infty}p\left(x\right)\cdot\left(log(p\left(x\right)-log(q\left(x\right)\right)dx=\\
+= & -\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(q\left(x\right)\right)dx+\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(p\left(x\right)\right)dx
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+We will start with open the expression 
+\begin_inset Formula $\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(p\left(x\right)\right)dx$
+\end_inset
+
+:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+\intop_{-\infty}^{\infty}p\left(x\right)\times log\left(p\left(x\right)\right)dx & =\intop_{-\infty}^{\infty}\left(\frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\cdot e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\cdot log\left(\frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\cdot e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\right)\right)dx\\
+= & \frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\cdot\intop_{-\infty}^{\infty}e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\cdot\left(log\left(\frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\right)+log\left(e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\right)\right)dx\\
+= & ??=-\frac{1}{2}\left(1+log\left(2\pi\sigma_{1}^{2}\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Now we will develop the second expression 
+\begin_inset Formula $-\intop_{-\infty}^{\infty}p\text{\ensuremath{\left(x\right)\cdot log\left(q\left(x\right)\right)dx}}$
+\end_inset
+
+:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+-\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(q\left(x\right)\right)dx & =-\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(\frac{1}{\sqrt{2\pi\sigma_{2}^{2}}}e^{-\frac{\left(x-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}}\right)dx=\\
+= & ?=\frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)-\intop_{-\infty}^{\infty}p\left(x\right)log\left(e^{-\frac{\left(x-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}}\right)dx=\\
+= & \frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)-\intop_{-\infty}^{\infty}-p\left(x\right)\frac{\left(x-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}dx=\\
+= & \frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)+\frac{1}{2\sigma_{2}^{2}}\left(\intop_{-\infty}^{\infty}p\left(x\right)x^{2}dx-\intop_{-\infty}^{\infty}2p\left(x\right)x\mu_{2}dx+\intop_{-\infty}^{\infty}p\left(x\right)\mu_{2}^{2}dx\right)=\\
+= & \frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)+\frac{E\left(x^{2}\right)-2\mu_{2}E\left(x\right)+\mu_{2}^{2}}{2\sigma_{2}^{2}}=\frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)+\frac{\sigma_{1}^{2}+\mu_{1}^{2}-2\mu_{2}\mu_{1}+\mu_{2}^{2}}{2\sigma_{2}^{2}}=\\
+= & \frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)+\frac{\sigma_{1}^{2}+\left(u_{1}-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+there for when we combine the two expressions we will get:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+D_{KL}(P||Q) & =-\frac{1}{2}\left(1+log\left(2\pi\sigma_{1}^{2}\right)\right)-\frac{1}{2}log\left(2\pi\sigma_{2}^{2}\right)+\frac{\sigma_{1}^{2}+\left(u_{1}-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}=\\
+= & \frac{\sigma_{1}^{2}+\left(u_{1}-\mu_{2}\right)^{2}}{2\sigma_{2}^{2}}+log\left(\frac{\sigma_{2}}{\sigma_{1}}\right)-\frac{1}{2}
+\end{align*}
+
 \end_inset
 
 
