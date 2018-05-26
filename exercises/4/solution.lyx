@@ -131,8 +131,8 @@ We will start with opening the first expression
 \intop_{-\infty}^{\infty}p\left(x\right)\times log\left(p\left(x\right)\right)dx & =\intop_{-\infty}^{\infty}\left(p\left(x\right)\cdot log\left(\frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\cdot e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\right)\right)dx\\
 = & \intop_{-\infty}^{\infty}p\left(x\right)\cdot\left(log\left(\frac{1}{\sqrt{2\pi\sigma_{1}^{2}}}\right)+log\left(e^{-\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}}\right)\right)dx\\
 = & \intop_{-\infty}^{\infty}p\left(x\right)\underset{\overbrace{=0}}{log\left(1\right)}dx-\intop_{-\infty}^{\infty}p\left(x\right)\cdot log\left(\sqrt{2\pi\sigma_{1}^{2}}\right)dx-\intop_{-\infty}^{\infty}p\left(x\right)\cdot\frac{\left(x-\mu_{1}\right)^{2}}{2\sigma_{1}^{2}}dx=\\
-= & 0-\frac{1}{2}log\left(2\pi\sigma_{1}^{2}\right)\underset{\overbrace{=1}}{\cdot\intop_{-\infty}^{\infty}p\left(x\right)dx}-\frac{1}{2}\intop_{-\infty}^{\infty}p\left(x\right)\cdot\frac{\left(x-\mu_{1}\right)^{2}}{\sigma_{1}^{2}}dx\\
-= & ?=-\frac{1}{2}log\left(2\pi\sigma_{1}^{2}\right)-\frac{1}{2}
+= & 0-\frac{1}{2}log\left(2\pi\sigma_{1}^{2}\right)\underset{\overbrace{=1}}{\cdot\intop_{-\infty}^{\infty}p\left(x\right)dx}-\frac{1}{2\sigma_{1}^{2}}\intop_{-\infty}^{\infty}p\left(x\right)\cdot\left(x-\mu_{1}\right)^{2}dx\\
+= & -\frac{1}{2}log\left(2\pi\sigma_{1}^{2}\right)-\frac{\sigma_{1}^{2}}{2\sigma_{1}^{2}}=-\frac{1}{2}log\left(2\pi\sigma_{1}^{2}\right)-\frac{1}{2}
 \end{align*}
 
 \end_inset
