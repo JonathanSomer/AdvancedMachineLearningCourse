@@ -83,9 +83,9 @@ _x_decoded_mean = decoder_mean(_h_decoded)
 generator = Model(x_encoded_mean, _x_decoded_mean)
 
 # save the models
-vae.save('vae.h5')
-encoder.save('encoder.h5')
-generator.save('generator.h5')
+# vae.save('vae.h5')
+# encoder.save('encoder.h5')
+# generator.save('generator.h5')
 
 # (c)
 print('\nCorresponding mapping coordinates in the latent space - one image per digit:\n')

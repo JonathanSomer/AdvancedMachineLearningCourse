@@ -9,19 +9,19 @@ from keras.datasets import mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 # for sections c, d, e + f
-x_train = x_train.astype('float32') / 255.
-x_test = x_test.astype('float32') / 255.
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
-
-# for section g
 # x_train = x_train.astype('float32') / 255.
 # x_test = x_test.astype('float32') / 255.
-# x_train = x_train.reshape((-1, 28, 28, 1))
-# x_test = x_test.reshape((-1, 28, 28, 1))
+# x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+# x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
-encoder = load_model('models/encoder.h5')
-generator = load_model('models/generator.h5')
+# for section g
+x_train = x_train.astype('float32') / 255.
+x_test = x_test.astype('float32') / 255.
+x_train = x_train.reshape((-1, 28, 28, 1))
+x_test = x_test.reshape((-1, 28, 28, 1))
+
+encoder = load_model('models/g.encoder.h5')
+generator = load_model('models/g.generator.h5')
 
 
 # (c)
