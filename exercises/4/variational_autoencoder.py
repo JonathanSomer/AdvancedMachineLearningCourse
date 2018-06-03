@@ -88,6 +88,18 @@ generator = Model(x_encoded_mean, _x_decoded_mean)
 # generator.save('generator.h5')
 
 # (c)
+colors = ['red', 'blue', 'green', 'lightsalmon', 'pink', 'purple', 'orange', 'black', 'brown', 'magenta']
+latent = encoder.predict(x_test)
+for digit in xrange(10):
+    X = latent[y_test == digit]
+    x1, x2 = [x[0] for x in X], [x[1] for x in X]
+    plt.scatter(x1, x2, alpha=1, s=1, c=colors[digit], label='{0}\'s'.format(digit))
+
+ut.plot(name='c',
+        title='Test Set Visualization',
+        xlabel='Latent dim 1',
+        ylabel='Latent dim 2')
+
 print('\nCorresponding mapping coordinates in the latent space - one image per digit:\n')
 encoded_x_test = encoder.predict(x_test)
 digits = {}

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import utils as ut
+import matplotlib.pyplot as plt
 
 from keras.models import load_model
 from keras.datasets import mnist
@@ -9,22 +10,33 @@ from keras.datasets import mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 # for sections c, d, e + f
-# x_train = x_train.astype('float32') / 255.
-# x_test = x_test.astype('float32') / 255.
-# x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-# x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
-
-# for section g
 x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
-x_train = x_train.reshape((-1, 28, 28, 1))
-x_test = x_test.reshape((-1, 28, 28, 1))
+x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
 
-encoder = load_model('models/g.encoder.h5')
-generator = load_model('models/g.generator.h5')
+# for section g
+# x_train = x_train.astype('float32') / 255.
+# x_test = x_test.astype('float32') / 255.
+# x_train = x_train.reshape((-1, 28, 28, 1))
+# x_test = x_test.reshape((-1, 28, 28, 1))
 
+encoder = load_model('models/f.encoder.h5')
+generator = load_model('models/f.generator.h5')
 
 # (c)
+colors = ['red', 'blue', 'green', 'lightsalmon', 'pink', 'purple', 'orange', 'black', 'brown', 'magenta']
+latent = encoder.predict(x_test)
+for digit in xrange(10):
+    X = latent[y_test == digit]
+    x1, x2 = [x[0] for x in X], [x[1] for x in X]
+    plt.scatter(x1, x2, alpha=1, s=1, c=colors[digit], label='{0}\'s'.format(digit))
+
+ut.plot(name='c',
+        title='Test Set Visualization',
+        xlabel='Latent dim 1',
+        ylabel='Latent dim 2')
+
 print('\nCorresponding mapping coordinates in the latent space - one image per digit:\n')
 encoded_x_test = encoder.predict(x_test)
 digits = {}
