@@ -80,8 +80,18 @@ Section (c)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename c.png
-	scale 40
+	filename outputs/c.latent.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename outputs/c.table.png
+	scale 60
 
 \end_inset
 
@@ -102,7 +112,7 @@ z_sample = np.array([[-2.5, 0.55]])
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/d.png
+	filename outputs/d.png
 	lyxscale 50
 	scale 50
 
@@ -117,7 +127,7 @@ Section (e)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/e.png
+	filename outputs/e.png
 	scale 60
 
 \end_inset
@@ -131,8 +141,18 @@ Section (f.c)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename c.png
-	scale 40
+	filename outputs/f.c.latent.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename outputs/f.c.table.png
+	scale 60
 
 \end_inset
 
@@ -145,7 +165,7 @@ Section (f.d)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/d.png
+	filename outputs/f.d.png
 	scale 50
 
 \end_inset
@@ -159,7 +179,7 @@ Section (f.e)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/e.png
+	filename outputs/f.e.png
 	scale 60
 
 \end_inset
@@ -173,7 +193,17 @@ Section (g.c)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename c.png
+	filename outputs/g.c.latent.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename outputs/g.c.table.png
 	scale 40
 
 \end_inset
@@ -187,7 +217,7 @@ Section (g.d)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/d.png
+	filename outputs/g.d.png
 	scale 50
 
 \end_inset
@@ -201,7 +231,7 @@ Section (g.e)
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename /Users/uriavron/Dropbox/School/MSc/aml/git/exercises/4/e.png
+	filename outputs/g.e.png
 	scale 60
 
 \end_inset
