@@ -3,3 +3,4 @@
 *.lyx.emergency
 *.lyx~
 *.DS_Store
+config.py
