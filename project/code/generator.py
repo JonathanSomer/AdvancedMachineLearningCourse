@@ -6,6 +6,13 @@ from sklearn.metrics import mean_squared_error
 from scipy.spatial.distance import cosine
 
 import numpy as np
+import pickle
+import os
+
+
+def pickle_path(name):
+    path = os.path.join(os.path.dirname(__file__), os.pardir, 'pickles', name + '.pickle')
+    return os.path.abspath(path)
 
 
 def cosine_similarity(a, b):
@@ -14,12 +21,20 @@ def cosine_similarity(a, b):
 
 class LowShotGenerator(object):
     def __init__(self, linear_classifier, dataset, n_layers=3, n_clusters=100, n_cpus=4, hidden_size=512,
-                 batch_size=100, n_epochs=10, activation='relu', n_examples=None, callbacks=[]):
+                 batch_size=100, n_epochs=10, activation='relu', n_examples=None, callbacks=[],
+                 name='low-shot-generator', force_rebuild=False):
         """
         dataset is a dict mapping base class to its feature vectors
         n_examples is k in the paper: the minimum number of examples per novel category
         # TODO: maybe need to add/remove another Dense layer (the paper says it should 3 layers so it's ambigous)
         """
+
+        file_path = pickle_path(name)
+        if os.path.exists(file_path) and not force_rebuild:
+            with open(file_path, "rb") as handle:
+                self.__dict__.update(pickle.load(handle))
+            return
+
         self.n_layers = n_layers
         self.n_clusters = n_clusters
         self.n_cpus = n_cpus
@@ -30,6 +45,7 @@ class LowShotGenerator(object):
         self.batch_size = batch_size
         self.n_epochs = n_epochs
         self.callbacks = callbacks
+        self.name = name
 
         if n_examples:
             self.n_examples = n_examples
@@ -102,3 +118,11 @@ class LowShotGenerator(object):
 
         x = np.concatenate((𝟇, c1a, c2a,))
         return self.model.predict(x)
+
+    def save(self, file_path=None):
+        if not file_path:
+            file_path = pickle_path(self.name)
+
+        with open(file_path, "wb") as handle:
+            pickle.dump(self.__dict__, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
