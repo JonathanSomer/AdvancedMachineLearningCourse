@@ -129,7 +129,7 @@ def get_resnet_model():
 # extract_image_features(model, df)
 
 # link to kaggle data: https://www.kaggle.com/nih-chest-xrays/data
-# note: must have images_1,....images_12 directories of images from kaggle in data/ directory
+# note: must have images_1,....images_12 directories of images from kaggle in local_data_dir/images/ directory
 #       must have Data_Entry_2017.csv from kaggle in data/ directory
 def extract_image_features(model=None, single_disease_images_dataframe=None, test_run=True):
 
