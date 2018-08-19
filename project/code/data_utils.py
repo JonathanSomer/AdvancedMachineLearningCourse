@@ -31,7 +31,7 @@ READ_ONLY_PROCESSED_DATA = DATA_DIRECTORY + 'processed_data/'
 
 
 # returns an absolute pickle/model path. local_data_dir should be configured in config.py
-# local_data_dir is the data directory and should contain the following directories: datasets, pickles, models
+# local_data_dir is the data directory and should contain the following directories: datasets, pickles, models, images
 # for instance: '~/amldata
 
 def read_pickle_path(name):
@@ -49,6 +49,8 @@ def write_model_path(name):
 def image_data_pickle_name(i):
     return 'image_data_{0}'.format(i)
 
+def images_directory(i):
+    return os.path.join(config.local_data_dir, 'images', 'images_{0}/'.format(i))
 
 # Use this to fetch the main data object:
 # data is partitioned into 12 files so num_files_to_fetch_data_from should be in [1,12]
@@ -110,9 +112,6 @@ def remove_diseases(X, y, diseases_to_remove, data):
     include = ~np.isin(y, black_list)
     return X[include], y[include]
 
-def images_directory(i):
-    return DATA_DIRECTORY + 'images_' + str(i) + '/'
-
 def get_single_disease_images_dataframe():
     df = pd.read_csv(DATA_DIRECTORY + 'Data_Entry_2017.csv')
     single_disease_images = df.loc[~df['Finding Labels'].str.contains('\|')]
@@ -132,7 +131,7 @@ def get_resnet_model():
 # link to kaggle data: https://www.kaggle.com/nih-chest-xrays/data
 # note: must have images_1,....images_12 directories of images from kaggle in data/ directory
 #       must have Data_Entry_2017.csv from kaggle in data/ directory
-def extract_image_features(model=None, single_disease_images_dataframe=None):
+def extract_image_features(model=None, single_disease_images_dataframe=None, test_run=True):
 
     if model is None:
         model = get_resnet_model()
@@ -146,7 +145,8 @@ def extract_image_features(model=None, single_disease_images_dataframe=None):
 
     cnt = 0
 
-    for file_index in range(1,13):
+    num_files = 2 if test_run else 13
+    for file_index in range(1, num_files):
 
         file_indexes = []
         image_names = []
@@ -178,6 +178,8 @@ def extract_image_features(model=None, single_disease_images_dataframe=None):
             cnt += 1
             if cnt % 10 == 0:
                 print("working on file #%d , handled %d images" % (file_index, cnt))
+            if test_run and cnt > 20:
+                break
 
         data = {
         'file_indexes' : file_indexes,
