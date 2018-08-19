@@ -12,3 +12,6 @@ local_code_dir = ''
 gcloud_username = ''
 gcloud_python_path = ''
 
+# should be an absolute path
+# the dir should contain the subdirs: datasets, pickles, models
+local_data_dir = ''

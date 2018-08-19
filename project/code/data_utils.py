@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import os.path        
+import os.path
 from os import listdir
 from os.path import isfile, join
 from keras.applications.resnet50 import ResNet50
@@ -16,16 +16,40 @@ from sklearn import preprocessing
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
+from collections import defaultdict
 import pickle
 
+import config
+
+from keras.utils import to_categorical
+import keras.backend as K
+
 N_CLASSES = 15
-MAX_BYTES = 2**31 - 1 # max size of block which pickle can write in one shot
+MAX_BYTES = 2 ** 31 - 1  # max size of block which pickle can write in one shot
 DATA_DIRECTORY = '../data/'
 READ_ONLY_PROCESSED_DATA = DATA_DIRECTORY + 'processed_data/'
 
 
-# BEFORE USING THIS METHOD MAKE SURE YOU HAVE THE NEEDED 'image_data_1.pickle' FILE
-# INSIDE THE DIRECTORY '/../data/'
+# returns an absolute pickle/model path. local_data_dir should be configured in config.py
+# local_data_dir is the data directory and should contain the following directories: datasets, pickles, models
+# for instance: '~/amldata
+
+def read_pickle_path(name):
+    return os.path.join(config.local_data_dir, 'pickles', 'read', '{0}.pickle'.format(name))
+
+def write_pickle_path(name):
+    return os.path.join(config.local_data_dir, 'pickles', 'write', '{0}.pickle'.format(name))
+
+def read_model_path(name):
+    return os.path.join(config.local_data_dir, 'models', 'read', '{0}.h5'.format(name))
+
+def write_model_path(name):
+    return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
+
+def image_data_pickle_name(i):
+    return 'image_data_{0}'.format(i)
+
+
 # Use this to fetch the main data object:
 # data is partitioned into 12 files so num_files_to_fetch_data_from should be in [1,12]
 # The data object contains:
@@ -36,25 +60,25 @@ READ_ONLY_PROCESSED_DATA = DATA_DIRECTORY + 'processed_data/'
 # label_encoder_classes: classes to feed into the LabelEncoder for decoding int labels
 def get_processed_data(num_files_to_fetch_data_from):
     data = {
-    'file_indexes' : [],
-    'image_names' : [],
-    'features' : [],
-    'int_labels' : [],
-    'label_encoder_classes' : [] 
+        'file_indexes': [],
+        'image_names': [],
+        'features': [],
+        'int_labels': [],
+        'label_encoder_classes': []
     }
 
     for i in range(1, min(13, num_files_to_fetch_data_from + 1)):
         print("fetching data from file #%d" % i)
-        file_path = READ_ONLY_PROCESSED_DATA + 'image_data_' + str(i) + '.pickle'
+        file_path = read_pickle_path(image_data_pickle_name(i))
         bytes_in = bytearray(0)
         input_size = os.path.getsize(file_path)
 
         with open(file_path, 'rb') as f:
             for _ in range(0, input_size, MAX_BYTES):
                 bytes_in += f.read(MAX_BYTES)
-                
+
         data_batch = pickle.loads(bytes_in)
-        
+
         for key in data.keys():
             if i > 1 and key == 'label_encoder_classes':
                 continue
@@ -62,11 +86,13 @@ def get_processed_data(num_files_to_fetch_data_from):
 
     return data
 
+
 # returns the features with shape of (7,7,2048)
 def get_features_and_labels(data):
     X = np.array(data['features']).squeeze()
     y = np.array(data['int_labels'])
     return X, y
+
 
 def get_train_test_split(X, y, test_size=0.1):
     yy = y.reshape(-1, 1)
@@ -97,8 +123,6 @@ def file_names_by_directory(directory):
 
 def get_resnet_model():
     return ResNet50(weights='imagenet', include_top=False)
-
-
 
 # in order to extract image features into pickle files run:
 # df = get_single_disease_images_dataframe()
@@ -136,7 +160,6 @@ def extract_image_features(model=None, single_disease_images_dataframe=None):
 
         for image_name in single_disease_images_in_directory:
 
-
             image_path = directory + image_name
             img = image.load_img(image_path, target_size=(224, 224))
             x = image.img_to_array(img)
@@ -165,7 +188,7 @@ def extract_image_features(model=None, single_disease_images_dataframe=None):
         }
 
         d = pickle.dumps(data)
-        with open(DATA_DIRECTORY + 'image_data_' + str(file_index) + '.pickle', 'wb') as f:
+        with open(write_pickle_path(image_data_pickle_name(file_index)), 'wb') as f:
             for i in range(0, len(d), MAX_BYTES):
                 f.write(d[i:i+MAX_BYTES])
 
@@ -176,3 +199,44 @@ def write_large_object_to_file(obj, path):
     with open(path, 'wb') as f:
         for i in range(0, len(d), max_bytes):
             f.write(d[i:i+max_bytes])
+
+# this methods filters diseases_to_remove from data (which is data_obj)
+# and then builds a dataset for the LowShotGenerator:
+# LowShotGenerator expects to receive as dataset a tuple of:
+# 1. dict mapping category (disease) as label string to the category's samsples
+# 2. dict mapping category (disease) as label string to the category's onehot encoding
+# 3. original_shape of the samples, because the generator expects to get a flattened vector
+#    and needs to reshape it to the original shape for the classifier prediction.
+#    In our case the original shape is of course (7, 7, 2048), but the function extracts it anyway.
+#
+# One thing to notice that I used keras.utils.to_categorical in order to onehot encode.
+# Probably it's better to onehot encode the same way in both this function and get_train_test_split.
+# I leave it for you to decide or we may discuss it together.
+def to_low_shot_dataset(data, diseases_to_remove=None):
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        X, y = get_features_and_labels(data)
+
+        le = preprocessing.LabelEncoder()
+        le.classes_ = data['label_encoder_classes']
+
+        if diseases_to_remove:
+            black_list = le.transform(diseases_to_remove)
+            include = ~np.isin(y, black_list)
+            X, y = X[include], y[include]
+
+        onehot_encoded = to_categorical(y)
+
+        cat_to_vectors = defaultdict(list)
+        cat_to_onehots = {}
+        original_shape = None
+        for i, x, yy in zip(range(len(X)), X, y):
+            original_shape = x.shape
+            cat = le.inverse_transform(yy)
+            cat_to_vectors[cat].append(x.flatten())
+            cat_to_onehots[cat] = onehot_encoded[i]
+
+        cat_to_vectors = {y: np.array(X) for y, X in cat_to_vectors.items()}
+
+        return cat_to_vectors, cat_to_onehots, original_shape
