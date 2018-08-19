@@ -146,7 +146,7 @@ def extract_image_features(model=None, single_disease_images_dataframe=None):
 
     cnt = 0
 
-    for file_index in range(1,2):
+    for file_index in range(1,13):
 
         file_indexes = []
         image_names = []
