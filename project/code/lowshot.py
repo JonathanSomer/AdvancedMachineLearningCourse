@@ -39,7 +39,7 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
     update('Creating clusters by {0} jobs'.format(n_jobs))
     clusters = {}
     for category, X in cat_to_vectors.items():
-        update('Running KMeans to get {0} clusters for "{1}".'.format(n_clusters, category))
+        update('Running KMeans to get {0} clusters for `{1}`.'.format(n_clusters, category))
         kmeans = KMeans(n_clusters=n_clusters, n_jobs=n_jobs, verbose=1).fit(X)
         clusters[category] = kmeans
     update('done :tada:')
@@ -67,7 +67,7 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
             'centroids': centroids,
             'dataset': dataset}
 
-    file_path = du.read_pickle_path(name)
+    file_path = du.write_pickle_path(name)
     joblib.dump(data, file_path)
     update('done :tada:')
 
