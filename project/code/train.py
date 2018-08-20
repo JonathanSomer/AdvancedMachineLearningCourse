@@ -14,7 +14,7 @@ def update(msg):
 
 
 def main(n_files, stop_instance):
-    update('Training procedure has just started :weight_lifter:')
+    update('*Training procedure has just started* :weight_lifter:')
     update('Fetching processed data from {0} {1}'.format(n_files, 'files' if n_files > 1 else 'file'))
     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
     update('done :tada:')
@@ -44,6 +44,7 @@ def main(n_files, stop_instance):
     update('done :tada: accuracy acheived: `{0}`'.format(acc))
 
     if stop_instance:
+        update('Stopping instance')
         requests.get(config.stop_url)
 
 

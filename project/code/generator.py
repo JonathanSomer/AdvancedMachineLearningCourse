@@ -44,22 +44,27 @@ class LowShotGenerator(object):
             self.n_examples = min(len(vs) for vs in self.cat_to_vectors.values())
 
         # load quadruplets & centroids if exists
-        self.quadruplets_file_path = du.pickle_path('{0}-{1}c-{2}h-quadruplets'.format(name, n_clusters, hidden_size))
-        if os.path.exists(self.quadruplets_file_path) and not force_rebuild:
+        self.read_quadruplets_file_path = du.read_pickle_path(
+            '{0}-{1}c-{2}h-quadruplets'.format(name, n_clusters, hidden_size))
+        if os.path.exists(self.read_quadruplets_file_path) and not force_rebuild:
             print('Loading quadruplets and centroids.')
-            loaded = joblib.load(self.quadruplets_file_path)
+            loaded = joblib.load(self.read_quadruplets_file_path)
             self.quadruplets, self.centroids = loaded['quadruplets'], loaded['centroids']
         else:
             self.quadruplets, self.centroids = self.create_quadruplets()
 
             print('Saving quadruplets and centroids.')
-            joblib.dump({'quadruplets': self.quadruplets, 'centroids': self.centroids}, self.quadruplets_file_path)
+            self.write_quadruplets_file_path = du.write_pickle_path(
+                '{0}-{1}c-{2}h-quadruplets'.format(name, n_clusters, hidden_size))
+            joblib.dump({'quadruplets': self.quadruplets, 'centroids': self.centroids},
+                        self.write_quadruplets_file_path)
 
         # load train data if exists
-        self.train_data_file_path = du.pickle_path('{0}-{1}c-{2}h-train_data'.format(name, n_clusters, hidden_size))
-        if os.path.exists(self.train_data_file_path) and not force_rebuild:
+        self.read_train_data_file_path = du.read_pickle_path(
+            '{0}-{1}c-{2}h-train_data'.format(name, n_clusters, hidden_size))
+        if os.path.exists(self.read_train_data_file_path) and not force_rebuild:
             print('Loading samples.')
-            loaded = joblib.load(self.train_data_file_path)
+            loaded = joblib.load(self.read_train_data_file_path)
             self.x_train, self.y_train = loaded['x_train'], loaded['y_train']
             self.original_shape = loaded['original_shape']
         else:
@@ -69,24 +74,28 @@ class LowShotGenerator(object):
                             'classifier': np.array([self.cat_to_onehots[cat] for (_, cat) in self.quadruplets])}
 
             print('Saving samples.')
+            self.write_train_data_file_path = du.write_pickle_path(
+                '{0}-{1}c-{2}h-train_data'.format(name, n_clusters, hidden_size))
             joblib.dump({'x_train': self.x_train, 'y_train': self.y_train, 'original_shape': self.original_shape},
-                        self.train_data_file_path)
+                        self.write_train_data_file_path)
 
         # load model & generator if exists
-        self.model_path = du.model_path('{0}-{1}c-{2}h'.format(name, n_clusters, hidden_size))
-        self.generator_path = du.model_path('{0}_generator'.format(name))
-        if os.path.exists(self.model_path) and os.path.exists(self.generator_path) and not force_rebuild:
+        self.read_model_path = du.read_model_path('{0}-{1}c-{2}h'.format(name, n_clusters, hidden_size))
+        self.read_generator_path = du.read_model_path('{0}_generator'.format(name))
+        if os.path.exists(self.read_model_path) and os.path.exists(self.read_generator_path) and not force_rebuild:
             print('Loading model & generator.')
-            self.model = load_model(self.model_path)
-            self.generator = load_model(self.generator_path)
+            self.model = load_model(self.read_model_path)
+            self.generator = load_model(self.read_generator_path)
         else:
             self.model, self.generator = self.build()
             print(self.model.summary())
 
             # self.fit()
-
             # print('Saving model & generator after fitting.')
-            # self.model.save(self.model_path)
+            # self.read_model_path = du.write_model_path('{0}-{1}c-{2}h'.format(name, n_clusters, hidden_size))
+            # self.model.save(self.read_model_path)
+            # self.write_generator_path = du.write_model_path('{0}_generator'.format(name))
+            # self.generator.save(self.write_generator_path)
 
     def create_quadruplets(self, verbose=0):
         clusters = {}
@@ -122,7 +131,7 @@ class LowShotGenerator(object):
         curr = inputs = Input(shape=(input_dim,))
 
         # hidden layers creation, as I understand the paper it should be 3 - 1 = 2 in our case
-        for _ in range(self.n_layers-1):
+        for _ in range(self.n_layers - 1):
             curr = Dense(self.hidden_size, activation=self.activation)(curr)
 
         generator_output = Dense(generator_output_dim, activation=self.activation, name='generator')(curr)

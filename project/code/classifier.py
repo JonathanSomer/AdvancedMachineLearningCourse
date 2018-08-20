@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 
 class Classifier(object):
     def __init__(self, n_classes=15, model_weights_file_path=None, trainable=True):
-        self.model = Classifier.new_model(n_classes, trainable=trainable)
+        self.model = Classifier.new_model_no_pooling(n_classes, trainable=trainable)
 
         if model_weights_file_path is not None:
             self.model.load_weights(model_weights_file_path)
@@ -24,6 +24,12 @@ class Classifier(object):
         a = Input(shape=(7, 7, 2048,))
         b = GlobalMaxPooling2D(trainable=trainable)(a)
         b = Dense(n_classes, activation='softmax', name='lclassifier', trainable=trainable)(b)
+        return Model(a, b)
+
+    @staticmethod
+    def new_model_no_pooling(n_classes, trainable=True):
+        a = Input(shape=(2048,))
+        b = Dense(n_classes, activation='softmax', name='lclassifier', trainable=trainable)(a)
         return Model(a, b)
 
     @staticmethod
