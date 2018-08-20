@@ -15,7 +15,9 @@ class Classifier(object):
             self.model.load_weights(model_weights_file_path)
 
         optimizer = Classifier.get_optimizer()
-        self.model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+        self.model.compile(loss='categorical_crossentropy',
+                           optimizer=optimizer,
+                           metrics=['accuracy'])
 
     @staticmethod
     def new_model(n_classes, trainable=True):
@@ -29,8 +31,8 @@ class Classifier(object):
         return Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
     # supply file_path if want to save model to file
-    def fit(self, X_train, y_train, model_weights_file_path=None):
-        self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1)
+    def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
+        self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1, callbacks=callbacks)
 
         if model_weights_file_path:
             self.model.save(model_weights_file_path)
