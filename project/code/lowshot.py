@@ -42,11 +42,12 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
         update('Running KMeans to get {0} clusters for `{1}`.'.format(n_clusters, category))
         kmeans = KMeans(n_clusters=n_clusters, n_jobs=n_jobs, verbose=1).fit(X)
         clusters[category] = kmeans
-    update('done :tada:')
+    update('done to cluster :tada:')
 
     update('Creating quadruplets (2 pairs of 2 centroids).')
     quadruplets = []
     for a, b in combinations(clusters, 2):
+        update('Current pair: `{0}`, `{1}`'.format(a, b))
         for c1a, c2a in combinations(clusters[a].cluster_centers_, 2):
             min_dist, quadruplet, category = float('inf'), None, None
             for c1b, c2b in combinations(clusters[b].cluster_centers_, 2):
@@ -57,7 +58,7 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
             c1a, c2a, c1b, c2b = quadruplet
             if cosine_similarity(c1a - c2a, c1b - c2b) > 0:
                 quadruplets.append((quadruplet, a))
-    update('done :tada:')
+    update('done to create quadruplets :tada:')
 
     name = 'lowshot_f_{0}_c_{1}'.format(n_files, n_clusters)
     update('Saving data as *{0}*'.format(name))
@@ -65,7 +66,8 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
 
     data = {'clusters': clusters,
             'centroids': centroids,
-            'dataset': dataset}
+            'dataset': dataset,
+            'quadruplets': quadruplets}
 
     file_path = du.write_pickle_path(name)
     joblib.dump(data, file_path)
