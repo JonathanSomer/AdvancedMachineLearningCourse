@@ -37,20 +37,26 @@ READ_ONLY_PROCESSED_DATA = DATA_DIRECTORY + 'processed_data/'
 def read_pickle_path(name):
     return os.path.join(config.local_data_dir, 'pickles', 'read', '{0}.pickle'.format(name))
 
+
 def write_pickle_path(name):
     return os.path.join(config.local_data_dir, 'pickles', 'write', '{0}.pickle'.format(name))
+
 
 def read_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'read', '{0}.h5'.format(name))
 
+
 def write_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
+
 
 def image_data_pickle_name(i):
     return 'image_data_{0}'.format(i)
 
+
 def images_directory(i):
     return os.path.join(config.local_data_dir, 'images', 'images_{0}/'.format(i))
+
 
 # Use this to fetch the main data object:
 # data is partitioned into 12 files so num_files_to_fetch_data_from should be in [1,12]
@@ -105,6 +111,7 @@ def get_train_test_split(X, y, test_size=0.1):
     X_train, X_test, y_train, y_test = train_test_split(X, one_hot_labels, test_size=test_size, random_state=42)
     return X_train, X_test, y_train, y_test
 
+
 def remove_diseases(X, y, diseases_to_remove, data):
     le = preprocessing.LabelEncoder()
     le.classes_ = data['label_encoder_classes']
@@ -112,16 +119,20 @@ def remove_diseases(X, y, diseases_to_remove, data):
     include = ~np.isin(y, black_list)
     return X[include], y[include]
 
+
 def get_single_disease_images_dataframe():
     df = pd.read_csv(DATA_DIRECTORY + 'Data_Entry_2017.csv')
     single_disease_images = df.loc[~df['Finding Labels'].str.contains('\|')]
     return single_disease_images
 
+
 def file_names_by_directory(directory):
     return [f for f in listdir(directory) if isfile(join(directory, f))]
 
+
 def get_resnet_model():
     return ResNet50(weights='imagenet', include_top=False)
+
 
 # in order to extract image features into pickle files run:
 # df = get_single_disease_images_dataframe()
@@ -132,7 +143,6 @@ def get_resnet_model():
 # note: must have images_1,....images_12 directories of images from kaggle in local_data_dir/images/ directory
 #       must have Data_Entry_2017.csv from kaggle in data/ directory
 def extract_image_features(model=None, single_disease_images_dataframe=None, test_run=True):
-
     if model is None:
         model = get_resnet_model()
 
@@ -155,7 +165,8 @@ def extract_image_features(model=None, single_disease_images_dataframe=None, tes
 
         directory = images_directory(file_index)
         names_of_images_in_directory = pd.Series(file_names_by_directory(directory))
-        single_disease_images_in_directory_bool = names_of_images_in_directory.isin(single_disease_images_dataframe['Image Index'])
+        single_disease_images_in_directory_bool = names_of_images_in_directory.isin(
+            single_disease_images_dataframe['Image Index'])
         single_disease_images_in_directory = names_of_images_in_directory[single_disease_images_in_directory_bool]
 
         for image_name in single_disease_images_in_directory:
@@ -167,13 +178,14 @@ def extract_image_features(model=None, single_disease_images_dataframe=None, tes
             x = preprocess_input(x)
             image_features = model.predict(x)
 
-            text_label = single_disease_images_dataframe.loc[single_disease_images_dataframe['Image Index'] == image_name]['Finding Labels'].values[0]
+            text_label = \
+            single_disease_images_dataframe.loc[single_disease_images_dataframe['Image Index'] == image_name][
+                'Finding Labels'].values[0]
 
             file_indexes.append(file_index)
             image_names.append(image_name)
             features.append(image_features)
             int_labels.extend(le.transform([text_label]))
-
 
             cnt += 1
             if cnt % 10 == 0:
@@ -182,25 +194,26 @@ def extract_image_features(model=None, single_disease_images_dataframe=None, tes
                 break
 
         data = {
-        'file_indexes' : file_indexes,
-        'image_names' : image_names,
-        'features' : features,
-        'int_labels' : int_labels,
-        'label_encoder_classes' : label_encoder_classes
+            'file_indexes': file_indexes,
+            'image_names': image_names,
+            'features': features,
+            'int_labels': int_labels,
+            'label_encoder_classes': label_encoder_classes
         }
 
         d = pickle.dumps(data)
         with open(write_pickle_path(image_data_pickle_name(file_index)), 'wb') as f:
             for i in range(0, len(d), MAX_BYTES):
-                f.write(d[i:i+MAX_BYTES])
+                f.write(d[i:i + MAX_BYTES])
 
 
 def write_large_object_to_file(obj, path):
     d = pickle.dumps(obj)
-    max_bytes = 2**31 - 1
+    max_bytes = 2 ** 31 - 1
     with open(path, 'wb') as f:
         for i in range(0, len(d), max_bytes):
-            f.write(d[i:i+max_bytes])
+            f.write(d[i:i + max_bytes])
+
 
 # this methods filters diseases_to_remove from data (which is data_obj)
 # and then builds a dataset for the LowShotGenerator:
