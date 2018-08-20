@@ -13,7 +13,10 @@ def update(msg):
     requests.post(config.slack_url, json=payload)
 
 
-def main(n_files, stop_instance):
+def main(n_files, test, stop_instance):
+    if test:
+        n_files = 1
+
     update('*Training procedure has just started* :weight_lifter:')
     update('Fetching processed data from {0} {1}'.format(n_files, 'files' if n_files > 1 else 'file'))
     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
@@ -50,9 +53,10 @@ def main(n_files, stop_instance):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--n_files', help='number of files to process', type=int, default=1)
+    parser.add_argument('-n', '--n_files', help='number of files to process', type=int, default=12)
     parser.add_argument('-s', '--stop_instance', help='stop instance when run ends or not', action='store_true')
+    parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
 
     args = parser.parse_args()
 
-    main(args.n_files, args.stop_instance)
+    main(args.n_files, args.test, args.stop_instance)
