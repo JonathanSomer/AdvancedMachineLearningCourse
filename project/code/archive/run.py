@@ -6,7 +6,7 @@ from config import *
 
 def main(disease, feature, n_epochs, remote, remote_update):
     if not remote:
-        import main as _main_
+        from archive import main as _main_
         return _main_.main(disease, feature, n_epochs, remote)
 
     call('gcloud compute instances start --zone={zone} {vm}'.format(zone=gcloud_zone, vm=gcloud_vm), shell=True)
