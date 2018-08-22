@@ -120,8 +120,7 @@ class LowShotGenerator(object):
         self.model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
 
         weights_file_path = du.write_model_path('{0}'.format(self.name))
-        if os.path.exists(weights_file_path):
-            self.model.save(weights_file_path)
+        self.model.save(weights_file_path)
 
         return self.model
 
