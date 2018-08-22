@@ -24,7 +24,7 @@ all_diseases = ['Atelectasis',
                 'Pneumothorax']
 
 
-def main(n_clusters, n_files, test):
+def main(n_clusters, n_files, λ, test):
     if test:
         n_clusters = 20
         n_files = 12
@@ -39,7 +39,7 @@ def main(n_clusters, n_files, test):
                             trainable=False)
 
     lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
-    lsg = LowShotGenerator(classifier, quadruplets_data, name=lsg_name)
+    lsg = LowShotGenerator(classifier, quadruplets_data, λ=λ, name=lsg_name)
 
     callbacks = [CloudCallback(True, config.slack_url, config.stop_url, config.slack_channel, name=lsg_name)]
     lsg.fit(callbacks=callbacks)
@@ -51,7 +51,6 @@ def main(n_clusters, n_files, test):
     example = lsg.generate(ϕ, n_new=1)
 
     print(example)
-    print(example.shape)
 
 
 if __name__ == "__main__":
@@ -59,7 +58,8 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
     parser.add_argument('-c', '--n_clusters', help='number of clusters', type=int, default=20)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
+    parser.add_argument('-l', '--λ', help='set λ regularization parameter', type=float, default=.5)
 
     args = parser.parse_args()
 
-    main(args.n_clusters, args.n_files, args.test)
+    main(args.n_clusters, args.n_files, args.λ, args.test)
