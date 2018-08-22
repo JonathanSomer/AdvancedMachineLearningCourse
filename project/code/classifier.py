@@ -13,6 +13,7 @@ class Classifier(object):
 
         if model_weights_file_path is not None:
             self.model.load_weights(model_weights_file_path)
+            print('Loaded classifier weights from a saved model')
 
         optimizer = Classifier.get_optimizer()
         self.model.compile(loss='categorical_crossentropy',

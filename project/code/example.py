@@ -30,6 +30,7 @@ def main(n_clusters, n_files, test):
         n_files = 12
 
     unused_diseases = ['Pleural_Thickening', 'Pneumonia', 'Pneumothorax']
+    print('Unused diseases: {0}'.format(', '.join(unused_diseases)))
     diseases = [d for d in all_diseases if d not in unused_diseases]
     quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=diseases, n_files=n_files)
 

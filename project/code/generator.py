@@ -88,6 +88,8 @@ class LowShotGenerator(object):
         return model, generator
 
     def fit(self, x_train=None, y_train=None, batch_size=None, epochs=None, callbacks=None):
+        print('Fitting generator')
+
         if not x_train:
             x_train = self.x_train
 
