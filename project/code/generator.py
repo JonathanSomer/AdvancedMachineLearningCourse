@@ -1,144 +1,74 @@
 from keras.models import Model, load_model
 from keras.layers import Dense, Input, Reshape, Lambda
-from itertools import combinations
-from sklearn.cluster import KMeans
-from scipy.spatial.distance import cosine
-from sklearn.externals import joblib
 
 import numpy as np
 import data_utils as du
 import os
 
 
-def cosine_similarity(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-
 class LowShotGenerator(object):
-    def __init__(self, linear_classifier, dataset, n_layers=3, n_clusters=100, n_cpus=4, hidden_size=512,
-                 batch_size=100, n_epochs=10, activation='relu', n_examples=None, callbacks=[],
-                 name='lsg', force_rebuild=False):
+    def __init__(self, linear_classifier, quadruplets_data, n_layers=3, hidden_size=512,
+                 batch_size=100, epochs=10, activation='relu', n_examples=None, callbacks=[],
+                 name='LowShotGenerator', λ=.5):
         """
         dataset is a dict mapping base class to its feature vectors + dict mapping from cat to its onehot encoding
         n_examples is k in the paper: the minimum number of examples per novel category
         # TODO: maybe need to add/remove another Dense layer (the paper says it should 3 layers so it's ambigous)
+        # TODO: For testing, I chose λ = .5 arbitrarily. We need to figure it out.
         """
 
         self.n_layers = n_layers
-        self.n_clusters = n_clusters
-        self.n_cpus = n_cpus
-        # self.dataset = dataset
-        self.cat_to_vectors, self.cat_to_onehots, self.original_shape = dataset
+        self.quadruplets, self.centroids, self.cat_to_vectors, self.cat_to_onehots, self.original_shape = quadruplets_data
         self.hidden_size = hidden_size
         self.W = self.linear_classifier = linear_classifier
         self.activation = activation
         self.batch_size = batch_size
-        self.n_epochs = n_epochs
+        self.epochs = epochs
         self.callbacks = callbacks
         self.name = name
+        self.λ = λ
+
+        self.x_train = np.array([np.concatenate((c1a, c1b, c2b)) for ((c1a, c2a, c1b, c2b), _) in self.quadruplets])
+        self.y_train = {'generator': np.array([np.array(c2a) for ((c1a, c2a, c1b, c2b), cat) in self.quadruplets]),
+                        'classifier': np.array([self.cat_to_onehots[cat] for (_, cat) in self.quadruplets])}
+
+        self.input_dim = len(self.x_train[0])
+        self.generator_output_dim = len(self.y_train['generator'][0])
 
         # n_examples is the maximum number to generate per class
-        if n_examples:
-            self.n_examples = n_examples
-        else:
-            self.n_examples = min(len(vs) for vs in self.cat_to_vectors.values())
+        # if n_examples:
+        #     self.n_examples = n_examples
+        # else:
+        #     self.n_examples = min(len(vs) for vs in self.cat_to_vectors.values())
 
-        # load quadruplets & centroids if exists
-        self.read_quadruplets_file_path = du.read_pickle_path(
-            '{0}-{1}c-{2}h-quadruplets'.format(name, n_clusters, hidden_size))
-        if os.path.exists(self.read_quadruplets_file_path) and not force_rebuild:
-            print('Loading quadruplets and centroids.')
-            loaded = joblib.load(self.read_quadruplets_file_path)
-            self.quadruplets, self.centroids = loaded['quadruplets'], loaded['centroids']
-        else:
-            self.quadruplets, self.centroids = self.create_quadruplets()
+        self.model, self.generator = self.build(self.linear_classifier,
+                                                self.original_shape,
+                                                self.input_dim,
+                                                self.generator_output_dim,
+                                                self.n_layers,
+                                                self.hidden_size,
+                                                self.activation,
+                                                self.λ)
 
-            print('Saving quadruplets and centroids.')
-            self.write_quadruplets_file_path = du.write_pickle_path(
-                '{0}-{1}c-{2}h-quadruplets'.format(name, n_clusters, hidden_size))
-            joblib.dump({'quadruplets': self.quadruplets, 'centroids': self.centroids},
-                        self.write_quadruplets_file_path)
+        self.weights_file_path = du.read_model_path('{0}'.format(self.name))
+        if os.path.exists(self.weights_file_path):
+            self.model.load_weights(self.weights_file_path)
 
-        # load train data if exists
-        self.read_train_data_file_path = du.read_pickle_path(
-            '{0}-{1}c-{2}h-train_data'.format(name, n_clusters, hidden_size))
-        if os.path.exists(self.read_train_data_file_path) and not force_rebuild:
-            print('Loading samples.')
-            loaded = joblib.load(self.read_train_data_file_path)
-            self.x_train, self.y_train = loaded['x_train'], loaded['y_train']
-            self.original_shape = loaded['original_shape']
-        else:
-            print('Creating samples.')
-            self.x_train = np.array([np.concatenate((c1a, c1b, c2b)) for ((c1a, c2a, c1b, c2b), _) in self.quadruplets])
-            self.y_train = {'generator': np.array([np.array(c2a) for ((c1a, c2a, c1b, c2b), cat) in self.quadruplets]),
-                            'classifier': np.array([self.cat_to_onehots[cat] for (_, cat) in self.quadruplets])}
-
-            print('Saving samples.')
-            self.write_train_data_file_path = du.write_pickle_path(
-                '{0}-{1}c-{2}h-train_data'.format(name, n_clusters, hidden_size))
-            joblib.dump({'x_train': self.x_train, 'y_train': self.y_train, 'original_shape': self.original_shape},
-                        self.write_train_data_file_path)
-
-        # load model & generator if exists
-        self.read_model_path = du.read_model_path('{0}-{1}c-{2}h'.format(name, n_clusters, hidden_size))
-        self.read_generator_path = du.read_model_path('{0}_generator'.format(name))
-        if os.path.exists(self.read_model_path) and os.path.exists(self.read_generator_path) and not force_rebuild:
-            print('Loading model & generator.')
-            self.model = load_model(self.read_model_path)
-            self.generator = load_model(self.read_generator_path)
-        else:
-            self.model, self.generator = self.build()
-            print(self.model.summary())
-
-            # self.fit()
-            # print('Saving model & generator after fitting.')
-            # self.read_model_path = du.write_model_path('{0}-{1}c-{2}h'.format(name, n_clusters, hidden_size))
-            # self.model.save(self.read_model_path)
-            # self.write_generator_path = du.write_model_path('{0}_generator'.format(name))
-            # self.generator.save(self.write_generator_path)
-
-    def create_quadruplets(self, verbose=0):
-        clusters = {}
-        for category, X in self.cat_to_vectors.items():
-            print('Running KMeans to get {0} clusters for "{1}".'.format(self.n_clusters, category))
-            kmeans = KMeans(n_clusters=self.n_clusters, n_jobs=self.n_cpus, verbose=verbose).fit(X)
-            clusters[category] = kmeans
-
-        print('Creating quadruplets (2 pairs of 2 centroids).')
-        quadruplets = []
-        for a, b in combinations(clusters, 2):
-            for c1a, c2a in combinations(clusters[a].cluster_centers_, 2):
-                min_dist, quadruplet, category = float('inf'), None, None
-                for c1b, c2b in combinations(clusters[b].cluster_centers_, 2):
-                    dist = cosine(c1a - c2a, c1b - c2b)
-                    if dist < min_dist:
-                        min_dist, quadruplet, category = dist, (c1a, c2a, c1b, c2b), a
-
-                c1a, c2a, c1b, c2b = quadruplet
-                if cosine_similarity(c1a - c2a, c1b - c2b) > 0:
-                    quadruplets.append((quadruplet, a))
-
-        centroids = {category: cluster.cluster_centers_ for category, cluster in clusters.items()}
-
-        return quadruplets, centroids
-
-    def build(self, λ=.5):  # TODO: For testing, I chose λ = .5 arbitrarily. We need to figure it out.
-        print('Building model.')
-
-        input_dim = len(self.x_train[0])
-        generator_output_dim = len(self.y_train['generator'][0])
-
+    @staticmethod
+    def build(linear_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size, activation,
+              λ=None):
         curr = inputs = Input(shape=(input_dim,))
 
         # hidden layers creation, as I understand the paper it should be 3 - 1 = 2 in our case
-        for _ in range(self.n_layers - 1):
-            curr = Dense(self.hidden_size, activation=self.activation)(curr)
+        for _ in range(n_layers - 1):
+            curr = Dense(hidden_size, activation=activation)(curr)
 
-        generator_output = Dense(generator_output_dim, activation=self.activation, name='generator')(curr)
+        generator_output = Dense(generator_output_dim, activation=activation, name='generator')(curr)
 
-        # classifier_wrapper is dummy layer for mapping the losses by giving a name to the classifier model
-        reshape = Reshape(self.original_shape)(generator_output)
-        classifier = self.linear_classifier.model(reshape)
+        reshape = Reshape(original_shape)(generator_output)
+        classifier = linear_classifier.model(reshape)
+
+        # classifier_wrapper is dummy layer for mapping the losses by naming the classifier model
         classifier_wrapper = Lambda(lambda x: x, name='classifier')(classifier)
 
         model = Model(inputs=inputs, outputs=[generator_output, classifier_wrapper])
@@ -157,19 +87,38 @@ class LowShotGenerator(object):
 
         return model, generator
 
-    def fit(self):
-        print('Fitting model.')
-        self.model.fit(self.x_train, self.y_train, batch_size=self.batch_size, epochs=self.n_epochs,
-                       callbacks=self.callbacks)
+    def fit(self, x_train=None, y_train=None, batch_size=None, epochs=None, callbacks=None):
+        if not x_train:
+            x_train = self.x_train
+
+        if not y_train:
+            y_train = self.y_train
+
+        if not batch_size:
+            batch_size = self.batch_size
+
+        if not epochs:
+            epochs = self.epochs
+
+        if not callbacks:
+            callbacks = self.callbacks
+
+        self.model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
+
+        weights_file_path = du.write_model_path('{0}'.format(self.name))
+        if os.path.exists(weights_file_path):
+            self.model.save(weights_file_path)
+
+        return self.model
 
     def generate(self, ϕ, n_new=1):
         """
         :param ϕ: real example for some category
-        :param n_new: number of new examples to return. should be <= self.n_examples
+        :param n_new: number of new examples to return. should be less than self.n_examples
         :return: list of hallucinated feature vectors G([ϕ, c1a , c2a]) of size n_new
         """
         X = []
-        for _ in range(min(n_new, self.n_examples)):
+        for _ in range(n_new):
             sample_category = np.random.choice(list(self.cat_to_vectors.keys()))
             centroids = self.centroids[sample_category]
 
