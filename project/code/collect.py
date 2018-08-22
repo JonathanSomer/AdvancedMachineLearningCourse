@@ -119,7 +119,7 @@ def load_quadruplets(n_clusters, categories, n_files=12):
 def main(n_files, n_clusters, n_jobs, test, stop_instance):
     if test:
         n_files = 1
-        n_clusters = 10
+        n_clusters = 5
 
     update('*Generating low shot data procedure has just started* :weight_lifter:')
 
@@ -142,7 +142,7 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
-    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=100)
+    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=20)
     parser.add_argument('-j', '--n_jobs', help='number of jobs to do in parallel', type=int, default=8)
     parser.add_argument('-s', '--stop_instance', help='stop instance when run ends or not', action='store_true')
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')

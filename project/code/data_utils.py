@@ -236,12 +236,14 @@ def to_low_shot_dataset(data, diseases_to_remove=None):
         le = preprocessing.LabelEncoder()
         le.classes_ = data['label_encoder_classes']
 
+        onehot_encoded = to_categorical(y)
+
         if diseases_to_remove:
             black_list = le.transform(diseases_to_remove)
             include = ~np.isin(y, black_list)
             X, y = X[include], y[include]
 
-        onehot_encoded = to_categorical(y)
+        # onehot_encoded = to_categorical(y)
 
         cat_to_vectors = defaultdict(list)
         cat_to_onehots = {}
