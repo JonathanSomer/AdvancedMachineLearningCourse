@@ -1,5 +1,8 @@
 from keras.models import Model, load_model
 from keras.layers import Dense, Input, Reshape, Lambda
+from keras.losses import categorical_crossentropy
+
+import keras.backend as K
 
 import numpy as np
 import data_utils as du
@@ -86,17 +89,18 @@ class LowShotGenerator(object):
         model = Model(inputs=inputs, outputs=[generator_output, classifier_wrapper])
         generator = Model(inputs=inputs, outputs=generator_output)
 
-        losses = {'generator': 'mse',
-                  'classifier': 'categorical_crossentropy'}
+        loss = {'generator': 'mse',
+                'classifier': lambda y_true, y_pred: K.log(categorical_crossentropy(y_true, y_pred))}
 
-        weights = {'generator': λ,
-                   'classifier': 1.}
+        loss_weights = {'generator': λ,
+                        'classifier': 1.}
 
-        model.compile(loss=losses,
-                      loss_weights=weights,
+        model.compile(loss=loss,
+                      loss_weights=loss_weights,
                       optimizer='adam',
                       metrics=['accuracy'])
 
+        print(model.summary())
         return model, generator
 
     def fit(self, x_train=None, y_train=None, batch_size=None, epochs=None, callbacks=None):
