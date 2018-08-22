@@ -78,10 +78,12 @@ class LowShotGenerator(object):
         for _ in range(n_layers - 1):
             curr = Dense(hidden_size, activation=activation)(curr)
 
-        generator_output = Dense(generator_output_dim, activation=activation, name='generator')(curr)
+        curr = generator_output = Dense(generator_output_dim, activation=activation, name='generator')(curr)
 
-        reshape = Reshape(original_shape)(generator_output)
-        classifier = linear_classifier.model(reshape)
+        if original_shape != input_dim:
+            curr = Reshape(original_shape)(generator_output)
+
+        classifier = linear_classifier.model(curr)
 
         # classifier_wrapper is dummy layer for mapping the losses by naming the classifier model
         classifier_wrapper = Lambda(lambda x: x, name='classifier')(classifier)
