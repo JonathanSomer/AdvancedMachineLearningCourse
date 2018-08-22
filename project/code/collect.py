@@ -112,7 +112,8 @@ def load_quadruplets(n_clusters, categories, n_files=12):
         quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids[a], centroids[b], silent=True))
         quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
 
-    return quadruplets, cat_to_vectors, cat_to_onehots, original_shape
+    centroids = {category: cs for category, cs in centroids.items() if category in categories}
+    return quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape
 
 
 def main(n_files, n_clusters, n_jobs, test, stop_instance):
