@@ -28,9 +28,21 @@ class LowShotGenerator(object):
         self.name = name
         self.λ = λ
 
-        self.x_train = np.array([np.concatenate((c1a, c1b, c2b)) for ((c1a, c2a, c1b, c2b), _) in self.quadruplets])
-        self.y_train = {'generator': np.array([np.array(c2a) for ((c1a, c2a, c1b, c2b), cat) in self.quadruplets]),
-                        'classifier': np.array([self.cat_to_onehots[cat] for (_, cat) in self.quadruplets])}
+        # self.x_train = np.array([np.concatenate((c1a, c1b, c2b)) for ((c1a, c2a, c1b, c2b), _) in self.quadruplets])
+        # self.y_train = {'generator': np.array([np.array(c2a) for ((c1a, c2a, c1b, c2b), cat) in self.quadruplets]),
+        #                 'classifier': np.array([self.cat_to_onehots[cat] for (_, cat) in self.quadruplets])}
+
+        x_train, y_classifier, y_generator = [], [], []
+
+        for category, quadruplets in self.quadruplets.items():
+            for (c1a, c2a, c1b, c2b) in quadruplets:
+                x_train.append(np.concatenate((c1a, c1b, c2b)))
+                y_generator.append(np.array(c2a))
+                y_classifier.append(self.cat_to_onehots[category])
+
+        self.x_train = np.array(x_train)
+        self.y_train = {'generator': np.array(y_generator),
+                        'classifier': np.array(y_classifier)}
 
         self.input_dim = len(self.x_train[0])
         self.generator_output_dim = len(self.y_train['generator'][0])

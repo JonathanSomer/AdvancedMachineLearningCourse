@@ -1,4 +1,5 @@
 from itertools import combinations
+from collections import defaultdict
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cosine
 from sklearn.externals import joblib
@@ -63,7 +64,7 @@ def process_centroids(n_files, n_clusters, n_jobs, cat_to_vectors):
         write_path = du.write_pickle_path(centroids_name)
         joblib.dump(centroids, write_path)
         update('done to cluster :tada: centroids saved as *{0}*'.format(centroids_name))
-    
+
     return centroids
 
 
@@ -104,13 +105,21 @@ def process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids_a=None, ce
     return quadruplets
 
 
+# TODO: quadruplets is  a dict! or add the category...
 def load_quadruplets(n_clusters, categories, n_files=12):
     cat_to_vectors, cat_to_onehots, original_shape = preprocess(n_files=n_files, silent=True)
     centroids = process_centroids(n_files, n_clusters, 1, cat_to_vectors)
-    quadruplets = []
+    # quadruplets = []
+    # for a, b in combinations(categories, 2):
+    #     quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids[a], centroids[b], silent=True))
+    #     quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
+
+    quadruplets = defaultdict(list)
     for a, b in combinations(categories, 2):
-        quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids[a], centroids[b], silent=True))
-        quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
+        quadruplets[a].extend(
+            process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids[a], centroids[b], silent=True))
+        quadruplets[b].extend(
+            process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
 
     centroids = {category: cs for category, cs in centroids.items() if category in categories}
     return quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape
