@@ -24,7 +24,9 @@ def main(n_files, test, stop_instance):
 
     diseases = data_obj['label_encoder_classes']
     diseases_to_remove = diseases[12:]
-    n_classes = len(diseases) - len(diseases_to_remove)
+    # n_classes = len(diseases) - len(diseases_to_remove)
+    n_classes = len(diseases)
+
 
     update('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
     X, y = du.get_features_and_labels(data_obj)
