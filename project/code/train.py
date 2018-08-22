@@ -24,13 +24,14 @@ def main(n_files, test, stop_instance):
 
     diseases = data_obj['label_encoder_classes']
     diseases_to_remove = diseases[12:]
+    n_classes = len(diseases) - len(diseases_to_remove)
 
     update('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
     X, y = du.get_features_and_labels(data_obj)
     X_filtered, y_filtered = du.remove_diseases(X, y, diseases_to_remove, data_obj)
-    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=0.1)
+    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=0.1, n_classes=n_classes)
 
-    n_classes = len(diseases) - len(diseases_to_remove)
+    # TODO: maybe we can use int labels (not onehot) + sparse_categorical_crossentropy!
     classifier = Classifier(n_classes=n_classes)
 
     name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(diseases_to_remove))

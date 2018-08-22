@@ -112,8 +112,8 @@ def get_train_test_split_old(X, y, test_size=0.1):
     return X_train, X_test, y_train, y_test
 
 
-def get_train_test_split(X, y, test_size=0.1):
-    one_hot_labels = to_categorical(y)
+def get_train_test_split(X, y, test_size=0.1, n_classes=15):
+    one_hot_labels = to_categorical(y, num_classes=n_classes)
 
     X_train, X_test, y_train, y_test = train_test_split(X, one_hot_labels, test_size=test_size, random_state=42)
     return X_train, X_test, y_train, y_test
