@@ -36,7 +36,7 @@ def main(n_clusters, n_files, λ, test):
 
     classifier_name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(unused_diseases))
     classifier = Classifier(model_weights_file_path=du.read_model_path(classifier_name),
-                            trainable=False)
+                            trainable=True)
 
     lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
     lsg = LowShotGenerator(classifier, quadruplets_data, λ=λ, name=lsg_name)
