@@ -140,7 +140,9 @@ class LowShotGenerator(object):
         """
         X = []
         for _ in range(n_new):
-            category_centroids = np.random.choice(self.centroids.values())
+            centroids_all_categories = self.centroids.values()  # this is a list of lists, each list is centroids of cat
+            idx = np.random.choice(len(centroids_all_categories))
+            category_centroids = centroids_all_categories[idx]
 
             idx = np.random.choice(len(category_centroids), 2)
             c1a, c2a = category_centroids[idx]
