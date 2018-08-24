@@ -27,9 +27,9 @@ class CloudCallback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         # loss = logs.get('pos_loss') or logs.get('loss')
-        acc = logs.get('acc')
+        # acc = logs.get('acc')
 
-        self.send_update('*Epoch {0} has ended*! - Accuracy: `{1}`'.format(epoch + 1, acc))
+        self.send_update('*Epoch {0} has ended*! Logs are\n```{1}```'.format(epoch + 1, str(logs)))
         # self.send_update('*Epoch {0} has ended*! Loss: `{1}` - Accuracy: `{2}`'.format(epoch + 1, loss, acc))
 
     # def on_train_end(self, logs=None):

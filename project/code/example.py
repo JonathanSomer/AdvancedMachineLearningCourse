@@ -28,6 +28,7 @@ def main(n_clusters, n_files, λ, test):
     if test:
         n_clusters = 20
         n_files = 12
+        λ = 10.
 
     unused_diseases = ['Pleural_Thickening', 'Pneumonia', 'Pneumothorax']
     print('Unused diseases: {0}'.format(', '.join(unused_diseases)))
@@ -36,10 +37,10 @@ def main(n_clusters, n_files, λ, test):
 
     classifier_name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(unused_diseases))
     classifier = Classifier(model_weights_file_path=du.read_model_path(classifier_name),
-                            trainable=True)
+                            trainable=False)
 
     lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
-    lsg = LowShotGenerator(classifier, quadruplets_data, λ=λ, name=lsg_name)
+    lsg = LowShotGenerator(classifier.model, quadruplets_data, λ=λ, name=lsg_name)
 
     callbacks = [CloudCallback(True, config.slack_url, config.stop_url, config.slack_channel, name=lsg_name)]
     lsg.fit(callbacks=callbacks)
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
     parser.add_argument('-c', '--n_clusters', help='number of clusters', type=int, default=20)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
-    parser.add_argument('-l', '--λ', help='set λ regularization parameter', type=float, default=.5)
+    parser.add_argument('-l', '--λ', help='set λ regularization parameter', type=float, default=10.)
 
     args = parser.parse_args()
 
