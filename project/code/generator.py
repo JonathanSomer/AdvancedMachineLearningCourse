@@ -71,8 +71,8 @@ class LowShotGenerator(object):
     def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size, activation,
               λ=10., lr=.1, momentum=.9, decay=1e-4):
         # verify that the trained classifier is not trainable
-        n_non_trainable_params = np.sum(K.count_params(p) for p in set(trained_classifier.non_trainable_weights))
-        if n_non_trainable_params > 0:
+        n_trainable_params = np.sum(K.count_params(p) for p in set(trained_classifier.trainable_weights))
+        if n_trainable_params > 0:
             raise ValueError('The given classifier is trainable.')
 
         curr = inputs = Input(shape=(input_dim,))
