@@ -140,11 +140,10 @@ class LowShotGenerator(object):
         """
         X = []
         for _ in range(n_new):
-            sample_category = np.random.choice(list(self.cat_to_vectors.keys()))
-            centroids = self.centroids[sample_category]
+            category_centroids = np.random.choice(self.centroids.values())
 
-            idx = np.random.choice(len(centroids), 2)
-            c1a, c2a = centroids[idx]
+            idx = np.random.choice(len(category_centroids), 2)
+            c1a, c2a = category_centroids[idx]
 
             x = np.concatenate((ϕ, c1a, c2a))
             X.append(x)

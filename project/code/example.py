@@ -53,7 +53,7 @@ def main(n_clusters, n_files, λ, test):
 
     n_examples = min(len(ls) for ls in cat_to_vectors.values())
 
-    n_samples = 100
+    n_samples = 10
     disease = 'Pneumonia'
     print('Generating {0} examples from {1} samples of {2}'.format(n_examples, n_samples, disease))
 
