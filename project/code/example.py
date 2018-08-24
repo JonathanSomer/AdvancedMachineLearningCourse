@@ -2,6 +2,7 @@ from generator import LowShotGenerator
 from classifier import Classifier
 from callbacks import CloudCallback
 
+import numpy as np
 import data_utils as du
 import collect
 import argparse
@@ -42,16 +43,40 @@ def main(n_clusters, n_files, λ, test):
     lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
     lsg = LowShotGenerator(classifier.model, quadruplets_data, λ=λ, name=lsg_name)
 
-    callbacks = [CloudCallback(True, config.slack_url, config.stop_url, config.slack_channel, name=lsg_name)]
-    lsg.fit(callbacks=callbacks)
+    # callback = CloudCallback(True, config.slack_url, config.stop_url, config.slack_channel, name=lsg_name)
+    # lsg.fit(callbacks=[callback])
+
+    lsg.fit()
 
     unused_data = collect.load_quadruplets(n_clusters=n_clusters, categories=unused_diseases, n_files=n_files)
     quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape = unused_data
 
-    ϕ = cat_to_vectors['Pneumonia'][15]
-    example = lsg.generate(ϕ, n_new=1)
+    n_examples = min(len(ls) for ls in cat_to_vectors.values())
 
-    print(example)
+    n_samples = 100
+    disease = 'Pneumonia'
+    print('Generating {0} examples from {1} samples of {2}'.format(n_examples, n_samples, disease))
+
+    X_train_disease, X_test_disease = cat_to_vectors[disease][:n_samples], cat_to_vectors[disease][n_samples:]
+    X_train_disease = np.concatenate(
+        [X_train_disease] + [lsg.generate(ϕ, n_new=n_examples // n_samples) for ϕ in X_train_disease])
+    y_train_disease = np.array([cat_to_onehots[disease] for x in X_train_disease])
+    y_test_disease = np.array([cat_to_onehots[disease] for x in X_test_disease])
+
+    data_obj = du.get_processed_data(num_files_to_fetch_data_from=12)
+    X, y = du.get_features_and_labels(data_obj)
+    X, y = du.remove_diseases(X, y, unused_diseases, data_obj)
+    X_train, X_test, y_train, y_test = du.get_train_test_split(X, y, test_size=0.1)
+    X_train, y_train = np.concatenate((X_train, X_train_disease)), np.concatenate((y_train, y_train_disease))
+
+    classifier = Classifier(trainable=True)
+    classifier.fit(X_train, y_train)
+
+    loss, acc = classifier.evaluate(X_test, y_test)
+    print('accuracy for regular diseases is {0}'.format(acc))
+
+    loss, acc = classifier.evaluate(X_test_disease, y_test_disease)
+    print('accuracy for novel disease "{0}" is {1}'.format(disease, acc))
 
 
 if __name__ == "__main__":
