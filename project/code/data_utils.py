@@ -102,9 +102,9 @@ def get_features_and_labels(data):
     return X, y
 
 
-def onehot_encode(y):
+def onehot_encode(y, n_classes=None):
     yy = y.reshape(-1, 1)
-    enc = OneHotEncoder()
+    enc = OneHotEncoder(n_values=n_classes) if n_classes else OneHotEncoder()
     enc.fit(yy)
     one_hot_labels = enc.transform(yy).toarray()
     return one_hot_labels
