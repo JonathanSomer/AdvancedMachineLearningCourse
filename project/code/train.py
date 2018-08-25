@@ -21,8 +21,8 @@ def do_print(data):
 
 # TODO: log results into files or into slack channel for results only.
 # TODO: try to work with sparse?
-def get_trained_model_and_data(diseases_to_remove, test_size=.1, n_files=12, logging_func=do_print,
-                               force_training=False):
+def get_trained_classifier_and_data(diseases_to_remove, test_size=.1, n_files=12, logging_func=do_print,
+                                    force_training=False):
     name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(diseases_to_remove))
 
     model_path = du.read_model_path(name)
