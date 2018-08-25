@@ -37,13 +37,12 @@ def get_trained_classifier_and_data(diseases_to_remove, test_size=.1, n_files=12
     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
 
     diseases = data_obj['label_encoder_classes']
-    # n_classes = len(diseases) - len(diseases_to_remove)
-    n_classes = len(diseases)
+    n_classes = len(diseases) - len(diseases_to_remove)
+    # n_classes = len(diseases)
 
     X, y = du.get_features_and_labels(data_obj)
     X_filtered, y_filtered = du.remove_diseases(X, y, diseases_to_remove, data_obj)
-    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=test_size,
-                                                               n_classes=n_classes)
+    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=test_size)
 
     joblib.dump((X_train, X_test, y_train, y_test), du.write_pickle_path(name))
 

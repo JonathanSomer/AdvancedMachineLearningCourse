@@ -15,7 +15,7 @@ class LowShotGenerator(object):
                  name='LowShotGenerator', λ=10., lr=.1, momentum=.9, decay=1e-4):
 
         self.n_layers = n_layers
-        self.quadruplets, self.centroids, self.cat_to_vectors, self.cat_to_onehots, self.original_shape = quadruplets_data
+        self.quadruplets, self.centroids, self.cat_to_vectors, self.original_shape = quadruplets_data
         self.hidden_size = hidden_size
         self.W = self.trained_classifier = trained_classifier
         self.activation = activation
@@ -34,7 +34,9 @@ class LowShotGenerator(object):
             for (c1a, c2a, c1b, c2b) in quadruplets:
                 x_train.append(np.concatenate((c1a, c1b, c2b)))
                 y_generator.append(np.array(c2a))
-                y_classifier.append(self.cat_to_onehots[category])
+                y_classifier.append(category)
+
+        y_classifier = du.onehot_encode(y_classifier)
 
         self.x_train = np.array(x_train)
         self.y_train = [np.array(y_generator), np.array(y_classifier)]
@@ -94,7 +96,7 @@ class LowShotGenerator(object):
         loss = ['mse', 'categorical_crossentropy']
         loss_weights = [λ, 1]
 
-        optimizer = SGD(lr=lr, momentum=momentum, decay=decay, nesterov=False)
+        optimizer = SGD(lr=lr, momentum=momentum, decay=decay)
 
         model.compile(loss=loss,
                       loss_weights=loss_weights,

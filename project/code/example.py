@@ -29,32 +29,39 @@ Number of samples per category:
 14          No Finding  60361
 '''
 
-all_diseases = ['Atelectasis',
-                'Cardiomegaly',
-                'Consolidation',
-                'Edema',
-                'Effusion',
-                'Emphysema',
-                'Fibrosis',
-                'Hernia',
-                'Infiltration',
-                'Mass',
-                'No Finding',
-                'Nodule',
-                'Pleural_Thickening',
-                'Pneumonia',
-                'Pneumothorax']
+# all_diseases = ['Atelectasis',
+#                 'Cardiomegaly',
+#                 'Consolidation',
+#                 'Edema',
+#                 'Effusion',
+#                 'Emphysema',
+#                 'Fibrosis',
+#                 'Hernia',
+#                 'Infiltration',
+#                 'Mass',
+#                 'No Finding',
+#                 'Nodule',
+#                 'Pleural_Thickening',
+#                 'Pneumonia',
+#                 'Pneumothorax']
+
+all_diseases = list(range(15))
 
 
-def main(n_clusters, n_files, λ, test):
+def main(disease_name, n_clusters, n_files, λ, test):
     if test:
         n_clusters = 20
         n_files = 12
         λ = 10.
 
-    unused_diseases = ['Hernia', 'Pneumonia', 'Edema', 'Emphysema', 'Fibrosis']
-    diseases_to_remove = list(unused_diseases)
-    print('Unused diseases: {0}'.format(', '.join(unused_diseases)))
+    data_obj = du.get_processed_data(n_files)
+    le = du.get_label_encoder(data_obj)
+    disease = le.transform(disease_name)
+
+    unused_diseases = [disease]
+    diseases_to_remove = [disease_name]
+
+    print('Unused diseases: {0}'.format(', '.join(diseases_to_remove)))
     diseases = [d for d in all_diseases if d not in unused_diseases]
 
     classifier, X_train, X_test, y_train, y_test = get_trained_classifier_and_data(diseases_to_remove, n_files=n_files)
@@ -99,6 +106,7 @@ def main(n_clusters, n_files, λ, test):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('disease', help='disease to experiment on')
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
     parser.add_argument('-c', '--n_clusters', help='number of clusters', type=int, default=20)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
@@ -106,4 +114,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.n_clusters, args.n_files, args.λ, args.test)
+    main(args.disease, args.n_clusters, args.n_files, args.λ, args.test)

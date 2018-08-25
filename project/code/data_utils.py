@@ -102,25 +102,24 @@ def get_features_and_labels(data):
     return X, y
 
 
-def get_train_test_split_old(X, y, test_size=0.1):
+def onehot_encode(y):
     yy = y.reshape(-1, 1)
     enc = OneHotEncoder()
     enc.fit(yy)
     one_hot_labels = enc.transform(yy).toarray()
-
-    X_train, X_test, y_train, y_test = train_test_split(X, one_hot_labels, test_size=test_size, random_state=42)
-    return X_train, X_test, y_train, y_test
+    return one_hot_labels
 
 
-def get_train_test_split(X, y, test_size=0.1, n_classes=15):
-    one_hot_labels = to_categorical(y, num_classes=n_classes)
+def get_label_encoder(data_obj):
+    le = preprocessing.LabelEncoder()
+    le.classes_ = data_obj['label_encoder_classes']
+    return le
 
-    X_train, X_test, y_train, y_test = train_test_split(X, one_hot_labels, test_size=test_size, random_state=42)
-    return X_train, X_test, y_train, y_test
 
+def get_train_test_split(X, y, test_size=0.1):
+    onehot_labels = onehot_encode(y)
 
-def get_train_test_split_sparse(X, y, test_size=0.1):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, onehot_labels, test_size=test_size, random_state=42)
     return X_train, X_test, y_train, y_test
 
 
@@ -253,27 +252,13 @@ def to_low_shot_dataset(data, diseases_to_remove=None):
         warnings.simplefilter('ignore')
         X, y = get_features_and_labels(data)
 
-        le = preprocessing.LabelEncoder()
-        le.classes_ = data['label_encoder_classes']
-
-        onehot_encoded = to_categorical(y)
-
-        if diseases_to_remove:
-            black_list = le.transform(diseases_to_remove)
-            include = ~np.isin(y, black_list)
-            X, y = X[include], y[include]
-
-        # onehot_encoded = to_categorical(y)
+        X, y = remove_diseases(X, y, diseases_to_remove, data)
 
         cat_to_vectors = defaultdict(list)
-        cat_to_onehots = {}
-        original_shape = None
+        original_shape = X[0].shape
         for i, x, yy in zip(range(len(X)), X, y):
-            original_shape = x.shape
-            cat = le.inverse_transform(yy)
-            cat_to_vectors[cat].append(x.flatten())
-            cat_to_onehots[cat] = onehot_encoded[i]
+            cat_to_vectors[yy].append(x.flatten())
 
         cat_to_vectors = {y: np.array(X) for y, X in cat_to_vectors.items()}
 
-        return cat_to_vectors, cat_to_onehots, original_shape
+        return cat_to_vectors, original_shape

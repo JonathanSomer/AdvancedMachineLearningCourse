@@ -4,6 +4,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial.distance import cosine
 from sklearn.externals import joblib
 from concurrent.futures import ProcessPoolExecutor
+from sklearn.preprocessing import LabelEncoder
 
 import data_utils as du
 import numpy as np
@@ -44,8 +45,8 @@ def preprocess(n_files, silent=False):
         joblib.dump(dataset, write_path)
         update('done :tada: dataset for quadruplets collection saved as *{0}*'.format(dataset_name))
 
-    cat_to_vectors, cat_to_onehots, original_shape = dataset
-    return cat_to_vectors, cat_to_onehots, original_shape
+    cat_to_vectors, original_shape = dataset
+    return cat_to_vectors, original_shape
 
 
 def process_centroids(n_files, n_clusters, n_jobs, cat_to_vectors):
@@ -108,12 +109,8 @@ def process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids_a=None, ce
 
 # TODO: quadruplets is  a dict! or add the category...
 def load_quadruplets(n_clusters, categories, n_files=12):
-    cat_to_vectors, cat_to_onehots, original_shape = preprocess(n_files=n_files, silent=True)
+    cat_to_vectors, original_shape = preprocess(n_files=n_files, silent=True)
     centroids = process_centroids(n_files, n_clusters, 1, cat_to_vectors)
-    # quadruplets = []
-    # for a, b in combinations(categories, 2):
-    #     quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, a, b, centroids[a], centroids[b], silent=True))
-    #     quadruplets.extend(process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
 
     quadruplets = defaultdict(list)
     for a, b in combinations(categories, 2):
@@ -123,7 +120,7 @@ def load_quadruplets(n_clusters, categories, n_files=12):
             process_quadruplets_for_pair(n_files, n_clusters, b, a, centroids[b], centroids[a], silent=True))
 
     centroids = {category: cs for category, cs in centroids.items() if category in categories}
-    return quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape
+    return quadruplets, centroids, cat_to_vectors, original_shape
 
 
 def main(n_files, n_clusters, n_jobs, test, stop_instance):
@@ -133,7 +130,7 @@ def main(n_files, n_clusters, n_jobs, test, stop_instance):
 
     update('*Generating low shot data procedure has just started* :weight_lifter:')
 
-    cat_to_vectors, cat_to_onehots, original_shape = preprocess(n_files)
+    cat_to_vectors, original_shape = preprocess(n_files)
     centroids = process_centroids(n_files, n_clusters, n_jobs, cat_to_vectors)
 
     update('Creating quadruplets (2 pairs of 2 centroids).')
@@ -156,7 +153,6 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--n_jobs', help='number of jobs to do in parallel', type=int, default=8)
     parser.add_argument('-s', '--stop_instance', help='stop instance when run ends or not', action='store_true')
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
-    # parser.add_argument('-snf', '--shallow_no_finding', help='shallow_no_finding', action='store_true')
 
     args = parser.parse_args()
 
