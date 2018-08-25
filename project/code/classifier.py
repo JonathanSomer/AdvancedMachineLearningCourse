@@ -12,10 +12,10 @@ import config
 class Classifier(object):
     def __init__(self, n_classes=15, model_weights_file_path=None, trainable=True):
         self.trainable = trainable
-        if config.with_pooling:
-            self.model = Classifier.new_model(n_classes, trainable=trainable)
-        else:
+        if config.resnet_version_performs_pooling:
             self.model = Classifier.new_model_no_pooling(n_classes, trainable=trainable)
+        else:
+            self.model = Classifier.new_model(n_classes, trainable=trainable)
 
         if model_weights_file_path is not None:
             self.model.load_weights(model_weights_file_path)
