@@ -55,6 +55,13 @@ class Classifier(object):
     def get_optimizer():
         return Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
+    @staticmethod
+    def get_class_weights(y_train):  # expects a one hot encoded y_train array
+        y_integers = np.argmax(y_train, axis=1)
+        class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+        class_weights_dict = dict(enumerate(class_weights))
+        return class_weights_dict
+
     def compile(self):
         optimizer = Classifier.get_optimizer()
         self.model.compile(loss='categorical_crossentropy',
@@ -64,20 +71,13 @@ class Classifier(object):
     # supply file_path if want to save model to file
     def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
 
-        class_weight = self.get_class_weights(y_train)
+        class_weight = Classifier.get_class_weights(y_train)
         self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1, callbacks=callbacks, class_weight=class_weight)
 
         if model_weights_file_path:
             self.model.save(model_weights_file_path)
 
         return self.model
-
-    # expects a one hot encoded y_train array
-    def get_class_weights(self, y_train):
-        y_integers = np.argmax(y_train, axis=1)
-        class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
-        class_weights_dict = dict(enumerate(class_weights))
-        return class_weights_dict
 
     # returns an array with [loss, accuracy]
     def evaluate(self, X_test, y_test):
