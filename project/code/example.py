@@ -48,7 +48,7 @@ Number of samples per category:
 all_diseases = list(range(15))
 
 
-def main(disease_name, n_clusters, n_files, λ, test):
+def main(disease_name, n_clusters, n_files, λ, n_samples, n_examples, test):
     if test:
         n_clusters = 20
         n_files = 12
@@ -56,9 +56,9 @@ def main(disease_name, n_clusters, n_files, λ, test):
 
     data_obj = du.get_processed_data(n_files)
     le = du.get_label_encoder(data_obj)
-    disease = le.transform(disease_name)
+    disease_label_int = le.transform(disease_name)
 
-    unused_diseases = [disease]
+    unused_diseases = [disease_label_int]
     diseases_to_remove = [disease_name]
 
     print('Unused diseases: {0}'.format(', '.join(diseases_to_remove)))
@@ -78,19 +78,18 @@ def main(disease_name, n_clusters, n_files, λ, test):
     lsg.fit()
 
     unused_data = collect.load_quadruplets(n_clusters=n_clusters, categories=unused_diseases, n_files=n_files)
-    quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape = unused_data
+    quadruplets, centroids, cat_to_vectors, original_shape = unused_data
 
-    n_examples = min(len(vecs) for cat, vecs in cat_to_vectors.items() if cat not in diseases_to_remove)
+    print('Generating {0} examples from {1} samples of {2}'.format(n_examples, n_samples, disease_label_int))
 
-    n_samples = 10
-    disease = 'Hernia'
-    print('Generating {0} examples from {1} samples of {2}'.format(n_examples, n_samples, disease))
+    X_train_disease = cat_to_vectors[disease_label_int][:n_samples]
+    X_test_disease = cat_to_vectors[disease_label_int][n_samples:]
 
-    X_train_disease, X_test_disease = cat_to_vectors[disease][:n_samples], cat_to_vectors[disease][n_samples:]
     X_train_disease = np.concatenate(
         [X_train_disease] + [lsg.generate(ϕ, n_new=n_examples // n_samples) for ϕ in X_train_disease])
-    y_train_disease = np.array([cat_to_onehots[disease] for x in X_train_disease])
-    y_test_disease = np.array([cat_to_onehots[disease] for x in X_test_disease])
+    y_train_disease = np.array([disease_label_int for x in X_train_disease])
+
+    y_test_disease = np.array([disease_label_int for x in X_test_disease])
 
     X_train, y_train = np.concatenate((X_train, X_train_disease)), np.concatenate((y_train, y_train_disease))
 
@@ -101,7 +100,7 @@ def main(disease_name, n_clusters, n_files, λ, test):
     print('accuracy for regular diseases is {0}'.format(acc))
 
     loss, acc = classifier.evaluate(X_test_disease, y_test_disease)
-    print('accuracy for novel disease "{0}" is {1}'.format(disease, acc))
+    print('accuracy for novel disease "{0}" is {1}'.format(disease_label_int, acc))
 
 
 if __name__ == "__main__":
@@ -111,7 +110,9 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--n_clusters', help='number of clusters', type=int, default=20)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
     parser.add_argument('-l', '--λ', help='set λ regularization parameter', type=float, default=10.)
+    parser.add_argument('-s', '--n_samples', help='how much samples to use', type=int, default=1)
+    parser.add_argument('-e', '--n_examples', help='how much samples to use', type=int, default=20)
 
     args = parser.parse_args()
 
-    main(args.disease, args.n_clusters, args.n_files, args.λ, args.test)
+    main(args.disease, args.n_clusters, args.n_files, args.λ, args.n_samples, args.n_examples, args.test)
