@@ -1,6 +1,7 @@
 from keras.models import Model, load_model
 from keras.layers import Dense, Input, Reshape, Lambda
 from keras.optimizers import SGD
+from classifier import Classifier
 
 import keras.backend as K
 
@@ -42,6 +43,9 @@ class LowShotGenerator(object):
         self.y_train = [np.array(y_generator), np.array(y_classifier)]
         # self.y_train = {'generator': np.array(y_generator),
         #                 'classifier': np.array(y_classifier)}
+
+        # TODO: try to set the first weights to be all 1...
+        self.class_weights = [None, Classifier.get_class_weights(y_classifier)]
 
         self.input_dim = len(self.x_train[0])
         self.generator_output_dim = len(self.y_train[0][0])
