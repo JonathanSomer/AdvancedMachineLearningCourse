@@ -4,3 +4,6 @@
 *.lyx~
 *.DS_Store
 config.py
+
+project/.idea/*
+project/code/__pycache__/*
