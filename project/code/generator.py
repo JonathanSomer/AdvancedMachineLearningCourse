@@ -36,7 +36,7 @@ class LowShotGenerator(object):
                 y_generator.append(np.array(c2a))
                 y_classifier.append(category)
 
-        y_classifier = du.onehot_encode(y_classifier)
+        y_classifier = du.onehot_encode(np.array(y_classifier))
 
         self.x_train = np.array(x_train)
         self.y_train = [np.array(y_generator), np.array(y_classifier)]

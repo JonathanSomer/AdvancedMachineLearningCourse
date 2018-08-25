@@ -56,9 +56,9 @@ def main(disease_name, n_clusters, n_files, λ, n_samples, n_examples, test):
 
     data_obj = du.get_processed_data(n_files)
     le = du.get_label_encoder(data_obj)
-    disease_label_int = le.transform(disease_name)
+    disease_label_int = le.transform((disease_name,))[0]
 
-    unused_diseases = [disease_label_int]
+    unused_diseases = list(disease_label_int)
     diseases_to_remove = [disease_name]
 
     print('Unused diseases: {0}'.format(', '.join(diseases_to_remove)))
@@ -69,7 +69,7 @@ def main(disease_name, n_clusters, n_files, λ, n_samples, n_examples, test):
 
     quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=diseases, n_files=n_files)
 
-    lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
+    lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join([str(d) for d in unused_diseases]))
     lsg = LowShotGenerator(classifier.model, quadruplets_data, λ=λ, name=lsg_name)
 
     # callback = CloudCallback(True, config.slack_url, config.stop_url, config.slack_channel, name=lsg_name)
