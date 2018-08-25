@@ -24,19 +24,22 @@ def get_trained_classifier_and_data(diseases_to_remove, test_size=.1, n_files=12
                                     force_training=False):
     name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(diseases_to_remove))
 
+    n_diseases = 15
+    n_classes = n_diseases - len(diseases_to_remove)
+
     model_path = du.read_model_path(name)
     data_path = du.read_pickle_path(name)
     if os.path.exists(model_path) and os.path.exists(data_path) and not force_training:
         logging_func('Loaded classifier and data from files')
-        classifier = Classifier(model_weights_file_path=model_path)
+        classifier = Classifier(model_weights_file_path=model_path, n_classes=n_classes)
         X_train, X_test, y_train, y_test = joblib.load(data_path)
         return classifier, X_train, X_test, y_train, y_test
 
     logging_func('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
 
-    diseases = data_obj['label_encoder_classes']
-    n_classes = len(diseases) - len(diseases_to_remove)
+    # diseases = data_obj['label_encoder_classes']
+    # n_classes = len(diseases) - len(diseases_to_remove)
     # n_classes = len(diseases)
 
     X, y = du.get_features_and_labels(data_obj)
