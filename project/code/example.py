@@ -1,7 +1,7 @@
 from generator import LowShotGenerator
 from classifier import Classifier
 from callbacks import CloudCallback
-from train import get_trained_model_and_data
+from train import get_trained_classifier_and_data
 
 import numpy as np
 import data_utils as du
@@ -46,10 +46,6 @@ all_diseases = ['Atelectasis',
                 'Pneumothorax']
 
 
-# TODO: change unused_diseases to be 'Hernia', 'Pneumonia', 'Edema', 'Emphysema', 'Fibrosis'
-# TODO: add evalutation without 'No Finding'?
-# TODO: try to train and evaluate without 'No Finding' at all
-# TODO: change it to create a new classifier (and do not load a pretrained one)
 def main(n_clusters, n_files, λ, test):
     if test:
         n_clusters = 20
@@ -61,14 +57,10 @@ def main(n_clusters, n_files, λ, test):
     print('Unused diseases: {0}'.format(', '.join(unused_diseases)))
     diseases = [d for d in all_diseases if d not in unused_diseases]
 
-    classifier, X_train, X_test, y_train, y_test = get_trained_model_and_data(diseases_to_remove, n_files=n_files)
+    classifier, X_train, X_test, y_train, y_test = get_trained_classifier_and_data(diseases_to_remove, n_files=n_files)
     classifier.toggle_trainability()  # make the classifier non-trainable
 
     quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=diseases, n_files=n_files)
-
-    # classifier_name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(unused_diseases))
-    # classifier = Classifier(model_weights_file_path=du.read_model_path(classifier_name),
-    #                         trainable=False)
 
     lsg_name = 'lsg_f.{0}_c.{1}_w.{2}'.format(n_files, n_clusters, '.'.join(unused_diseases))
     lsg = LowShotGenerator(classifier.model, quadruplets_data, λ=λ, name=lsg_name)
@@ -81,9 +73,9 @@ def main(n_clusters, n_files, λ, test):
     unused_data = collect.load_quadruplets(n_clusters=n_clusters, categories=unused_diseases, n_files=n_files)
     quadruplets, centroids, cat_to_vectors, cat_to_onehots, original_shape = unused_data
 
-    n_examples = min(len(ls) for ls in cat_to_vectors.values())
+    n_examples = min(len(vecs) for cat, vecs in cat_to_vectors.items() if cat not in diseases_to_remove)
 
-    n_samples = 5
+    n_samples = 10
     disease = 'Hernia'
     print('Generating {0} examples from {1} samples of {2}'.format(n_examples, n_samples, disease))
 
