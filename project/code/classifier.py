@@ -5,6 +5,7 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Flatten, Input
 from keras.layers import GlobalMaxPooling2D, GlobalAveragePooling2D, GlobalMaxPooling3D, AveragePooling2D
 from keras.optimizers import Adam
+from sklearn.utils.class_weight import compute_class_weight
 
 import config
 
@@ -61,12 +62,21 @@ class Classifier(object):
 
     # supply file_path if want to save model to file
     def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
-        self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1, callbacks=callbacks)
+
+        class_weight = self.get_class_weights(y_train)
+        self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1, callbacks=callbacks, class_weight=class_weight)
 
         if model_weights_file_path:
             self.model.save(model_weights_file_path)
 
         return self.model
+
+    # expects a one hot encoded y_train array
+    def get_class_weights(y_train):
+        y_integers = np.argmax(y_train, axis=1)
+        class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+        class_weights_dict = dict(enumerate(class_weights))
+        return class_weights_dict
 
     # returns an array with [loss, accuracy]
     def evaluate(self, X_test, y_test):
