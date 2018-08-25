@@ -252,7 +252,8 @@ def to_low_shot_dataset(data, diseases_to_remove=None):
         warnings.simplefilter('ignore')
         X, y = get_features_and_labels(data)
 
-        X, y = remove_diseases(X, y, diseases_to_remove, data)
+        if diseases_to_remove:
+            X, y = remove_diseases(X, y, diseases_to_remove, data)
 
         cat_to_vectors = defaultdict(list)
         original_shape = X[0].shape
