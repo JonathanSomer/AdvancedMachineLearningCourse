@@ -1,11 +1,13 @@
 from classifier import Classifier
 from callbacks import CloudCallback
+from sklearn.externals import joblib
 
 import config
 import data_utils as du
 import argparse
 import pandas as pd
 import requests
+import os
 
 
 def update(msg):
@@ -17,15 +19,21 @@ def do_print(data):
     print(data)
 
 
-# TODO: make save optional
 # TODO: log results into files or into slack channel for results only.
 # TODO: try to work with sparse?
-def do_train(diseases_to_remove, test_size=.1, shallow_no_finding=False, n_files=12, logging_func=do_print):
-    logging_func('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
-    # if with_no_finding:
-    #     logging_func('No Finding is excluded as well')
-    #     diseases_to_remove += ['No Finding']
+def get_trained_model_and_data(diseases_to_remove, test_size=.1, n_files=12, logging_func=do_print,
+                               force_training=False):
+    name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(diseases_to_remove))
 
+    model_path = du.read_model_path(name)
+    data_path = du.read_pickle_path(name)
+    if os.path.exists(model_path) and os.path.exists(data_path) and not force_training:
+        logging_func('Loaded classifier and data from files')
+        classifier = Classifier(model_weights_file_path=model_path)
+        X_train, X_test, y_train, y_test = joblib.load(data_path)
+        return classifier, X_train, X_test, y_train, y_test
+
+    logging_func('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
 
     diseases = data_obj['label_encoder_classes']
@@ -33,22 +41,18 @@ def do_train(diseases_to_remove, test_size=.1, shallow_no_finding=False, n_files
     n_classes = len(diseases)
 
     X, y = du.get_features_and_labels(data_obj)
-    if shallow_no_finding:
-        X, y = du.shallow_no_finding(X, y, data_obj)
-
     X_filtered, y_filtered = du.remove_diseases(X, y, diseases_to_remove, data_obj)
     X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=test_size,
                                                                n_classes=n_classes)
-    logging_func('working with total of {0} samples. Test size is {1}'.format(len(X_filtered), test_size))
+
+    joblib.dump((X_train, X_test, y_train, y_test), du.write_pickle_path(name))
 
     classifier = Classifier(n_classes=n_classes)
-    name = 'classifier_f_{0}_w_{1}'.format(n_files, '.'.join(diseases_to_remove))
     classifier.fit(X_train,
-                   y_train)
-                   # model_weights_file_path=du.write_model_path(name))
-    # logging_func('done :tada: classifier saved as *{0}.h5*'.format(name))
+                   y_train,
+                   model_weights_file_path=du.write_model_path(name))
 
-    logging_func('Evaluating with `{0}` of the data'.format(0.1))
+    logging_func('Evaluating with `{0}` of the data'.format(test_size))
     loss, acc = classifier.evaluate(X_test, y_test)
     logging_func('\naccuracy acheived: `{0}`'.format(acc))
 
@@ -69,11 +73,11 @@ def main(n_files, test_size, test, stop_instance):
     n_classes = len(diseases) - len(diseases_to_remove)
     # n_classes = len(diseases)
 
-
     update('Fitting classifier without the diseases: *{0}*'.format(', '.join(diseases_to_remove)))
     X, y = du.get_features_and_labels(data_obj)
     X_filtered, y_filtered = du.remove_diseases(X, y, diseases_to_remove, data_obj)
-    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=test_size, n_classes=n_classes)
+    X_train, X_test, y_train, y_test = du.get_train_test_split(X_filtered, y_filtered, test_size=test_size,
+                                                               n_classes=n_classes)
 
     # TODO: maybe we can use int labels (not onehot) + sparse_categorical_crossentropy!
     classifier = Classifier(n_classes=n_classes)
