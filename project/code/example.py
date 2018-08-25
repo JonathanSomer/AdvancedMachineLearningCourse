@@ -93,7 +93,7 @@ def main(disease_name, n_clusters, n_files, λ, n_samples, n_examples, test):
 
     X_train, y_train = np.concatenate((X_train, X_train_disease)), np.concatenate((y_train, y_train_disease))
 
-    classifier = Classifier(trainable=True)
+    classifier = Classifier(trainable=True, n_classes=15)
     classifier.fit(X_train, y_train)
 
     loss, acc = classifier.evaluate(X_test, y_test)
