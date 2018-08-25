@@ -1,7 +1,7 @@
 from generator import LowShotGenerator
 from classifier import Classifier
 from callbacks import CloudCallback
-from train import do_train
+from train import get_trained_model_and_data
 
 import numpy as np
 import data_utils as du
@@ -50,7 +50,7 @@ all_diseases = ['Atelectasis',
 # TODO: add evalutation without 'No Finding'?
 # TODO: try to train and evaluate without 'No Finding' at all
 # TODO: change it to create a new classifier (and do not load a pretrained one)
-def main(n_clusters, n_files, λ, shallow_no_finding, test):
+def main(n_clusters, n_files, λ, test):
     if test:
         n_clusters = 20
         n_files = 12
@@ -61,12 +61,7 @@ def main(n_clusters, n_files, λ, shallow_no_finding, test):
     print('Unused diseases: {0}'.format(', '.join(unused_diseases)))
     diseases = [d for d in all_diseases if d not in unused_diseases]
 
-    # if shallow_no_finding:  # currently it No Finding it entirely
-    #     print('No Finding is excluded')
-    #     diseases = [d for d in diseases if d != 'No Finding']
-    #     diseases_to_remove += ['No Finding']
-
-    classifier, X_train, X_test, y_train, y_test = do_train(diseases_to_remove, n_files=n_files)
+    classifier, X_train, X_test, y_train, y_test = get_trained_model_and_data(diseases_to_remove, n_files=n_files)
     classifier.toggle_trainability()  # make the classifier non-trainable
 
     quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=diseases, n_files=n_files)
@@ -116,8 +111,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--n_clusters', help='number of clusters', type=int, default=20)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
     parser.add_argument('-l', '--λ', help='set λ regularization parameter', type=float, default=10.)
-    parser.add_argument('-nf', '--shallow_no_finding', help='whether to shallow No Finding or not', action='store_true')
 
     args = parser.parse_args()
 
-    main(args.n_clusters, args.n_files, args.λ, args.shallow_no_finding, args.test)
+    main(args.n_clusters, args.n_files, args.λ, args.test)

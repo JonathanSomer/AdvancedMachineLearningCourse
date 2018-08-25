@@ -277,31 +277,3 @@ def to_low_shot_dataset(data, diseases_to_remove=None):
         cat_to_vectors = {y: np.array(X) for y, X in cat_to_vectors.items()}
 
         return cat_to_vectors, cat_to_onehots, original_shape
-
-
-def to_low_shot_dataset_new(data, diseases_to_remove=None):
-    import warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        X, y = get_features_and_labels(data)
-
-        le = preprocessing.LabelEncoder()
-        le.classes_ = data['label_encoder_classes']
-
-        if diseases_to_remove:
-            black_list = le.transform(diseases_to_remove)
-            include = ~np.isin(y, black_list)
-            X, y = X[include], y[include]
-
-        cat_to_vectors = defaultdict(list)
-        cat_to_labels = {}
-        original_shape = None
-        for i, x, yy in zip(range(len(X)), X, y):
-            original_shape = x.shape
-            cat = le.inverse_transform(yy)
-            cat_to_vectors[cat].append(x.flatten())
-            cat_to_labels[cat] = yy
-
-        cat_to_vectors = {y: np.array(X) for y, X in cat_to_vectors.items()}
-
-        return cat_to_vectors, cat_to_labels, original_shape
