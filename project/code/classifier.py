@@ -4,7 +4,7 @@ from keras.preprocessing import image
 from keras.models import Sequential, Model
 from keras.layers import Dense, Flatten, Input
 from keras.layers import GlobalMaxPooling2D, GlobalAveragePooling2D, GlobalMaxPooling3D, AveragePooling2D
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from sklearn.utils.class_weight import compute_class_weight
 
 import config
@@ -12,8 +12,10 @@ import numpy as np
 
 
 class Classifier(object):
-    def __init__(self, n_classes=15, model_weights_file_path=None, trainable=True):
+    def __init__(self, n_classes=15, model_weights_file_path=None, trainable=True, n_epochs=100):
+        self.n_epochs = n_epochs
         self.trainable = trainable
+
         if config.resnet_version_performs_pooling:
             self.model = Classifier.new_model_no_pooling(n_classes, trainable=trainable)
         else:
@@ -53,7 +55,9 @@ class Classifier(object):
 
     @staticmethod
     def get_optimizer():
-        return Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        # return SGD()
+        # return Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        return Adam(lr=1e-4)
 
     @staticmethod
     def get_class_weights(y_train):  # expects a one hot encoded y_train array
@@ -70,9 +74,8 @@ class Classifier(object):
 
     # supply file_path if want to save model to file
     def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
-
         class_weight = Classifier.get_class_weights(y_train)
-        self.model.fit(X_train, y_train, batch_size=50, epochs=10, verbose=2, validation_split=0.1, callbacks=callbacks, class_weight=class_weight)
+        self.model.fit(X_train, y_train, batch_size=50, epochs=self.n_epochs, verbose=1, validation_split=0.1, callbacks=callbacks, class_weight=class_weight)
 
         if model_weights_file_path:
             self.model.save(model_weights_file_path)
@@ -82,3 +85,6 @@ class Classifier(object):
     # returns an array with [loss, accuracy]
     def evaluate(self, X_test, y_test):
         return self.model.evaluate(X_test, y_test, batch_size=32, verbose=1)
+
+    def predict(self, X_test):
+        return self.model.predict(X_test)
