@@ -119,11 +119,24 @@ def get_train_test_split(X, y, test_size=0.1, n_classes=15):
     return X_train, X_test, y_train, y_test
 
 
+def get_train_test_split_sparse(X, y, test_size=0.1):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    return X_train, X_test, y_train, y_test
+
+
 def remove_diseases(X, y, diseases_to_remove, data):
     le = preprocessing.LabelEncoder()
     le.classes_ = data['label_encoder_classes']
     black_list = le.transform(diseases_to_remove)
     include = ~np.isin(y, black_list)
+    return X[include], y[include]
+
+
+def shallow_no_finding(X, y, data):
+    le = preprocessing.LabelEncoder()
+    le.classes_ = data['label_encoder_classes']
+    black_list = le.transform(['No Finding'])
+    include = ~np.isin(y, black_list[:10000])
     return X[include], y[include]
 
 

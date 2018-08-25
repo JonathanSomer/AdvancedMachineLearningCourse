@@ -155,6 +155,7 @@ if __name__ == "__main__":
     parser.add_argument('-j', '--n_jobs', help='number of jobs to do in parallel', type=int, default=8)
     parser.add_argument('-s', '--stop_instance', help='stop instance when run ends or not', action='store_true')
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
+    # parser.add_argument('-snf', '--shallow_no_finding', help='shallow_no_finding', action='store_true')
 
     args = parser.parse_args()
 

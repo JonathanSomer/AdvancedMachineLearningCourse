@@ -6,19 +6,35 @@ from keras.layers import Dense, Flatten, Input
 from keras.layers import GlobalMaxPooling2D, GlobalAveragePooling2D, GlobalMaxPooling3D, AveragePooling2D
 from keras.optimizers import Adam
 
+import config
+
 
 class Classifier(object):
     def __init__(self, n_classes=15, model_weights_file_path=None, trainable=True):
-        self.model = Classifier.new_model_no_pooling(n_classes, trainable=trainable)
+        self.trainable = trainable
+        if config.with_pooling:
+            self.model = Classifier.new_model(n_classes, trainable=trainable)
+        else:
+            self.model = Classifier.new_model_no_pooling(n_classes, trainable=trainable)
 
         if model_weights_file_path is not None:
             self.model.load_weights(model_weights_file_path)
             print('Loaded classifier weights from a saved model')
 
-        optimizer = Classifier.get_optimizer()
-        self.model.compile(loss='categorical_crossentropy',
-                           optimizer=optimizer,
-                           metrics=['accuracy'])
+        self.compile()
+
+    def toggle_trainability(self):
+        if self.trainable:
+            print('Classifier is now non-trainable!')
+        else:
+            print('Classifier is now trainable!')
+
+        self.trainable = not self.trainable
+
+        for layer in self.model.layers[1:]:  # first layer is input
+            layer.trainable = self.trainable
+
+        self.compile()
 
     @staticmethod
     def new_model(n_classes, trainable=True):
@@ -36,6 +52,12 @@ class Classifier(object):
     @staticmethod
     def get_optimizer():
         return Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+
+    def compile(self):
+        optimizer = Classifier.get_optimizer()
+        self.model.compile(loss='categorical_crossentropy',
+                           optimizer=optimizer,
+                           metrics=['accuracy'])
 
     # supply file_path if want to save model to file
     def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
