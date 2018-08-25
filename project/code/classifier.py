@@ -8,6 +8,7 @@ from keras.optimizers import Adam
 from sklearn.utils.class_weight import compute_class_weight
 
 import config
+import numpy as np
 
 
 class Classifier(object):
@@ -72,7 +73,7 @@ class Classifier(object):
         return self.model
 
     # expects a one hot encoded y_train array
-    def get_class_weights(y_train):
+    def get_class_weights(self, y_train):
         y_integers = np.argmax(y_train, axis=1)
         class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
         class_weights_dict = dict(enumerate(class_weights))
