@@ -65,6 +65,14 @@ def write_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
 
 
+def read_plot_path(name):
+    return os.path.join(config.local_data_dir, 'plot', 'read', '{0}.png'.format(name))
+
+
+def write_plot_path(name):
+    return os.path.join(config.local_data_dir, 'plot', 'write', '{0}.png'.format(name))
+
+
 def image_data_pickle_name(i):
     return 'image_data_{0}'.format(i)
 
