@@ -43,20 +43,13 @@ class LowShotGenerator(object):
                 y_classifier.append(category)
 
         y_classifier = du.onehot_encode(np.array(y_classifier))
-        self.class_weights = Classifier.get_class_weights(y_classifier, as_array=True)
 
         self.x_train = np.array(x_train)
-        self.y_train = [np.array(y_generator), np.array(y_classifier)]
-        # self.y_train = {'generator': np.array(y_generator),
-        #                 'classifier': np.array(y_classifier)}
-
-        # TODO: try to set the first weights to be all 1...
-        # self.class_weights = [None, Classifier.get_class_weights(y_classifier)]
-        # self.class_weights = Classifier.get_class_weights(y_classifier)
+        self.y_train = {'generator': np.array(y_generator),
+                        'classifier': np.array(y_classifier)}
 
         self.input_dim = len(self.x_train[0])
         self.generator_output_dim = len(self.y_train[0][0])
-        # self.generator_output_dim = len(self.y_train['generator'][0])
 
         # n_examples is the maximum number to generate per class
         # if n_examples:
@@ -67,7 +60,6 @@ class LowShotGenerator(object):
         self.model, self.generator = self.build(self.trained_classifier,
                                                 self.original_shape,
                                                 self.input_dim,
-                                                self.class_weights,
                                                 self.generator_output_dim,
                                                 self.n_layers,
                                                 self.hidden_size,
@@ -82,7 +74,7 @@ class LowShotGenerator(object):
             self.model.load_weights(self.weights_file_path)
 
     @staticmethod
-    def build(trained_classifier, original_shape, input_dim, class_weights, generator_output_dim, n_layers, hidden_size,
+    def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size,
               activation,
               λ=10., lr=.1, momentum=.9, decay=1e-4):
         # verify that the trained classifier is not trainable
@@ -100,38 +92,21 @@ class LowShotGenerator(object):
         if original_shape != (generator_output_dim,):
             curr = Reshape(original_shape)(generator_output)
 
-        # weights_input = Input(shape=(n_classes,))
-        # classifier = Model([trained_classifier.inputs, weights_input], trained_classifier.outputs)
         classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
-
         classifier_output = classifier(curr)
 
         model = Model(inputs=inputs, outputs=[generator_output, classifier_output])
         generator = Model(inputs=inputs, outputs=generator_output)
 
-        def weighted_categorical_crossentropy(y_true, y_pred, weights):
-            nb_cl = len(weights)
-            final_mask = K.zeros_like(y_pred[:, 0])
-            y_pred_max = K.max(y_pred, axis=1)
-            y_pred_max = K.expand_dims(y_pred_max, 1)
-            y_pred_max_mat = K.equal(y_pred, y_pred_max)
-            for c_p, c_t in product(range(nb_cl), range(nb_cl)):
-                final_mask += (K.cast(weights[c_t, c_p], K.floatx()) *
-                               K.cast(y_pred_max_mat[:, c_p], K.floatx()) *
-                               K.cast(y_true[:, c_t], K.floatx()))
-            return K.categorical_crossentropy(y_pred, y_true) * final_mask
-
-        # def weighted_categorical_crossentropy(y_true, y_pred, weights):
-        #     return categorical_crossentropy(y_true, y_pred) * weights
-
         loss = {'generator': 'mse',
-                'classifier': partial(weighted_categorical_crossentropy, weights=class_weights)}
+                'classifier': 'categorical_crossentropy'}
 
         loss_weights = {'generator': λ,
                         'classifier': 1.}
 
-        # loss = ['mse', partial(weighted_categorical_crossentropy, weights=class_weights)]
-        # loss_weights = [λ, 1.]
+        # the other option:
+        # loss_weights = {'generator': λ,
+        #                 'classifier': 1. - λ}
 
         optimizer = SGD(lr=lr, momentum=momentum, decay=decay)
 
