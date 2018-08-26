@@ -49,7 +49,7 @@ class LowShotGenerator(object):
                         'classifier': np.array(y_classifier)}
 
         self.input_dim = len(self.x_train[0])
-        self.generator_output_dim = len(self.y_train[0][0])
+        self.generator_output_dim = len(self.y_train['generator'][0])
 
         # n_examples is the maximum number to generate per class
         # if n_examples:
