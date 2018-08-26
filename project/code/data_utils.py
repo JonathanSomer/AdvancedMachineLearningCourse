@@ -43,6 +43,7 @@ ALL_DISEASE_NAMES = ['Atelectasis',
                     'Pleural_Thickening',
                     'Pneumonia',
                     'Pneumothorax']
+TOTAL_SAMPLES_TO_GENERATE = 20
 
 
 # returns an absolute pickle/model path. local_data_dir should be configured in config.py
@@ -150,10 +151,62 @@ def get_label_encoder(data_obj):
     return le
 
 
+def new_get_train_test_split_without_disease(X, y, disease, data_obj):
+    X_no_disease, y_no_disease = remove_diseases(X, y, [disease], data_obj)
+    X_train, X_test, y_train, y_test = new_get_train_test_split(X_no_disease, y_no_disease, test_size=0.1)
+    return X_train, X_test, y_train, y_test
+
+def new_get_train_test_split(X, y, test_size=0.1):
+    test_mask = get_choose_n_mask(len(y), round(test_size*len(y)))
+    X_train = X[~test_mask]
+    y_train = y[~test_mask]
+    X_test = X[test_mask]
+    y_test = y[test_mask]
+
+    return X_train, X_test, y_train, y_test
+
+def new_onehot_encode(y, disease_indexes_removed=[]):
+    yy = y.reshape(-1, 1)
+    enc = OneHotEncoder(n_values=N_CLASSES)
+    enc.fit(yy)
+    one_hot_labels = np.array(enc.transform(yy).toarray())
+    one_hot_labels = np.delete(one_hot_labels, disease_indexes_removed, axis=1)
+    return one_hot_labels
+
+def get_all_disease_samples_and_rest(X,y, disease_index, data_obj, n=TOTAL_SAMPLES_TO_GENERATE):
+    include_disease_mask = y[:] == disease_index
+    disease_X = X[include_disease_mask]
+    disease_y = y[include_disease_mask]
+    n_mask = get_choose_n_mask(len(disease_y), n)
+    return disease_X[n_mask], disease_y[n_mask], disease_X[~n_mask], disease_y[~n_mask]
+
+def add_disease_to_test_data(X_test, y_test, disease_X, disease_y):
+    X_test_with_disease = np.concatenate((X_test, disease_X))
+    y_test_with_disease = np.concatenate((y_test, disease_y))
+    return unison_shuffle(X_test, y_test)
+
+def add_n_samples_to_train_data(X_train, y_train, all_samples_features, all_samples_labels, n):
+    n_samples_features = all_samples_features[:n+1]
+    n_labels = all_samples_labels[:n+1]
+    X_train_with_samples = np.concatenate((X_train, n_samples_features))
+    y_train_with_samples = np.concatenate((y_train, n_labels))
+    X_train_with_samples, y_train_with_samples = unison_shuffle(X_train_with_samples, y_train_with_samples)
+    return X_train_with_samples, y_train_with_samples, n_samples_features
+
+def add_generated_data_to_train_data(X_train, y_train, generated_features, generated_features_label):
+    X_train_with_generated_data = np.concatenate((X_train, generated_features))
+    y_train_with_generated_data = np.concatenate((y_train, np.repeat(generated_features_label, len(generated_features))))
+    return unison_shuffle(X_train_with_generated_data, y_train_with_generated_data)
+
 def get_train_test_split(X, y, test_size=0.1):
     onehot_labels = onehot_encode(y)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, onehot_labels, test_size=test_size, random_state=42)
+    test_mask = get_choose_n_mask(len(y), round(test_size*len(y)))
+    X_train = X[~test_mask]
+    y_train = y[~test_mask]
+    X_test = X[test_mask]
+    y_test = y[test_mask]
+
     return X_train, X_test, y_train, y_test
 
 def disease_name_to_index(disease_name, data_obj):
