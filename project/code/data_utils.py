@@ -153,6 +153,11 @@ def split_by_disease(X, y, disease_index, data):
     include_disease = y[:] == disease_index
     return X[~include_disease], y[~include_disease], X[include_disease], y[include_disease]
 
+def get_train_test_split_without_disease(X, y, disease, data_obj):
+    X_no_hernia, y_no_hernia = remove_diseases(X, y, [disease], data_obj)
+    X_train, X_test, y_train, y_test = get_train_test_split(X_no_hernia, y_no_hernia, test_size=0.1)
+    return X_train, X_test, y_train, y_test
+
 # training data includes n samples of the disease
 def get_train_test_split_with_n_samples_of_disease(X, y, disease, data_obj, n):
     disease_index = disease_name_to_index(disease, data_obj) if type(disease) == str else disease
@@ -182,9 +187,6 @@ def get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generat
 
     X_train, y_train = unison_shuffle(X_train, y_train)
     return X_train, X_test, y_train, y_test
-
-
-
 
 def unison_shuffle(X, y):
     assert len(X) == len(y)
