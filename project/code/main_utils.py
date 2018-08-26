@@ -15,6 +15,9 @@ _logger = logger.get_logger(__name__)
 N_GIVEN_EXAMPLES = [1,2,5,10,20]
 NUMBER_OF_TOTAL_GENRATED_EXAMPLES = 20
 
+NUMBER_OF_CLUSTERS = 20
+λ = 0.5
+
 ALL_DISEASES_MODEL = 'model_trained_on_all_diseases'
 all_diseases = ['Atelectasis',
                 'Cardiomegaly',
@@ -84,26 +87,47 @@ def extract_base_results(filename):
 
 
 def get_low_shot_results(raw_data):
-    return {}
     low_shot_learning_results = {}
     low_show_dir_path = 'low_shot'
+    X, y = get_features_and_labels(raw_data)
+    le = get_label_encoder(raw_data)
+
     for disease in all_diseases:
         disease_path = os.path.join('low_shot', disease)
         _logger.info('\t %s' % disease)
         low_shot_learning_results[disease] = {}
-        partial_dataset = to_low_shot_dataset(raw_data, [disease])
-        classifier = Classifier(n_classes=NUMBER_OF_DISEASES-1, trainable=False)
-        lsg = LowShotGenerator(classifier, partial_dataset, n_clusters=NUMBER_OF_DISEASES-1, hidden_size=16)
-        lsg.fit()
-        used_diseases = list(all_diseases)
-        used_diseases.remove(disease)
-        unused_dataset = to_low_shot_dataset(raw_data, used_diseases)
-        for n_examples in N_GIVEN_EXAMPLES:
-            cls_with_generator = None  # TODO -> change to get_no_disease_with_generation(raw_data, generator, n_examples)
-            cls_without_generator = None  # TODO -> change to get_no_disease_without_generation(raw_data, n_examples)
 
-            results_with_generator = evaluate_cls(cls_with_generator)
-            results_without_generator = evaluate_cls(cls_without_generator)
+
+        novel_disease_label = le.transform((disease,))[0]
+        X_train, X_test, y_train, y_test = get_train_test_split_without_disease(X, y, disease, raw_data)
+        disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
+        disease_base_cls.fit(X_train, y_train)
+        cls_results = evaluate_cls(disease_base_cls, X_evaluation, y_evaluation)
+        create_cls_roc_plot(cls_results, '%s base cls' % disease, disease_path)
+
+        for n_examples in N_GIVEN_EXAMPLES:
+            temp = get_train_test_split_with_n_samples_of_disease(X, y, disease, raw_data, n_examples)
+            X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels = temp
+            generated_features = LowShotGenerator.get_generated_features(disease_base_cls,
+                                                                         novel_disease_label,
+                                                                         n_samples_features,
+                                                                         NUMBER_OF_CLUSTERS,
+                                                                         λ,
+                                                                         NUMBER_OF_TOTAL_GENRATED_EXAMPLES)
+
+            temp = get_train_test_split_with_n_samples_of_disease(X, y, disease, raw_data, n_examples)
+            X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels = temp
+
+            cls_with_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
+            cls_with_generator.fit(X_train, y_train)
+
+            temp = get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generated_features, novel_disease_label)
+            X_train, X_test, y_train, y_test = temp
+            cls_without_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
+            cls_without_generator.fit(X_train, y_train)
+
+            results_with_generator = evaluate_cls(cls_with_generator, X_evaluation, y_evaluation)
+            results_without_generator = evaluate_cls(cls_without_generator, X_evaluation, y_evaluation)
             create_cls_roc_plot(results_with_generator, '%d examples with generated samples'%n_examples, disease_path)
             create_cls_roc_plot(results_without_generator, '%d examples without generated samples'%n_examples, disease_path)
 
@@ -140,7 +164,7 @@ def parse_results(results):
         base_results = results['base results'][disease]
         _logger.info('base line accuracy %f, auc %f' % (base_results['accuracy'], base_results['auc']))
 
-        '''for n_examples in N_GIVEN_EXAMPLES:
+        for n_examples in N_GIVEN_EXAMPLES:
             _logger.info('low shot results:')
             low_shot_results_n_with = results['low shot results'][disease][n_examples]['with']
             low_shot_results_n_without = results['low shot results'][disease][n_examples]['without']
@@ -149,7 +173,7 @@ def parse_results(results):
                                                                             low_shot_results_n_with['auc']))
             _logger.info('%d samples without generator accuracy %f, auc %f' % (n_examples,
                                                                             low_shot_results_n_without['accuracy'],
-                                                                            low_shot_results_n_without['auc']))'''
+                                                                            low_shot_results_n_without['auc']))
 
         path = os.path.join('low_shot', disease)
         #create_low_shot_results_plot(results['low shot results'][disease], '%s low shot results' % disease, path)
