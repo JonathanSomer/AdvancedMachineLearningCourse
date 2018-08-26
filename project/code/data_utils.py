@@ -174,8 +174,8 @@ def get_train_test_split_with_n_samples_of_disease(X, y, disease, data_obj, n):
     X_test = np.concatenate((X_test, X_only_disease[~choose_n_mask]))
     y_test = np.concatenate((y_test, y_only_disease[~choose_n_mask]))
 
-    X_train, y_train = unison_shuffle(X_train, onehot_encode(y_train))
-    X_test, y_test = unison_shuffle(X_test, onehot_encode(y_test))
+    X_train, y_train = unison_shuffle(X_train, onehot_encode(y_train, n_classes=N_CLASSES))
+    X_test, y_test = unison_shuffle(X_test, onehot_encode(y_test, n_classes=N_CLASSES))
 
     return X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels
 
