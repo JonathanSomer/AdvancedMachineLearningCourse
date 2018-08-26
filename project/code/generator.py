@@ -171,13 +171,16 @@ class LowShotGenerator(object):
     @staticmethod
     def get_generated_features(classifier, novel_disease_label, seed_examples_of_novel_category, n_clusters, λ,
                                n_new=20):
+        if classifier.trainable:
+            classifier.toggle_trainability()
+
         trained_diseases = [d for d in ALL_DISEASES_AS_LABELS if d != novel_disease_label]
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=trained_diseases)
 
-        generator = LowShotGenerator(classifier, quadruplets_data, λ=λ)
+        generator = LowShotGenerator(classifier.model, quadruplets_data, λ=λ)
         generator.fit()
 
         n_new_per_example = (n_new - len(seed_examples_of_novel_category)) // len(seed_examples_of_novel_category)
         new_examples = [generator.generate(ϕ, n_new=n_new_per_example) for ϕ in seed_examples_of_novel_category]
 
-        return new_examples
+        return np.concatenate(new_examples)
