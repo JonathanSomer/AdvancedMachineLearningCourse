@@ -92,14 +92,13 @@ class LowShotGenerator(object):
         if original_shape != (generator_output_dim,):
             curr = Reshape(original_shape)(generator_output)
 
-        # classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
-        # classifier_output = classifier(curr)
-
         # the input of the trained_classifier is the output the generator
-        classifier = trained_classifier(curr)
-        generator = Model(inputs=inputs, outputs=generator_output)
+        classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
+        classifier_output = classifier(curr)
+        # classifier = trained_classifier(curr)
 
-        model = Model(inputs=inputs, outputs=[generator.outputs, classifier.outputs])
+        model = Model(inputs=inputs, outputs=[generator_output, classifier_output])
+        generator = Model(inputs=inputs, outputs=generator_output)
 
         loss = {'generator': 'mse',
                 'classifier': 'categorical_crossentropy'}
