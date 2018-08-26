@@ -176,9 +176,9 @@ def get_train_test_split_with_n_samples_of_disease(X, y, disease, data_obj, n):
 
 # uses the train and test data from get_train_test_split_with_n_samples_of_disease()
 # and the generated data
-def get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generated_features, generated_integer_labels):
+def get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generated_features, generated_data_label):
     X_train = np.concatenate((X_train, generated_features))
-    y_train = np.concatenate((y_train, onehot_encode(generated_integer_labels, n_classes=N_CLASSES)))
+    y_train = np.concatenate((y_train, onehot_encode(np.repeat(generated_data_label, len(generated_features)), n_classes=N_CLASSES)))
 
     X_train, y_train = unison_shuffle(X_train, y_train)
     return X_train, X_test, y_train, y_test
