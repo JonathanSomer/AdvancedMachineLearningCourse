@@ -60,9 +60,11 @@ class Classifier(object):
         return Adam(lr=1e-4)
 
     @staticmethod
-    def get_class_weights(y_train):  # expects a one hot encoded y_train array
+    def get_class_weights(y_train, as_array=False):  # expects a one hot encoded y_train array
         y_integers = np.argmax(y_train, axis=1)
         class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+        if as_array:
+            return class_weights
         class_weights_dict = dict(enumerate(class_weights))
         return class_weights_dict
 

@@ -1,7 +1,10 @@
 from keras.models import Model, load_model
 from keras.layers import Dense, Input, Reshape, Lambda
 from keras.optimizers import SGD
+from keras.losses import categorical_crossentropy
 from classifier import Classifier
+from functools import partial
+from itertools import product
 
 import keras.backend as K
 
@@ -17,6 +20,8 @@ class LowShotGenerator(object):
 
         self.n_layers = n_layers
         self.quadruplets, self.centroids, self.cat_to_vectors, self.original_shape = quadruplets_data
+        self.categories = list(self.cat_to_vectors.keys())
+        self.n_classes = len(self.categories)
         self.hidden_size = hidden_size
         self.W = self.trained_classifier = trained_classifier
         self.activation = activation
@@ -38,6 +43,7 @@ class LowShotGenerator(object):
                 y_classifier.append(category)
 
         y_classifier = du.onehot_encode(np.array(y_classifier))
+        self.class_weights = Classifier.get_class_weights(y_classifier, as_array=True)
 
         self.x_train = np.array(x_train)
         self.y_train = [np.array(y_generator), np.array(y_classifier)]
@@ -45,7 +51,8 @@ class LowShotGenerator(object):
         #                 'classifier': np.array(y_classifier)}
 
         # TODO: try to set the first weights to be all 1...
-        self.class_weights = [None, Classifier.get_class_weights(y_classifier)]
+        # self.class_weights = [None, Classifier.get_class_weights(y_classifier)]
+        # self.class_weights = Classifier.get_class_weights(y_classifier)
 
         self.input_dim = len(self.x_train[0])
         self.generator_output_dim = len(self.y_train[0][0])
@@ -60,6 +67,7 @@ class LowShotGenerator(object):
         self.model, self.generator = self.build(self.trained_classifier,
                                                 self.original_shape,
                                                 self.input_dim,
+                                                self.class_weights,
                                                 self.generator_output_dim,
                                                 self.n_layers,
                                                 self.hidden_size,
@@ -74,7 +82,8 @@ class LowShotGenerator(object):
             self.model.load_weights(self.weights_file_path)
 
     @staticmethod
-    def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size, activation,
+    def build(trained_classifier, original_shape, input_dim, class_weights, generator_output_dim, n_layers, hidden_size,
+              activation,
               λ=10., lr=.1, momentum=.9, decay=1e-4):
         # verify that the trained classifier is not trainable
         n_trainable_params = np.sum(K.count_params(p) for p in set(trained_classifier.trainable_weights))
@@ -86,19 +95,43 @@ class LowShotGenerator(object):
         for _ in range(n_layers - 1):
             curr = Dense(hidden_size, activation=activation)(curr)
 
-        curr = generator_output = Dense(generator_output_dim, activation=activation)(curr)
+        curr = generator_output = Dense(generator_output_dim, activation=activation, name='generator')(curr)
 
         if original_shape != (generator_output_dim,):
             curr = Reshape(original_shape)(generator_output)
 
-        classifier = Model(trained_classifier.inputs, trained_classifier.outputs)
+        # weights_input = Input(shape=(n_classes,))
+        # classifier = Model([trained_classifier.inputs, weights_input], trained_classifier.outputs)
+        classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
+
         classifier_output = classifier(curr)
 
         model = Model(inputs=inputs, outputs=[generator_output, classifier_output])
         generator = Model(inputs=inputs, outputs=generator_output)
 
-        loss = ['mse', 'categorical_crossentropy']
-        loss_weights = [λ, 1]
+        def weighted_categorical_crossentropy(y_true, y_pred, weights):
+            nb_cl = len(weights)
+            final_mask = K.zeros_like(y_pred[:, 0])
+            y_pred_max = K.max(y_pred, axis=1)
+            y_pred_max = K.expand_dims(y_pred_max, 1)
+            y_pred_max_mat = K.equal(y_pred, y_pred_max)
+            for c_p, c_t in product(range(nb_cl), range(nb_cl)):
+                final_mask += (K.cast(weights[c_t, c_p], K.floatx()) *
+                               K.cast(y_pred_max_mat[:, c_p], K.floatx()) *
+                               K.cast(y_true[:, c_t], K.floatx()))
+            return K.categorical_crossentropy(y_pred, y_true) * final_mask
+
+        # def weighted_categorical_crossentropy(y_true, y_pred, weights):
+        #     return categorical_crossentropy(y_true, y_pred) * weights
+
+        loss = {'generator': 'mse',
+                'classifier': partial(weighted_categorical_crossentropy, weights=class_weights)}
+
+        loss_weights = {'generator': λ,
+                        'classifier': 1.}
+
+        # loss = ['mse', partial(weighted_categorical_crossentropy, weights=class_weights)]
+        # loss_weights = [λ, 1.]
 
         optimizer = SGD(lr=lr, momentum=momentum, decay=decay)
 
@@ -112,7 +145,7 @@ class LowShotGenerator(object):
         print('\nWhole model summary:')
         print(model.summary())
         return model, generator
-    
+
     def fit(self, x_train=None, y_train=None, batch_size=None, epochs=None, callbacks=None):
         print('Fitting generator')
 
@@ -146,7 +179,8 @@ class LowShotGenerator(object):
         """
         X = []
         for _ in range(n_new):
-            centroids_all_categories = list(self.centroids.values())  # this is a list of lists, each list is centroids of cat
+            centroids_all_categories = list(
+                self.centroids.values())  # this is a list of lists, each list is centroids of cat
             idx = np.random.choice(len(centroids_all_categories))
             category_centroids = centroids_all_categories[idx]
 
