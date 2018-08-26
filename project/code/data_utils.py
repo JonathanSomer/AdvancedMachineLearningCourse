@@ -65,12 +65,24 @@ def write_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
 
 
+def generator_model_path(name):
+    return os.path.join(config.local_data_dir, 'models', 'generators', '{0}.h5'.format(name))
+
+
 def read_plot_path(name):
     return os.path.join(config.local_data_dir, 'plots', 'read', '{0}.png'.format(name))
 
 
 def write_plot_path(name):
     return os.path.join(config.local_data_dir, 'plots', 'write', '{0}.png'.format(name))
+
+
+def read_result_path(name):
+    return os.path.join(config.local_data_dir, 'results', 'read', '{0}.json'.format(name))
+
+
+def write_result_path(name):
+    return os.path.join(config.local_data_dir, 'results ', 'write', '{0}.json'.format(name))
 
 
 def image_data_pickle_name(i):

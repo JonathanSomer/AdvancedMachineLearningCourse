@@ -72,9 +72,16 @@ class LowShotGenerator(object):
                                                 self.momentum,
                                                 self.decay)
 
-        self.weights_file_path = du.read_model_path('{0}'.format(self.name))
+        # self.weights_file_path = du.read_model_path('{0}'.format(self.name))
+        # if os.path.exists(self.weights_file_path):
+        #     self.model.load_weights(self.weights_file_path)
+
+        self.weights_file_path = du.generator_model_path(self.name)
         if os.path.exists(self.weights_file_path):
             self.model.load_weights(self.weights_file_path)
+            print('Loaded generator weights from file')
+        else:
+            self.fit()
 
     @staticmethod
     def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size,
@@ -116,10 +123,10 @@ class LowShotGenerator(object):
                       optimizer=optimizer,
                       metrics=['accuracy'])
 
-        print('Generator summary:')
-        print(generator.summary())
-        print('\nWhole model summary:')
-        print(model.summary())
+        # print('Generator summary:')
+        # print(generator.summary())
+        # print('\nWhole model summary:')
+        # print(model.summary())
         return model, generator
 
     def fit(self, x_train=None, y_train=None, batch_size=None, epochs=None, callbacks=None):
@@ -142,10 +149,10 @@ class LowShotGenerator(object):
 
         self.model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, callbacks=callbacks)
 
-        weights_file_path = du.write_model_path('{0}'.format(self.name))
-        self.model.save(weights_file_path)
+        # weights_file_path = du.write_model_path('{0}'.format(self.name))
+        # self.model.save(weights_file_path)
 
-        return self.model
+        self.model.save(self.weights_file_path)
 
     def generate(self, ϕ, n_new=1):
         """
@@ -171,14 +178,18 @@ class LowShotGenerator(object):
     @staticmethod
     def get_generated_features(classifier, novel_disease_label, seed_examples_of_novel_category, n_clusters, λ,
                                n_new=20):
+        name = '{0}.{1}_lambda.{2}_clusters'.format(novel_disease_label, λ, n_clusters)
+
         if classifier.trainable:
             classifier.toggle_trainability()
 
         trained_diseases = [d for d in ALL_DISEASES_AS_LABELS if d != novel_disease_label]
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=trained_diseases)
 
-        generator = LowShotGenerator(classifier.model, quadruplets_data, λ=λ)
-        generator.fit()
+        generator = LowShotGenerator(classifier.model,
+                                     quadruplets_data,
+                                     λ=λ,
+                                     name=name)
 
         n_new_per_example = (n_new - len(seed_examples_of_novel_category)) // len(seed_examples_of_novel_category)
         new_examples = [generator.generate(ϕ, n_new=n_new_per_example) for ϕ in seed_examples_of_novel_category]
