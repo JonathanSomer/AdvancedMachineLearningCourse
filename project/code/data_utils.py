@@ -66,11 +66,11 @@ def write_model_path(name):
 
 
 def read_plot_path(name):
-    return os.path.join(config.local_data_dir, 'plot', 'read', '{0}.png'.format(name))
+    return os.path.join(config.local_data_dir, 'plots', 'read', '{0}.png'.format(name))
 
 
 def write_plot_path(name):
-    return os.path.join(config.local_data_dir, 'plot', 'write', '{0}.png'.format(name))
+    return os.path.join(config.local_data_dir, 'plots', 'write', '{0}.png'.format(name))
 
 
 def image_data_pickle_name(i):
