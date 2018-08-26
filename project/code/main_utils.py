@@ -35,9 +35,8 @@ all_diseases = ['Atelectasis',
                 'Pneumonia',
                 'Pneumothorax']
 
-queries_diseases = ['Effusion',
-                'Emphysema',
-                'Fibrosis',]
+queries_diseases = ['Atelectasis',
+                    'Effusion',]
 
 NUMBER_OF_DISEASES = len(all_diseases)
 NUMBER_OF_QUERIES_DISEASES = len(all_diseases)
@@ -103,39 +102,42 @@ def get_low_shot_results(raw_data):
         _logger.info('\t %s' % disease)
         low_shot_learning_results[disease] = {}
 
-
         novel_disease_label = le.transform((disease,))[0]
-        X_train, X_test, y_train, y_test = get_train_test_split_without_disease(X, y, disease, raw_data)
+        X_train, X_test, y_train, y_test = new_get_train_test_split_without_disease(X, y, disease, raw_data)
         disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
-        disease_base_cls.fit(X_train, y_train)
+        disease_base_cls.fit(X_train, new_onehot_encode(y_train, [novel_disease_label]))
         cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test)
-        create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, disease_path)
+        create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, new_onehot_encode(y_test, [novel_disease_label]))
 
+        temp = get_all_disease_samples_and_rest(X, y,   novel_disease_label,  raw_data)
+        all_samples_features, all_samples_labels, rest_features, rest_labels = temp
+        X_test_with_disease, y_test_with_disease = add_disease_to_test_data(X_test, y_test, rest_features, rest_labels)
+        y_test_with_disease = new_onehot_encode(y_test_with_disease)
         for n_examples in N_GIVEN_EXAMPLES:
-            temp = get_train_test_split_with_n_samples_of_disease(X, y, disease, raw_data, n_examples)
-            X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels = temp
-            generated_features = LowShotGenerator.get_generated_features(disease_base_cls,
-                                                                         novel_disease_label,
-                                                                         n_samples_features,
-                                                                         NUMBER_OF_CLUSTERS,
-                                                                         λ,
-                                                                         NUMBER_OF_TOTAL_GENRATED_EXAMPLES)
+            temp = add_n_samples_to_train_data(X_train, y_train, all_samples_features, all_samples_labels, n_examples)
+            X_train_with_disease_samples, y_train_with_disease_samples, n_samples_features = temp
 
-            temp = get_train_test_split_with_n_samples_of_disease(X, y, disease, raw_data, n_examples)
-            X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels = temp
+            cls_without_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
+            cls_without_generator.fit(X_train_with_disease_samples, new_onehot_encode(y_train_with_disease_samples))
+            results_without_generator, fpr_without, tpr_without = evaluate_cls(cls_without_generator, X_test_with_disease, y_test_with_disease)
+            plt_name = '%d examples without generated samples' % n_examples
+            create_cls_roc_plot(fpr_without, tpr_without, results_without_generator, plt_name, disease_path)
+
+            generated_features = LowShotGenerator.get_generated_features(disease_base_cls,
+                                                             novel_disease_label,
+                                                             n_samples_features,
+                                                             NUMBER_OF_CLUSTERS,
+                                                             λ,
+                                                             NUMBER_OF_TOTAL_GENRATED_EXAMPLES)
+
+            temp = add_generated_data_to_train_data(X_train_with_disease_samples, y_train_with_disease_samples, generated_features, novel_disease_label)
+            X_train_with_generated_data, y_train_with_generated_data = temp
 
             cls_with_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
-            cls_with_generator.fit(X_train, y_train)
+            cls_with_generator.fit(X_train_with_generated_data, new_onehot_encode(y_train_with_generated_data))
 
-            temp = get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generated_features, novel_disease_label)
-            X_train, X_test, y_train, y_test = temp
-            cls_without_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
-            cls_without_generator.fit(X_train, y_train)
-
-            results_with_generator, fpr_with, tpr_with = evaluate_cls(cls_with_generator, X_test, y_test)
-            results_without_generator, fpr_without, tpr_without = evaluate_cls(cls_without_generator, X_test, y_test)
+            results_with_generator, fpr_with, tpr_with = evaluate_cls(cls_with_generator, X_test_with_disease, y_test_with_disease)
             create_cls_roc_plot(fpr_with, tpr_with, results_with_generator, '%d examples with generated samples'%n_examples, disease_path)
-            create_cls_roc_plot(fpr_without, tpr_without, results_without_generator, '%d examples without generated samples'%n_examples, disease_path)
 
             low_shot_learning_results[disease][n_examples] = {'with':results_with_generator[disease],
                                                               'without':results_without_generator[disease]}
