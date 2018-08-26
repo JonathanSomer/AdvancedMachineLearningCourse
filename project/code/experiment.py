@@ -11,7 +11,7 @@ def log_fn(data):
     print(data)
 
 
-def run(novel_disease_name, n_examples, n_samples_to_generate, λ, n_clusters, n_files):
+def run(novel_disease_name, n_examples, n_samples_to_generate, λ, n_clusters=20, n_files=12):
     # Define the name of the experiment
     experiment_name = '{0}.{1}_examples.{2}_generated.{3}_lambda.{4}_clusters.{5}_files'.format(novel_disease_name,
                                                                                                 n_examples,
