@@ -206,9 +206,9 @@ def get_train_test_split(X, y, test_size=0.1):
 
     test_mask = get_choose_n_mask(len(y), round(test_size*len(y)))
     X_train = X[~test_mask]
-    y_train = y[~test_mask]
+    y_train = onehot_labels[~test_mask]
     X_test = X[test_mask]
-    y_test = y[test_mask]
+    y_test = onehot_labels[test_mask]
 
     return X_train, X_test, y_train, y_test
 
