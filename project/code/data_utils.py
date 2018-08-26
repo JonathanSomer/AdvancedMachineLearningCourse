@@ -28,6 +28,21 @@ N_CLASSES = 15
 MAX_BYTES = 2 ** 31 - 1  # max size of block which pickle can write in one shot
 DATA_DIRECTORY = '../data/'
 READ_ONLY_PROCESSED_DATA = DATA_DIRECTORY + 'processed_data/'
+ALL_DISEASE_NAMES = ['Atelectasis',
+                    'Cardiomegaly',
+                    'Consolidation',
+                    'Edema',
+                    'Effusion',
+                    'Emphysema',
+                    'Fibrosis',
+                    'Hernia',
+                    'Infiltration',
+                    'Mass',
+                    'No Finding',
+                    'Nodule',
+                    'Pleural_Thickening',
+                    'Pneumonia',
+                    'Pneumothorax']
 
 
 # returns an absolute pickle/model path. local_data_dir should be configured in config.py
@@ -109,7 +124,6 @@ def onehot_encode(y, n_classes=None):
     one_hot_labels = enc.transform(yy).toarray()
     return one_hot_labels
 
-
 def get_label_encoder(data_obj):
     le = preprocessing.LabelEncoder()
     le.classes_ = data_obj['label_encoder_classes']
@@ -122,14 +136,70 @@ def get_train_test_split(X, y, test_size=0.1):
     X_train, X_test, y_train, y_test = train_test_split(X, onehot_labels, test_size=test_size, random_state=42)
     return X_train, X_test, y_train, y_test
 
+def disease_name_to_index(disease_name, data_obj):
+    le = get_label_encoder(data_obj)
+    return le.transform([disease_name])[0]
+
+def disease_index_to_name(disease_index, data_obj):
+    le = get_label_encoder(data_obj)
+    return le.inverse_transform([disease_index])[0]
 
 def remove_diseases(X, y, diseases_to_remove, data):
-    le = preprocessing.LabelEncoder()
-    le.classes_ = data['label_encoder_classes']
-    black_list = le.transform(diseases_to_remove)
+    black_list = [disease_name_to_index(name, data) for name in diseases_to_remove]
     include = ~np.isin(y, black_list)
     return X[include], y[include]
 
+def split_by_disease(X, y, disease_index, data):
+    include_disease = y[:] == disease_index
+    return X[~include_disease], y[~include_disease], X[include_disease], y[include_disease]
+
+# training data includes n samples of the disease
+def get_train_test_split_with_n_samples_of_disease(X, y, disease, data_obj, n):
+    disease_index = disease_name_to_index(disease, data_obj) if type(disease) == str else disease
+
+    X_no_disease, y_no_disease, X_only_disease, y_only_disease = split_by_disease(X, y, disease_index, data_obj)
+    X_train, X_test, y_train, y_test = train_test_split(X_no_disease, y_no_disease)
+
+    choose_n_mask = get_choose_n_mask(len(y_only_disease), n)
+    n_samples_features, n_samples_integer_labels = X_only_disease[choose_n_mask], y_only_disease[choose_n_mask]
+
+    X_train = np.concatenate((X_train, n_samples_features))
+    y_train = np.concatenate((y_train, n_samples_integer_labels))
+
+    X_test = np.concatenate((X_test, X_only_disease[~choose_n_mask]))
+    y_test = np.concatenate((y_test, y_only_disease[~choose_n_mask]))
+
+    X_train, y_train = unison_shuffle(X_train, onehot_encode(y_train))
+    X_test, y_test = unison_shuffle(X_test, onehot_encode(y_test))
+
+    return X_train, X_test, y_train, y_test, n_samples_features, n_samples_integer_labels
+
+# uses the train and test data from get_train_test_split_with_n_samples_of_disease()
+# and the generated data
+def get_train_test_with_generated_data(X_train, X_test, y_train, y_test, generated_features, generated_integer_labels):
+    X_train = np.concatenate((X_train, generated_features))
+    y_train = np.concatenate((y_train, onehot_encode(generated_integer_labels, n_classes=N_CLASSES)))
+
+    X_train, y_train = unison_shuffle(X_train, y_train)
+    return X_train, X_test, y_train, y_test
+
+
+
+
+def unison_shuffle(X, y):
+    assert len(X) == len(y)
+    p = np.random.permutation(len(X))
+    return X[p], y[p]
+
+def get_choose_n_mask(mask_size, n):
+    choose_n_mask = np.array([True]*n + [False]*(mask_size - n))
+    np.random.shuffle(choose_n_mask)
+    return choose_n_mask
+
+def all_disease_names_except(name):
+    names = list(ALL_DISEASE_NAMES)
+    names.remove(name)
+    return names
 
 def shallow_no_finding(X, y, data):
     le = preprocessing.LabelEncoder()
