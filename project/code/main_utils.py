@@ -35,7 +35,13 @@ all_diseases = ['Atelectasis',
                 'Pneumonia',
                 'Pneumothorax']
 
+queries_diseases = ['Effusion',
+                'Emphysema',
+                'Fibrosis',]
+
 NUMBER_OF_DISEASES = len(all_diseases)
+NUMBER_OF_QUERIES_DISEASES = len(all_diseases)
+
 
 
 def get_raw_data(n_files):
@@ -50,8 +56,8 @@ def get_base_results(raw_data):
     X_train, X_test, y_train, y_test = get_train_test_split(X, y, test_size=0.2)
     cls.fit(X_train, y_train, model_weights_file_path=read_model_path(ALL_DISEASES_MODEL))
 
-    results = evaluate_cls(cls, X_test, y_test)
-    create_cls_roc_plot(results, 'base line results')
+    results, fpr, tpr = evaluate_cls(cls, X_test, y_test)
+    create_cls_roc_plot(fpr, tpr, results, 'base line results')
     return results
 
 
@@ -59,7 +65,8 @@ def evaluate_cls(cls, X_test, y_test):
     results = {}
 
     y_score = cls.model.predict(X_test)
-
+    fpr = dict()
+    tpr = dict()
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         for i, disease in enumerate(all_diseases):
@@ -72,10 +79,10 @@ def evaluate_cls(cls, X_test, y_test):
             loss, acc = cls.evaluate(X_test_sub, y_test_sub)
             results[disease]['accuracy'] = acc
 
-            results[disease]['fpr'], results[disease]['tpr'], _ = roc_curve(y_test[:, i], y_score[:, i])
-            results[disease]['auc'] = auc(results[disease]['fpr'], results[disease]['tpr'])
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+            results[disease]['auc'] = auc(fpr[i], tpr[i])
 
-    return results
+    return results, fpr, tpr
 
 
 def store_base_results(results, filename):
@@ -88,11 +95,10 @@ def extract_base_results(filename):
 
 def get_low_shot_results(raw_data):
     low_shot_learning_results = {}
-    low_show_dir_path = 'low_shot'
     X, y = get_features_and_labels(raw_data)
     le = get_label_encoder(raw_data)
 
-    for disease in all_diseases:
+    for disease in queries_diseases:
         disease_path = os.path.join('low_shot', disease)
         _logger.info('\t %s' % disease)
         low_shot_learning_results[disease] = {}
@@ -102,8 +108,8 @@ def get_low_shot_results(raw_data):
         X_train, X_test, y_train, y_test = get_train_test_split_without_disease(X, y, disease, raw_data)
         disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
         disease_base_cls.fit(X_train, y_train)
-        cls_results = evaluate_cls(disease_base_cls, X_evaluation, y_evaluation)
-        create_cls_roc_plot(cls_results, '%s base cls' % disease, disease_path)
+        cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test)
+        create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, disease_path)
 
         for n_examples in N_GIVEN_EXAMPLES:
             temp = get_train_test_split_with_n_samples_of_disease(X, y, disease, raw_data, n_examples)
@@ -126,10 +132,10 @@ def get_low_shot_results(raw_data):
             cls_without_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
             cls_without_generator.fit(X_train, y_train)
 
-            results_with_generator = evaluate_cls(cls_with_generator, X_evaluation, y_evaluation)
-            results_without_generator = evaluate_cls(cls_without_generator, X_evaluation, y_evaluation)
-            create_cls_roc_plot(results_with_generator, '%d examples with generated samples'%n_examples, disease_path)
-            create_cls_roc_plot(results_without_generator, '%d examples without generated samples'%n_examples, disease_path)
+            results_with_generator, fpr_with, tpr_with = evaluate_cls(cls_with_generator, X_test, y_test)
+            results_without_generator, fpr_without, tpr_without = evaluate_cls(cls_without_generator, X_test, y_test)
+            create_cls_roc_plot(fpr_with, tpr_with, results_with_generator, '%d examples with generated samples'%n_examples, disease_path)
+            create_cls_roc_plot(fpr_without, tpr_without, results_without_generator, '%d examples without generated samples'%n_examples, disease_path)
 
             low_shot_learning_results[disease][n_examples] = {'with':results_with_generator[disease],
                                                               'without':results_without_generator[disease]}
@@ -164,6 +170,10 @@ def parse_results(results):
         base_results = results['base results'][disease]
         _logger.info('base line accuracy %f, auc %f' % (base_results['accuracy'], base_results['auc']))
 
+        if disease not in queries_diseases:
+            _logger.info('not a query disease\n')
+            continue
+
         for n_examples in N_GIVEN_EXAMPLES:
             _logger.info('low shot results:')
             low_shot_results_n_with = results['low shot results'][disease][n_examples]['with']
@@ -176,7 +186,7 @@ def parse_results(results):
                                                                             low_shot_results_n_without['auc']))
 
         path = os.path.join('low_shot', disease)
-        #create_low_shot_results_plot(results['low shot results'][disease], '%s low shot results' % disease, path)
+        create_low_shot_results_plot(results['low shot results'][disease], '%s low shot results' % disease, path)
         _logger.info('\n')
 
 
@@ -188,12 +198,12 @@ def create_low_shot_results_plot_tester():
     create_low_shot_results_plot(result, 'example')
 
 
-def create_cls_roc_plot(results, figure_name, sub_directory=None):
+def create_cls_roc_plot(fpr, tpr, results , figure_name, sub_directory=None):
     plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
     lw = 2
     fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
     for i, disease in enumerate(results.keys()):
-        plt.plot(results[disease]['fpr'], results[disease]['tpr'], lw=lw,
+        plt.plot(fpr[i], tpr[i], lw=lw,
                  label='{0} (area = {1:0.2f})'.format(disease, results[disease]['auc']))
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
@@ -271,6 +281,6 @@ def create_sub_directory():
     for dir in subdirs:
         dir_path = os.path.join(local_results_dir, dir)
         os.mkdir(dir_path)
-        for disease in all_diseases:
+        for disease in queries_diseases:
             disease_path = os.path.join(dir_path, disease)
             os.mkdir(disease_path)
