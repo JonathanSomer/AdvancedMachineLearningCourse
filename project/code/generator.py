@@ -76,12 +76,14 @@ class LowShotGenerator(object):
         # if os.path.exists(self.weights_file_path):
         #     self.model.load_weights(self.weights_file_path)
 
-        self.weights_file_path = du.generator_model_path(self.name)
-        if os.path.exists(self.weights_file_path):
-            self.model.load_weights(self.weights_file_path)
-            print('Loaded generator weights from file')
-        else:
-            self.fit()
+        # self.weights_file_path = du.generator_model_path(self.name)
+        # if os.path.exists(self.weights_file_path):
+        #     self.model.load_weights(self.weights_file_path)
+        #     print('Loaded generator weights from file')
+        # else:
+        #     self.fit()
+
+        self.fit()
 
     @staticmethod
     def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size,
@@ -152,7 +154,7 @@ class LowShotGenerator(object):
         # weights_file_path = du.write_model_path('{0}'.format(self.name))
         # self.model.save(weights_file_path)
 
-        self.model.save(self.weights_file_path)
+        # self.model.save(self.weights_file_path)
 
     def generate(self, ϕ, n_new=1):
         """
