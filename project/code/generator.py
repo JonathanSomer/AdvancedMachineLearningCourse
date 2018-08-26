@@ -92,21 +92,20 @@ class LowShotGenerator(object):
         if original_shape != (generator_output_dim,):
             curr = Reshape(original_shape)(generator_output)
 
-        classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
-        classifier_output = classifier(curr)
+        # classifier = Model(trained_classifier.inputs, trained_classifier.outputs, name='classifier')
+        # classifier_output = classifier(curr)
 
-        model = Model(inputs=inputs, outputs=[generator_output, classifier_output])
+        # the input of the trained_classifier is the output the generator
+        classifier = trained_classifier(curr)
         generator = Model(inputs=inputs, outputs=generator_output)
+
+        model = Model(inputs=inputs, outputs=[generator.outputs, classifier.outputs])
 
         loss = {'generator': 'mse',
                 'classifier': 'categorical_crossentropy'}
 
         loss_weights = {'generator': λ,
-                        'classifier': 1.}
-
-        # the other option:
-        # loss_weights = {'generator': λ,
-        #                 'classifier': 1. - λ}
+                        'classifier': 1. - λ}
 
         optimizer = SGD(lr=lr, momentum=momentum, decay=decay)
 
@@ -148,7 +147,7 @@ class LowShotGenerator(object):
 
     def generate(self, ϕ, n_new=1):
         """
-        :param ϕ: "seed" example for some category
+        :param ϕ: "seed" example for some novel category
         :param n_new: number of new examples to return. should be less than self.n_examples
         :return: list of hallucinated feature vectors G([ϕ, c1a , c2a]) of size n_new
         """
