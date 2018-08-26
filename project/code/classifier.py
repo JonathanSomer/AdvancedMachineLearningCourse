@@ -44,13 +44,13 @@ class Classifier(object):
     def new_model(n_classes, trainable=True):
         a = Input(shape=(7, 7, 2048,))
         b = GlobalMaxPooling2D(trainable=trainable)(a)
-        b = Dense(n_classes, activation='softmax', name='lclassifier', trainable=trainable)(b)
+        b = Dense(n_classes, activation='softmax', name='classifier', trainable=trainable)(b)
         return Model(a, b)
 
     @staticmethod
     def new_model_no_pooling(n_classes, trainable=True):
         a = Input(shape=(2048,))
-        b = Dense(n_classes, activation='softmax', name='lclassifier', trainable=trainable)(a)
+        b = Dense(n_classes, activation='softmax', name='classifier', trainable=trainable)(a)
         return Model(a, b)
 
     @staticmethod
