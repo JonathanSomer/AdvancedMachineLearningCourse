@@ -45,6 +45,7 @@ ALL_DISEASE_NAMES = ['Atelectasis',
                     'Pneumothorax']
 TOTAL_SAMPLES_TO_GENERATE = 20
 
+DEFAULT_MODEL_FILE = 'model'
 
 # returns an absolute pickle/model path. local_data_dir should be configured in config.py
 # local_data_dir is the data directory and should contain the following directories: datasets, pickles, models, images
@@ -58,9 +59,11 @@ def write_pickle_path(name):
     return os.path.join(config.local_data_dir, 'pickles', 'write', '{0}.pickle'.format(name))
 
 
-def read_model_path(name):
+def read_model_path(name=DEFAULT_MODEL_FILE):
     return os.path.join(config.local_data_dir, 'models', 'read', '{0}.h5'.format(name))
 
+def is_model_file_exists(name=DEFAULT_MODEL_FILE):
+    return os.path.isfile(read_model_path(name))
 
 def write_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
@@ -219,6 +222,7 @@ def disease_index_to_name(disease_index, data_obj):
 
 def remove_diseases(X, y, diseases_to_remove, data):
     black_list = [disease_name_to_index(name, data) for name in diseases_to_remove]
+
     include = ~np.isin(y, black_list)
     return X[include], y[include]
 
@@ -301,7 +305,7 @@ def get_resnet_model():
 # in order to extract image features into pickle files run:
 # df = get_single_disease_images_dataframe()
 # model = get_resnet_model()
-# extract_image_features(model, df)
+# extract_image_features(model, df, test_run=False)
 
 # link to kaggle data: https://www.kaggle.com/nih-chest-xrays/data
 # note: must have images_1,....images_12 directories of images from kaggle in local_data_dir/images/ directory

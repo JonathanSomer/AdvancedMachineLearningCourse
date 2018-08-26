@@ -16,8 +16,8 @@ import os
 
 def update(msg):
     print(msg)
-    # payload = {'message': msg, 'channel': config.slack_channel}
-    # requests.post(config.slack_url, json=payload)
+    #payload = {'message': msg, 'channel': config.slack_channel}
+    #requests.post(config.slack_url, json=payload)
 
 
 def cosine_similarity(a, b):
