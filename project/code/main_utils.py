@@ -52,15 +52,16 @@ def get_base_results(raw_data):
     _logger.info('get base results')
     cls = Classifier(n_epochs=2) #TODO -> remove n_epochs for full run!
     X, y = get_features_and_labels(raw_data)
-    X_train, X_test, y_train, y_test = get_train_test_split(X, y, test_size=0.2)
-    cls.fit(X_train, y_train, model_weights_file_path=read_model_path(ALL_DISEASES_MODEL))
+    X_train, X_test, y_train, y_test = new_get_train_test_split(X, y, test_size=0.2)
+    cls.fit(X_train, new_onehot_encode(y_train), model_weights_file_path=read_model_path(ALL_DISEASES_MODEL))
 
     results, fpr, tpr = evaluate_cls(cls, X_test, y_test)
     create_cls_roc_plot(fpr, tpr, results, 'base line results')
     return results
 
 
-def evaluate_cls(cls, X_test, y_test):
+# receives y_test as integers
+def evaluate_cls(cls, X_test, y_test, diseases_removed=[]):
     results = {}
 
     y_score = cls.model.predict(X_test)
@@ -68,17 +69,22 @@ def evaluate_cls(cls, X_test, y_test):
     tpr = dict()
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
+        offset_fix = 0
         for i, disease in enumerate(all_diseases):
+            if len(diseases_removed) > 0 and i == diseases_removed[0]:
+                offset_fix = -1
+                continue
             _logger.info('\t %s' % disease)
             results[disease] = {}
 
-            mask = (y_test[:, i] == 1.0)
+            mask = y_test[:] == i
             y_test_sub = y_test[mask]
             X_test_sub = X_test[mask]
-            loss, acc = cls.evaluate(X_test_sub, y_test_sub)
+
+            loss, acc = cls.evaluate(X_test_sub, new_onehot_encode(y_test_sub, diseases_removed))
             results[disease]['accuracy'] = acc
 
-            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+            fpr[i], tpr[i], _ = roc_curve(y_test[:] == i, y_score[:, i + offset_fix])
             results[disease]['auc'] = auc(fpr[i], tpr[i])
 
     return results, fpr, tpr
@@ -106,13 +112,12 @@ def get_low_shot_results(raw_data):
         X_train, X_test, y_train, y_test = new_get_train_test_split_without_disease(X, y, disease, raw_data)
         disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
         disease_base_cls.fit(X_train, new_onehot_encode(y_train, [novel_disease_label]))
-        cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test)
+        cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test, diseases_removed=[novel_disease_label])
         create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, new_onehot_encode(y_test, [novel_disease_label]))
 
         temp = get_all_disease_samples_and_rest(X, y,   novel_disease_label,  raw_data)
         all_samples_features, all_samples_labels, rest_features, rest_labels = temp
         X_test_with_disease, y_test_with_disease = add_disease_to_test_data(X_test, y_test, rest_features, rest_labels)
-        y_test_with_disease = new_onehot_encode(y_test_with_disease)
         for n_examples in N_GIVEN_EXAMPLES:
             temp = add_n_samples_to_train_data(X_train, y_train, all_samples_features, all_samples_labels, n_examples)
             X_train_with_disease_samples, y_train_with_disease_samples, n_samples_features = temp
@@ -205,8 +210,9 @@ def create_cls_roc_plot(fpr, tpr, results , figure_name, sub_directory=None):
     lw = 2
     fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
     for i, disease in enumerate(results.keys()):
-        plt.plot(fpr[i], tpr[i], lw=lw,
-                 label='{0} (area = {1:0.2f})'.format(disease, results[disease]['auc']))
+        if i in fpr and i in tpr:
+            plt.plot(fpr[i], tpr[i], lw=lw,
+                     label='{0} (area = {1:0.2f})'.format(disease, results[disease]['auc']))
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
