@@ -169,12 +169,8 @@ def new_get_train_test_split(X, y, test_size=0.1):
     return X_train, X_test, y_train, y_test
 
 def new_onehot_encode(y, disease_indexes_removed=[]):
-    # yy = y.reshape(-1, 1)
-    # enc = OneHotEncoder(n_values=N_CLASSES)
-    # enc.fit(yy)
     one_hot_labels = np.zeros((len(y), N_CLASSES))
     one_hot_labels[np.arange(len(y)), y] = 1.0
-    # one_hot_labels = np.array(enc.transform(yy).toarray())
     one_hot_labels = np.delete(one_hot_labels, disease_indexes_removed, axis=1)
     return one_hot_labels
 
