@@ -113,7 +113,7 @@ def get_low_shot_results(raw_data):
         disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
         disease_base_cls.fit(X_train, new_onehot_encode(y_train, [novel_disease_label]))
         cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test, diseases_removed=[novel_disease_label])
-        create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, new_onehot_encode(y_test, [novel_disease_label]))
+        create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, disease_path)
 
         temp = get_all_disease_samples_and_rest(X, y,   novel_disease_label,  raw_data)
         all_samples_features, all_samples_labels, rest_features, rest_labels = temp
@@ -222,7 +222,7 @@ def create_cls_roc_plot(fpr, tpr, results , figure_name, sub_directory=None):
     plt.title('ROC curves %s' % figure_name)
     plt.legend(loc="lower right")
 
-    if sub_directory:
+    if sub_directory is not None:
         abs_path = os.path.join(local_results_dir, sub_directory)
     else:
         abs_path = local_results_dir
