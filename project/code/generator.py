@@ -3,6 +3,7 @@ from keras.layers import Dense, Input, Reshape
 from keras.optimizers import SGD
 from collections import defaultdict
 from sklearn.preprocessing import OneHotEncoder
+from itertools import product
 
 from mnist_classifier import *
 from mnist_data import *
@@ -13,6 +14,7 @@ import numpy as np
 import data_utils as du
 import os
 import collect
+import config
 
 
 class LowShotGenerator(object):
@@ -206,7 +208,7 @@ class LowShotGenerator(object):
         return np.concatenate(new_examples)
 
     @staticmethod
-    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1):
+    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1, hidden_size=512):
         """
         :param Classifier: Classifier class (for creating classifiers)
         :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
@@ -239,7 +241,7 @@ class LowShotGenerator(object):
         # for i, c in enumerate(y):
         #     masks[c] += [i]
 
-        accs, cat_to_n_unique = {}, {}
+        losses, accs, cat_to_n_unique = {}, {}, {}
 
         for category in categories:  # iterate on categories to test on each one of them (category is the int label)
             # setup boolean mask
@@ -263,7 +265,8 @@ class LowShotGenerator(object):
                                  quadruplets_data,
                                  data_object,
                                  λ=λ,
-                                 epochs=epochs)
+                                 epochs=epochs,
+                                 hidden_size=hidden_size)
 
             n_real_examples = 10
             n_new_per_example = n_new // n_real_examples
@@ -278,7 +281,7 @@ class LowShotGenerator(object):
 
             print('Testing the ALL classifier on generated data:')
             loss, acc = all_classifier.evaluate(X_new, y_new)
-            accs[category] = acc
+            losses[category], accs[category] = loss, acc
 
             print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
 
@@ -297,6 +300,44 @@ class LowShotGenerator(object):
         return encode_func, one_hot_labels
 
     @staticmethod
-    def cross_validate_hidden_size(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1):
-        pass
+    def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=10, test=False):
+        import requests
+
+        def slack_update(msg):
+            print(msg)
+            payload = {'message': msg, 'channel': config.slack_channel}
+            requests.post(config.slack_url, json=payload)
+
+        if test:
+            hidden_sizes = (16,)
+            lambdas = (.5,)
+            epochs = 1
+        else:
+            hidden_sizes = (16, 32, 64, 128, 256, 512)
+            lambdas = (0., .05, .1, .25, .5, .75, .9, .95, 1.)
+
+        avg_losses, avg_accs = {}, {}
+
+        for hs, λ in product(hidden_sizes, lambdas):
+            losses, accs = LowShotGenerator.benchmark(Classifier,
+                                                      data_object,
+                                                      dataset_name,
+                                                      n_clusters,
+                                                      λ,
+                                                      n_new,
+                                                      epochs,
+                                                      hs)
+            avg_losses[hs, λ] = sum(losses.values()) / len(losses)
+            avg_accs[hs, λ] = sum(accs.values()) / len(accs)
+
+            rows = ['{0}\t{1}'.format(losses[k], accs[k]) for k in sorted(losses.keys())]
+            msg = '{0}, {1}============\n{2}============'.format(hs, λ, '\n'.join(rows))
+            slack_update(msg)
+
+        hs, λ = min(avg_losses, key=lambda k: avg_losses[k])
+        slack_update('Best hidden_size = {0}, λ = {1}\navg loss = {2}, acc = {3}'.format(hs,
+                                                                                         λ,
+                                                                                         avg_losses[hs, λ],
+                                                                                         avg_accs[hs, λ]))
+        return hs, λ
 
