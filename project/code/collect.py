@@ -84,10 +84,11 @@ def process_centroids(dataset_name, n_files, n_clusters, cat_to_vectors, n_jobs,
         update('Creating clusters/centroids by {0} jobs'.format(n_jobs))
         cat_to_centroids = {}
         for category, X in cat_to_vectors.items():
-            update('Running KMeans to get {0} clusters/centroids for `{1}`.'.format(n_clusters, category))
+            update('Running KMeans to get {0} clusters/centroids for {1}.'.format(n_clusters, category))
             kmeans = KMeans(n_clusters=n_clusters, n_jobs=n_jobs, verbose=0).fit(X)
             cat_to_centroids[category] = kmeans.cluster_centers_
             cat_to_inertia[category] = kmeans.inertia_
+            update('inertia of {0} clusters for {1} is {2}'.format(n_clusters, category, kmeans.inertia_))
 
         write_path = du.write_pickle_path(centroids_name)
         joblib.dump(cat_to_centroids, write_path)
@@ -168,7 +169,7 @@ def cross_validate(dataset_name='mnist', min_n=10, max_n=40, init_step=10, n_job
     low, high, step = min_n, max_n, init_step
     while step > 0:
         inertias = {low: process_centroids(dataset_name, n_files, low, cat_to_vectors, n_jobs, evaluate=True),
-                    high: process_centroids(dataset_name, n_files, low, cat_to_vectors, n_jobs, evaluate=True)}
+                    high: process_centroids(dataset_name, n_files, high, cat_to_vectors, n_jobs, evaluate=True)}
         for n in range(low + step, high, step):
             inertias[n] = process_centroids(dataset_name, n_files, n, cat_to_vectors, n_jobs, evaluate=True)
 
