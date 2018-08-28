@@ -312,6 +312,7 @@ class LowShotGenerator(object):
             hidden_sizes = (16,)
             lambdas = (.5,)
             epochs = 1
+            n_clusters = 10
         else:
             hidden_sizes = (16, 32, 64, 128, 256, 512)
             lambdas = (0., .05, .1, .25, .5, .75, .9, .95, 1.)
