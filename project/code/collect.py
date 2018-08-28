@@ -176,7 +176,7 @@ def cross_validate(dataset_name='mnist', min_n=10, max_n=40, init_step=10, n_job
 
         best = min(inertias, key=lambda n: inertias[n])
         # slack_update('*[n_clusters cross validation]* current best is _{0}_'.format(best))
-        msg = '\n'.join('{0}\t{1}'.format(k, v) for k, v in sorted(inertias.items(), key=lambda x, y: x))
+        msg = '\n'.join('{0}\t{1}'.format(k, v) for k, v in sorted(inertias.items(), key=lambda x: x[0]))
         slack_update(msg)
         if best in (low, high):
             return best
