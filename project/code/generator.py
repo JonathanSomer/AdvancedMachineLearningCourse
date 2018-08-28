@@ -296,3 +296,7 @@ class LowShotGenerator(object):
 
         return encode_func, one_hot_labels
 
+    @staticmethod
+    def cross_validate_hidden_size(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1):
+        pass
+

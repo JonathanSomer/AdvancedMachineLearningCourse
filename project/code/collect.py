@@ -85,7 +85,7 @@ def process_centroids(dataset_name, n_files, n_clusters, cat_to_vectors, n_jobs,
         cat_to_centroids = {}
         for category, X in cat_to_vectors.items():
             update('Running KMeans to get {0} clusters/centroids for {1}.'.format(n_clusters, category))
-            kmeans = KMeans(n_clusters=n_clusters, n_jobs=n_jobs, verbose=0).fit(X)
+            kmeans = KMeans(n_clusters=n_clusters, n_jobs=n_jobs, verbose=1).fit(X)
             cat_to_centroids[category] = kmeans.cluster_centers_
             cat_to_inertia[category] = kmeans.inertia_
             update('inertia of {0} clusters for {1} is {2}'.format(n_clusters, category, kmeans.inertia_))
@@ -174,7 +174,7 @@ def cross_validate(dataset_name='mnist', min_n=10, max_n=40, init_step=10, n_job
             inertias[n] = process_centroids(dataset_name, n_files, n, cat_to_vectors, n_jobs, evaluate=True)
 
         best = min(inertias, key=lambda n: inertias[n])
-        slack_update('(*[n_clusters cross validation]* current best is _{0}_'.format(best))
+        slack_update('*[n_clusters cross validation]* current best is _{0}_'.format(best))
         if best in (low, high):
             return best
 
