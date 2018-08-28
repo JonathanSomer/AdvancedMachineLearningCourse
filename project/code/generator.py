@@ -189,10 +189,10 @@ class LowShotGenerator(object):
 
         if classifier.trainable:
             classifier.toggle_trainability()
-        
+
         all_labels = list(range(10 if dataset_name == 'mnist' else 15))
         trained_categories = [d for d in all_labels if d != novel_category_label]
-        
+
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
                                                     categories=trained_categories,
                                                     dataset_name=dataset_name)
@@ -285,8 +285,8 @@ class LowShotGenerator(object):
 
             print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
 
-        return accs, cat_to_n_unique
-    
+        return losses, accs, cat_to_n_unique
+
     @staticmethod
     def onehot_encode(y, n_classes=None):
         yy = y.reshape(-1, 1)
@@ -320,25 +320,25 @@ class LowShotGenerator(object):
         avg_losses, avg_accs = {}, {}
 
         for hs, λ in product(hidden_sizes, lambdas):
-            losses, accs = LowShotGenerator.benchmark(Classifier,
-                                                      data_object,
-                                                      dataset_name,
-                                                      n_clusters,
-                                                      λ,
-                                                      n_new,
-                                                      epochs,
-                                                      hs)
+            losses, accs, cat_to_n_unique = LowShotGenerator.benchmark(Classifier,
+                                                                       data_object,
+                                                                       dataset_name,
+                                                                       n_clusters,
+                                                                       λ,
+                                                                       n_new,
+                                                                       epochs,
+                                                                       hs)
             avg_losses[hs, λ] = sum(losses.values()) / len(losses)
             avg_accs[hs, λ] = sum(accs.values()) / len(accs)
 
-            rows = ['{0}\t{1}'.format(losses[k], accs[k]) for k in sorted(losses.keys())]
-            msg = '{0}, {1}============\n{2}============'.format(hs, λ, '\n'.join(rows))
+            rows = ['digit {0},\tloss = {1}\tacc = {2}\tunique = {3}'.format(k, losses[k], accs[k], cat_to_n_unique[k])
+                    for k in sorted(losses.keys())]
+            msg = '*hidden_size = {0}, lambda = {1}*\n```{2}```'.format(hs, λ, '\n'.join(rows))
             slack_update(msg)
 
         hs, λ = min(avg_losses, key=lambda k: avg_losses[k])
-        slack_update('Best hidden_size = {0}, λ = {1}\navg loss = {2}, acc = {3}'.format(hs,
-                                                                                         λ,
-                                                                                         avg_losses[hs, λ],
-                                                                                         avg_accs[hs, λ]))
+        slack_update('*Best hidden_size = {0}, lambda = {1}*\navg loss = {2}, acc = {3}'.format(hs,
+                                                                                                λ,
+                                                                                                avg_losses[hs, λ],
+                                                                                                avg_accs[hs, λ]))
         return hs, λ
-
