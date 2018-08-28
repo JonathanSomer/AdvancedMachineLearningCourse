@@ -5,7 +5,7 @@ from mnist_data import *
 import argparse
 
 Classifiers = {'mnist': MnistClassifier}
-data_obj_getters = {'mnist': lambda: MnistData(use_data_subset=True)}
+data_obj_getters = {'mnist': MnistData}
 
 
 def main(dataset_name, n_clusters, test):

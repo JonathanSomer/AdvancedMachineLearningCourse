@@ -208,7 +208,7 @@ class LowShotGenerator(object):
         return np.concatenate(new_examples)
 
     @staticmethod
-    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1, hidden_size=512):
+    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=512):
         """
         :param Classifier: Classifier class (for creating classifiers)
         :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
