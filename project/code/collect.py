@@ -15,11 +15,16 @@ import config
 import os
 
 
+def to_low_shot_xray():
+    data_obj = du.get_processed_data(num_files_to_fetch_data_from=12)
+    return du.to_low_shot_dataset(data_obj)
+
+
 dataset_to_n_categories = {'xray': 15,
                            'mnist': 10}
 
-dataset_to_lowshot_func = {#'xray': du.to_low_shot_xray,
-                           'mnist': MnistData().to_low_shot_dataset}  # TODO: change it to the func you wrote
+dataset_to_lowshot_func = {'xray': to_low_shot_xray,
+                           'mnist': MnistData().to_low_shot_dataset}
 
 
 def update(msg):
@@ -49,12 +54,6 @@ def preprocess(dataset_name, n_files, verbose=False):
         return joblib.load(read_path)
     else:
         dataset = dataset_to_lowshot_func[dataset_name]()
-    # elif dataset_name == 'mnist':
-    #     dataset = du.to_low_shot_dataset()  # TODO: figure out what the real name is
-    # else:
-    #     update('Fetching processed data from {0} {1}'.format(n_files, 'files' if n_files > 1 else 'file'))
-    #     data_obj = du.get_processed_data(num_files_to_fetch_data_from=n_files)
-    #     dataset = du.to_low_shot_dataset(data_obj)
 
     write_path = du.write_pickle_path(save_name)
     joblib.dump(dataset, write_path)

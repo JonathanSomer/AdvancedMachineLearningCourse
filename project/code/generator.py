@@ -1,10 +1,6 @@
 from keras.models import Model, load_model
-from keras.layers import Dense, Input, Reshape, Lambda
+from keras.layers import Dense, Input, Reshape
 from keras.optimizers import SGD
-from keras.losses import categorical_crossentropy
-from classifier import Classifier
-from functools import partial
-from itertools import product
 from collections import defaultdict
 from sklearn.preprocessing import OneHotEncoder
 
@@ -227,24 +223,23 @@ class LowShotGenerator(object):
                                                     dataset_name=dataset_name)
         quadruplets, cat_to_centroids, cat_to_vectors, original_shape = quadruplets_data
 
-        X = np.concatenate(tuple(cat_to_vectors.values()))
-        y = np.concatenate(tuple([c] * len(v) for c, v in cat_to_vectors.items()))  # y as ints
+        # X = np.concatenate(tuple(cat_to_vectors.values()))
+        # y = np.concatenate(tuple([c] * len(v) for c, v in cat_to_vectors.items()))  # y as ints
         # onehot_encode_all_func, y_onehot = LowShotGenerator.onehot_encode(y)
 
         # all_classifier = Classifier((n_classes=len(categories), n_epochs=epochs))
         # all_classifier.fit(X, y_onehot)
         # all_classifier.toggle_trainability()
 
-
         data_object.set_removed_class(None)
         all_classifier = Classifier()
         all_classifier.fit(*data_object.into_fit())
 
-        masks = defaultdict(list)
-        for i, c in enumerate(y):
-            masks[c] += [i]
+        # masks = defaultdict(list)
+        # for i, c in enumerate(y):
+        #     masks[c] += [i]
 
-        accs = {}
+        accs, cat_to_n_unique = {}, {}
 
         for category in categories:  # iterate on categories to test on each one of them (category is the int label)
             # setup boolean mask
@@ -274,17 +269,20 @@ class LowShotGenerator(object):
             n_new_per_example = n_new // n_real_examples
             n_examples = data_object.get_n_samples(n=n_real_examples)
             new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
-            
+
+            cat_to_n_unique[category] = n_unique = np.unique(new_examples, axis=0)
+
             data_object.set_removed_class(None)
             X_new = new_examples
             y_new = data_object._one_hot_encode(np.repeat(category, n_new))
 
-            print("Testing the ALL classifier on generated data:")
+            print('Testing the ALL classifier on generated data:')
             loss, acc = all_classifier.evaluate(X_new, y_new)
             accs[category] = acc
-            print(category, acc)
 
-        return accs
+            print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
+
+        return accs, cat_to_n_unique
     
     @staticmethod
     def onehot_encode(y, n_classes=None):
@@ -293,7 +291,8 @@ class LowShotGenerator(object):
         encoder.fit(yy)
         one_hot_labels = encoder.transform(yy).toarray()
 
-        encode_func = lambda z: encoder.transform(z.reshape(-1, 1)).toarray()
+        def encode_func(z):
+            return encoder.transform(z.reshape(-1, 1)).toarray()
 
         return encode_func, one_hot_labels
 
