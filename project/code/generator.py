@@ -273,7 +273,7 @@ class LowShotGenerator(object):
             n_examples = data_object.get_n_samples(n=n_real_examples)
             new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
 
-            cat_to_n_unique[category] = n_unique = np.unique(new_examples, axis=0)
+            cat_to_n_unique[category] = n_unique = len(np.unique(new_examples, axis=0))
 
             data_object.set_removed_class(None)
             X_new = new_examples
