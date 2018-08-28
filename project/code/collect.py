@@ -90,9 +90,10 @@ def process_centroids(dataset_name, n_files, n_clusters, cat_to_vectors, n_jobs,
             cat_to_inertia[category] = kmeans.inertia_
             update('inertia of {0} clusters for {1} is {2}'.format(n_clusters, category, kmeans.inertia_))
 
-        write_path = du.write_pickle_path(centroids_name)
-        joblib.dump(cat_to_centroids, write_path)
-        update('done to cluster :tada: centroids saved as *{0}*'.format(centroids_name))
+        if not evaluate:
+            write_path = du.write_pickle_path(centroids_name)
+            joblib.dump(cat_to_centroids, write_path)
+            update('done to cluster :tada: centroids saved as *{0}*'.format(centroids_name))
 
     if evaluate:
         avg_inertia = sum(cat_to_inertia.values()) / len(cat_to_inertia)
@@ -174,7 +175,9 @@ def cross_validate(dataset_name='mnist', min_n=10, max_n=40, init_step=10, n_job
             inertias[n] = process_centroids(dataset_name, n_files, n, cat_to_vectors, n_jobs, evaluate=True)
 
         best = min(inertias, key=lambda n: inertias[n])
-        slack_update('*[n_clusters cross validation]* current best is _{0}_'.format(best))
+        # slack_update('*[n_clusters cross validation]* current best is _{0}_'.format(best))
+        msg = '\n'.join('{0}\t{1}'.format(k, v) for k, v in sorted(inertias.items(), key=lambda x, y: x))
+        slack_update(msg)
         if best in (low, high):
             return best
 
@@ -186,9 +189,6 @@ def cross_validate(dataset_name='mnist', min_n=10, max_n=40, init_step=10, n_job
             slack_update('WEIRD (best == low == high) = {0}'.format(low))
 
         step //= 2
-
-        msg = '\n'.join('{0}\t{1}'.format(k, v) for k, v in sorted(inertias.items(), key=lambda x, y: x))
-        slack_update(msg)
 
     return best
 
