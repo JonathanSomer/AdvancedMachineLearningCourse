@@ -6,6 +6,10 @@ from classifier import Classifier
 from functools import partial
 from itertools import product
 from collections import defaultdict
+from sklearn.preprocessing import OneHotEncoder
+
+from mnist_classifier import *
+from mnist_data import *
 
 import keras.backend as K
 
@@ -14,13 +18,9 @@ import data_utils as du
 import os
 import collect
 
-from classifier import Classifier
-
-ALL_DISEASES_AS_LABELS = list(range(du.N_CLASSES))
-
 
 class LowShotGenerator(object):
-    def __init__(self, trained_classifier, quadruplets_data, n_layers=3, hidden_size=512,
+    def __init__(self, trained_classifier, quadruplets_data, data_object, n_layers=3, hidden_size=512,
                  batch_size=128, epochs=10, activation='relu', n_examples=None, callbacks=[],
                  name='LowShotGenerator', λ=10., lr=.1, momentum=.9, decay=1e-4):
 
@@ -39,6 +39,7 @@ class LowShotGenerator(object):
         self.lr = lr
         self.momentum = momentum
         self.decay = decay
+        self.data_object = data_object
 
         x_train, y_classifier, y_generator = [], [], []
 
@@ -48,7 +49,7 @@ class LowShotGenerator(object):
                 y_generator.append(np.array(c2a))
                 y_classifier.append(category)
 
-        y_classifier = du.onehot_encode(np.array(y_classifier))
+        y_classifier = data_object._one_hot_encode(y_classifier)
 
         self.x_train = np.array(x_train)
         self.y_train = {'generator': np.array(y_generator),
@@ -176,21 +177,27 @@ class LowShotGenerator(object):
             idx = np.random.choice(len(category_centroids), 2)
             c1a, c2a = category_centroids[idx]
 
-            x = np.concatenate((ϕ, c1a, c2a))
+            # print(ϕ.shape)
+            # print(c1a.shape)
+            x = np.concatenate((ϕ.flatten(), c1a, c2a))
             X.append(x)
 
         return self.generator.predict(np.array(X))
 
     @staticmethod
     def get_generated_features(classifier, novel_category_label, seed_examples_of_novel_category, n_clusters, λ,
-                               n_new=20):
-        name = '{0}.{1}_lambda.{2}_clusters'.format(novel_category_label, λ, n_clusters)
+                               n_new=20, dataset_name='xray'):
+        name = '{3}.{0}.{1}_lambda.{2}_clusters'.format(novel_category_label, λ, n_clusters, dataset_name)
 
         if classifier.trainable:
             classifier.toggle_trainability()
-
-        trained_diseases = [d for d in ALL_DISEASES_AS_LABELS if d != novel_category_label]
-        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=trained_diseases)
+        
+        all_labels = list(range(10 if dataset_name == 'mnist' else 15))
+        trained_categories = [d for d in all_labels if d != novel_category_label]
+        
+        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+                                                    categories=trained_categories,
+                                                    dataset_name=dataset_name)
 
         generator = LowShotGenerator(classifier.model,
                                      quadruplets_data,
@@ -203,26 +210,35 @@ class LowShotGenerator(object):
         return np.concatenate(new_examples)
 
     @staticmethod
-    def benchmark(n_clusters, λ, n_new=100, epochs=10):
+    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=1):
         """
+        :param Classifier: Classifier class (for creating classifiers)
+        :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
         :param n_clusters: number of clusters to use
         :param λ: lambda parameter
         :param n_new: number of new examples to test accuracy on
         :param epochs: number of epochs to fit with
         :return: dict mapping category to accuracy
         """
-        categories = list(range(du.N_CLASSES))
+        categories = list(range(collect.dataset_to_n_categories[dataset_name]))
 
-        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters, categories=categories)
-        quadruplets, centroids, cat_to_vectors, original_shape = quadruplets_data
+        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+                                                    categories=categories,  # can be 'all' as well
+                                                    dataset_name=dataset_name)
+        quadruplets, cat_to_centroids, cat_to_vectors, original_shape = quadruplets_data
 
         X = np.concatenate(tuple(cat_to_vectors.values()))
-        y = np.concatenate(tuple([c] * len(v) for c, v in cat_to_vectors.items()))  # y as numbers
-        y_onehot = du.onehot_encode(y)
+        y = np.concatenate(tuple([c] * len(v) for c, v in cat_to_vectors.items()))  # y as ints
+        # onehot_encode_all_func, y_onehot = LowShotGenerator.onehot_encode(y)
 
-        all_classifier = Classifier(n_classes=len(categories), n_epochs=epochs)
-        all_classifier.fit(X, y_onehot)
-        all_classifier.toggle_trainability()
+        # all_classifier = Classifier((n_classes=len(categories), n_epochs=epochs))
+        # all_classifier.fit(X, y_onehot)
+        # all_classifier.toggle_trainability()
+
+
+        data_object.set_removed_class(None)
+        all_classifier = Classifier()
+        all_classifier.fit(*data_object.into_fit())
 
         masks = defaultdict(list)
         for i, c in enumerate(y):
@@ -231,27 +247,53 @@ class LowShotGenerator(object):
         accs = {}
 
         for category in categories:  # iterate on categories to test on each one of them (category is the int label)
-            mask = np.ones(len(X), dtype=bool)
-            mask[masks[category]] = False
-            X_category, X_rest = X[~mask], X[mask]
-            y_category, y_rest = y[~mask], X[mask]
+            # setup boolean mask
+            # mask = np.ones(len(X), dtype=bool)
+            # mask[masks[category]] = False
 
-            all_but_one_classifier = Classifier(n_classes=len(categories) - 1, n_epochs=epochs)
-            all_but_one_classifier.fit(X_rest, du.onehot_encode(y_rest))
+            # X_category, X_rest = X[~mask], X[mask]
+            # y_category, y_rest = y[~mask], X[mask]
+
+            # _, y_rest_onehot = LowShotGenerator.onehot_encode(y_rest)
+
+            # all_but_one_classifier = Classifier(n_classes=len(categories) - 1, n_epochs=epochs)
+            # all_but_one_classifier.fit(X_rest, y_rest_onehot)
+
+            data_object.set_removed_class(category)
+            all_but_one_classifier = Classifier()
+            all_but_one_classifier.fit(*data_object.into_fit())
+            all_but_one_classifier.set_trainability(is_trainable=False)
 
             g = LowShotGenerator(all_but_one_classifier.model,
                                  quadruplets_data,
+                                 data_object,
                                  λ=λ,
                                  epochs=epochs)
 
             n_real_examples = 10
             n_new_per_example = n_new // n_real_examples
-            new_examples = [g.generate(ϕ, n_new_per_example) for ϕ in np.random.choice(X_category, n_real_examples)]
-            X_new = np.concatenate(new_examples)
-            y_new = np.array([category] * n_new)
+            n_examples = data_object.get_n_samples(n=n_real_examples)
+            new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
+            
+            data_object.set_removed_class(None)
+            X_new = new_examples
+            y_new = data_object._one_hot_encode(np.repeat(category, n_new))
 
+            print("Testing the ALL classifier on generated data:")
             loss, acc = all_classifier.evaluate(X_new, y_new)
             accs[category] = acc
+            print(category, acc)
 
         return accs
+    
+    @staticmethod
+    def onehot_encode(y, n_classes=None):
+        yy = y.reshape(-1, 1)
+        encoder = OneHotEncoder(n_values=n_classes) if n_classes else OneHotEncoder()
+        encoder.fit(yy)
+        one_hot_labels = encoder.transform(yy).toarray()
+
+        encode_func = lambda z: encoder.transform(z.reshape(-1, 1)).toarray()
+
+        return encode_func, one_hot_labels
 
