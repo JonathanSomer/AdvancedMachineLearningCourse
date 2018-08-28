@@ -1,0 +1,67 @@
+from __future__ import print_function
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras import backend as K
+
+IMG_ROWS, IMG_COLS = 28, 28
+
+# acheives 98% accuracy within 2 epochs
+class MnistClassifier(object):
+	def __init__(self, batch_size = 128, epochs = 1):
+		self.batch_size = batch_size
+		self.epochs = epochs
+		self.input_shape = self._input_shape()
+		self.model = None
+
+	def _input_shape(self):
+		if K.image_data_format() == 'channels_first':
+		    input_shape = (1, IMG_ROWS, IMG_COLS)
+		else:
+		    input_shape = (IMG_ROWS, IMG_COLS, 1)
+		return input_shape
+
+	def _mnist_cnn(self, n_classes):
+		model = Sequential()
+		model.add(Conv2D(32, kernel_size=(3, 3),
+		                 activation='relu',
+		                 input_shape=self.input_shape))
+		model.add(Conv2D(64, (3, 3), activation='relu'))
+		model.add(MaxPooling2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
+		model.add(Flatten())
+		model.add(Dense(128, activation='relu'))
+		model.add(Dropout(0.5))
+		model.add(Dense(n_classes, activation='softmax'))
+
+		model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.Adadelta(),
+              metrics=['accuracy'])
+
+		return model
+
+	# must get one hot encoded labels
+	def fit(self, x_train, y_train, x_test, y_test):
+		assert len(y_train[0]) == len(y_test[0])
+		assert x_train[0].shape == x_test[0].shape
+		self.model = self._mnist_cnn(n_classes = len(y_train[0]))
+		self.model.fit(x_train, y_train,
+          batch_size=self.batch_size,
+          epochs=self.epochs,
+          verbose=1,
+          validation_data=(x_test, y_test))
+
+	def evaluate(self, x_test, y_test, verbose=True):
+		if self.model is None:
+			raise Exception("must run cls.fit(...) in order to evaluate the model")
+
+		score =  self.model.evaluate(x_test, y_test, verbose=1)
+		if verbose:
+			print('Test loss:', score[0])
+			print('Test accuracy:', score[1])
+		return score
+
+	def predict(self, x):
+		return self.model.predict(x)
