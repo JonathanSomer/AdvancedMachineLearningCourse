@@ -300,7 +300,7 @@ class LowShotGenerator(object):
         return encode_func, one_hot_labels
 
     @staticmethod
-    def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=10, test=False):
+    def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=2, test=False):
         import requests
 
         def slack_update(msg):
@@ -314,8 +314,8 @@ class LowShotGenerator(object):
             epochs = 1
             n_clusters = 10
         else:
-            hidden_sizes = (16, 32, 64, 128, 256, 512)
-            lambdas = (0., .05, .1, .25, .5, .75, .9, .95, 1.)
+            hidden_sizes = (16, 128, 512)
+            lambdas = (.05, .25, .5, .75, .95)
 
         avg_losses, avg_accs = {}, {}
 
