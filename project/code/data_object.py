@@ -8,14 +8,18 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
 from collections import defaultdict
+from feature_extraction import *
 
+FRACTION_FOR_SUBSET = 0.05
 
 class DataObject(object):
     def __init__(self, use_data_subset=False, use_features=False, class_removed=None):
         self.use_data_subset = use_data_subset
         self.use_features = use_features
+
         (x_train, y_train), (x_test, y_test) = self._processed_data(class_removed=class_removed)
 
+        assert len(np.unique(y_test)) == len(np.unique(y_train))
         self.n_classes = len(np.unique(y_test))
 
         if self.use_data_subset:
@@ -34,6 +38,7 @@ class DataObject(object):
         
         self.x_class_removed_test = None
         self.y_class_removed_test = None
+
 
         self.y_train_one_hot = self._one_hot_encode(self.y_train)
         self.y_test_one_hot = self._one_hot_encode(self.y_test)
@@ -184,9 +189,30 @@ class DataObject(object):
 #
 #####################################################################
 
-    @abstractmethod
     def _processed_data(self, class_removed=None):
-        raise NotImplementedError("Implement a method which returns some -- (x_train, y_train), (x_test, y_test)")
+        if self.use_features is True:
+            return self._load_features(class_removed)
+        else:
+            return self._load_raw_data()
+
+    def _load_features(self, class_removed=None):
+        if class_removed is None:
+            read_path = read_features_from_all_classes_path(dataset=self.dataset)
+        else:
+            read_path = read_features_from_all_classes_but_one_path(dataset=self.dataset, 
+                                                                    class_removed=class_removed)
+
+        dict = joblib.load(read_path)
+        features = dict['features']
+        labels = dict['labels']
+
+        x_train = features[:self.train_size]
+        y_train = labels[:self.train_size]
+
+        x_test = features[self.train_size:]
+        y_test = labels[self.train_size:]
+
+        return (x_train, y_train), (x_test, y_test)
 
     def _one_hot_encode(self, y):
         n_rows, n_cols = len(y), self.n_classes
@@ -207,7 +233,7 @@ class DataObject(object):
     def _subset(self, x, y):
         assert len(x) == len(y)
         n = len(x)
-        subset_size = round(0.05 * n)
+        subset_size = round(FRACTION_FOR_SUBSET * n)
         return x[:subset_size], y[:subset_size]
 
     def _features_and_labels(self):
