@@ -295,6 +295,17 @@ class LowShotGenerator(object):
                                                     categories=categories,
                                                     dataset_name=dataset_name)
 
+        #                  EXAMPLE:
+        # data_object = MnistData(use_features = True,
+        #                         class_removed=category)
+        # all_classifier = Classifier(use_features=use_features)
+        # all_classifier.fit(*data_object.into_fit())
+        # 
+        # data_object.set_removed_class(category)
+        # all_but_one_classifier = Classifier(use_features=use_features)
+        # all_but_one_classifier.fit(*data_object.into_fit())
+        # all_but_one_classifier.set_trainability(is_trainable=False)
+
         data_object.set_removed_class(None)
         all_classifier = Classifier(use_features=use_features)
         all_classifier.fit(*data_object.into_fit())
