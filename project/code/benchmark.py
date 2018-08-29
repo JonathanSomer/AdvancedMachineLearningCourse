@@ -28,7 +28,7 @@ def main(dataset, category, n_clusters, epochs, n_new):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', help='what dataset to use')
-    parser.add_argument('category', help='what category to benchmark on')
+    parser.add_argument('category', help='what category to benchmark on', type=int)
     parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-e', '--epochs', help='number of clusters to create', type=int, default=2)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
