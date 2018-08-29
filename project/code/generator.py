@@ -216,48 +216,26 @@ class LowShotGenerator(object):
         :param λ: lambda parameter
         :param n_new: number of new examples to test accuracy on
         :param epochs: number of epochs to fit with
+        :param hidden_size: size of the hidden layers of the generator
         :return: dict mapping category to accuracy
         """
-        categories = list(range(collect.dataset_to_n_categories[dataset_name]))
+        use_features = 'raw' not in dataset_name
+        categories = collect.get_categories(dataset_name)
 
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
                                                     categories=categories,  # can be 'all' as well
                                                     dataset_name=dataset_name)
         quadruplets, cat_to_centroids, cat_to_vectors, original_shape = quadruplets_data
 
-        # X = np.concatenate(tuple(cat_to_vectors.values()))
-        # y = np.concatenate(tuple([c] * len(v) for c, v in cat_to_vectors.items()))  # y as ints
-        # onehot_encode_all_func, y_onehot = LowShotGenerator.onehot_encode(y)
-
-        # all_classifier = Classifier((n_classes=len(categories), n_epochs=epochs))
-        # all_classifier.fit(X, y_onehot)
-        # all_classifier.toggle_trainability()
-
         data_object.set_removed_class(None)
-        all_classifier = Classifier()
+        all_classifier = Classifier(use_features=use_features)
         all_classifier.fit(*data_object.into_fit())
-
-        # masks = defaultdict(list)
-        # for i, c in enumerate(y):
-        #     masks[c] += [i]
 
         losses, accs, cat_to_n_unique = {}, {}, {}
 
         for category in categories:  # iterate on categories to test on each one of them (category is the int label)
-            # setup boolean mask
-            # mask = np.ones(len(X), dtype=bool)
-            # mask[masks[category]] = False
-
-            # X_category, X_rest = X[~mask], X[mask]
-            # y_category, y_rest = y[~mask], X[mask]
-
-            # _, y_rest_onehot = LowShotGenerator.onehot_encode(y_rest)
-
-            # all_but_one_classifier = Classifier(n_classes=len(categories) - 1, n_epochs=epochs)
-            # all_but_one_classifier.fit(X_rest, y_rest_onehot)
-
             data_object.set_removed_class(category)
-            all_but_one_classifier = Classifier()
+            all_but_one_classifier = Classifier(use_features=use_features)
             all_but_one_classifier.fit(*data_object.into_fit())
             all_but_one_classifier.set_trainability(is_trainable=False)
 
@@ -286,6 +264,70 @@ class LowShotGenerator(object):
             print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
 
         return losses, accs, cat_to_n_unique
+
+    @staticmethod
+    def benchmark_single(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=512):
+        """
+        runs a benchmark test on the one category from the given dataset.
+        :param Classifier: Classifier class (for creating classifiers)
+        :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
+        :param n_clusters: number of clusters to use
+        :param λ: lambda parameter
+        :param n_new: number of new examples to test accuracy on
+        :param epochs: number of epochs to fit with
+        :param hidden_size: size of the hidden layers of the generator
+        :return: dict mapping category to accuracy
+        """
+        use_features = 'raw' not in dataset_name
+        categories = collect.get_categories(dataset_name)
+
+        try:
+            split = dataset_name.split('_')
+            if len(split) == 3:
+                dataset_name, category = split[1:]
+            else:
+                raise ValueError('Given dataset does not fit.')
+        except ValueError:
+            raise ValueError('Given dataset does not fit.')
+
+        # get all the quadruplets without the excluded category
+        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+                                                    categories=categories,
+                                                    dataset_name=dataset_name)
+
+        data_object.set_removed_class(None)
+        all_classifier = Classifier(use_features=use_features)
+        all_classifier.fit(*data_object.into_fit())
+
+        data_object.set_removed_class(category)
+        all_but_one_classifier = Classifier(use_features=use_features)
+        all_but_one_classifier.fit(*data_object.into_fit())
+        all_but_one_classifier.set_trainability(is_trainable=False)
+
+        g = LowShotGenerator(all_but_one_classifier.model,
+                             quadruplets_data,
+                             data_object,
+                             λ=λ,
+                             epochs=epochs,
+                             hidden_size=hidden_size)
+
+        n_real_examples = 10
+        n_new_per_example = n_new // n_real_examples
+        n_examples = data_object.get_n_samples(n=n_real_examples)
+        new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
+
+        n_unique = len(np.unique(new_examples, axis=0))
+
+        data_object.set_removed_class(None)
+        X_new = new_examples
+        y_new = data_object._one_hot_encode(np.repeat(category, n_new))
+
+        print('Testing the ALL classifier on generated data:')
+        loss, acc = all_classifier.evaluate(X_new, y_new)
+
+        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
+
+        return loss, acc, n_unique
 
     @staticmethod
     def onehot_encode(y, n_classes=None):
