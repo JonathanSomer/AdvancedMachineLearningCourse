@@ -2,7 +2,7 @@ from __future__ import print_function
 import keras
 from keras.datasets import mnist
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Dense, Dropout, Flatten, Input
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
@@ -11,32 +11,30 @@ IMG_ROWS, IMG_COLS = 28, 28
 
 # acheives 98% accuracy within 2 epochs
 class MnistClassifier(object):
-    def __init__(self, batch_size = 128, epochs = 1):
+    def __init__(self, use_features = False, batch_size = 128, epochs = 1):
         self.batch_size = batch_size
         self.epochs = epochs
-        self.input_shape = self._input_shape()
+        self.use_features = use_features
         self.model = None
         self.trainable = True
 
-    def _input_shape(self):
-        if K.image_data_format() == 'channels_first':
-            input_shape = (1, IMG_ROWS, IMG_COLS)
-        else:
-            input_shape = (IMG_ROWS, IMG_COLS, 1)
-        return input_shape
-
     def _mnist_cnn(self, n_classes):
         model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3),
-                         activation='relu',
-                         input_shape=self.input_shape))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-        model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(n_classes, activation='softmax'))
+        if not self.use_features:
+            model.add(Conv2D(32, kernel_size=(3, 3),
+                             activation='relu',
+                             input_shape=self.input_shape))
+            model.add(Conv2D(64, (3, 3), activation='relu'))
+            model.add(MaxPooling2D(pool_size=(2, 2)))
+            model.add(Dropout(0.25))
+            model.add(Flatten())
+            model.add(Dense(128, activation='relu', name="features"))
+            model.add(Dropout(0.5))
+            model.add(Dense(n_classes, activation='softmax', name="last"))
+        else:
+            model.add(Dropout(0.5, input_shape=self.input_shape))
+            model.add(Dense(n_classes, activation='softmax', name="last"))
+
         self.model = model
         self._compile()
         
@@ -46,6 +44,7 @@ class MnistClassifier(object):
     def fit(self, x_train, y_train, x_test, y_test):
         assert len(y_train[0]) == len(y_test[0])
         assert x_train[0].shape == x_test[0].shape
+        self.input_shape = x_train[0].shape
         self.model = self._mnist_cnn(n_classes = len(y_train[0]))
         self.model.fit(x_train, y_train,
           batch_size=self.batch_size,
