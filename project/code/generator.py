@@ -302,6 +302,7 @@ class LowShotGenerator(object):
     @staticmethod
     def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=2, test=False):
         import requests
+        from concurrent.futures import ProcessPoolExecutor
 
         def slack_update(msg):
             print(msg)
@@ -314,27 +315,38 @@ class LowShotGenerator(object):
             epochs = 1
             n_clusters = 10
         else:
-            hidden_sizes = (16, 128, 512)
-            lambdas = (.05, .25, .5, .75, .95)
+            # hidden_sizes = (16, 128, 512)
+            # lambdas = (.05, .25, .5, .75, .95)
+            hidden_sizes = (32, 64, 128, 256, 512)
+            lambdas = (.95,)
 
         avg_losses, avg_accs = {}, {}
 
-        for hs, λ in product(hidden_sizes, lambdas):
-            losses, accs, cat_to_n_unique = LowShotGenerator.benchmark(Classifier,
-                                                                       data_object,
-                                                                       dataset_name,
-                                                                       n_clusters,
-                                                                       λ,
-                                                                       n_new,
-                                                                       epochs,
-                                                                       hs)
-            avg_losses[hs, λ] = sum(losses.values()) / len(losses)
-            avg_accs[hs, λ] = sum(accs.values()) / len(accs)
+        def benchmark(_hs, _λ):
+            args = (Classifier, data_object, dataset_name, n_clusters, _λ, n_new, epochs, _hs)
+            return LowShotGenerator.benchmark(*args)
 
-            rows = ['digit {0},\tloss = {1}\tacc = {2}\tunique = {3}'.format(k, losses[k], accs[k], cat_to_n_unique[k])
+        with ProcessPoolExecutor() as executor:
+            # for hs, λ in product(hidden_sizes, lambdas):
+            #     losses, accs, cat_to_n_unique = LowShotGenerator.benchmark(Classifier,
+            #                                                                data_object,
+            #                                                                dataset_name,
+            #                                                                n_clusters,
+            #                                                                λ,
+            #                                                                n_new,
+            #                                                                epochs,
+            #                                                                hs)
+            for hs, λ, (losses, accs, cat_to_n_unique) in zip(hidden_sizes, lambdas,
+                                                              executor.map(benchmark, hidden_sizes, lambdas)):
+                avg_losses[hs, λ] = sum(losses.values()) / len(losses)
+                avg_accs[hs, λ] = sum(accs.values()) / len(accs)
+
+                rows = [
+                    'category {0},\tloss = {1}\tacc = {2}\tunique = {3}'.format(k, losses[k], accs[k],
+                                                                                cat_to_n_unique[k])
                     for k in sorted(losses.keys())]
-            msg = '*hidden_size = {0}, lambda = {1}*\n```{2}```'.format(hs, λ, '\n'.join(rows))
-            slack_update(msg)
+                msg = '*hidden_size = {0}, lambda = {1}*\n```{2}```'.format(hs, λ, '\n'.join(rows))
+                slack_update(msg)
 
         hs, λ = min(avg_losses, key=lambda k: avg_losses[k])
         slack_update('*Best hidden_size = {0}, lambda = {1}*\navg loss = {2}, acc = {3}'.format(hs,
