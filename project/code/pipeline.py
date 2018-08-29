@@ -8,7 +8,7 @@ from mnist_classifier import *
 from mnist_data import *
 
 _logger = logger.get_logger(__name__)
-N_GIVEN_EXAMPLES = [1,2,5,10,20]
+N_GIVEN_EXAMPLES = [5, 10, 20, 40, 60, 80, 100, 150 ,200,300]
 
 
 class PipeLine:
@@ -18,7 +18,7 @@ class PipeLine:
         self.n_classes = self.dataset.get_num_classes()
         self.base_results = self._base_results()
         self.low_shot_results = {}
-        for i in range(2):
+        for i in range(self.n_classes):
             self.low_shot_results[i] = self.get_low_shot_results(i)
 
         self.parse_results()
@@ -34,20 +34,23 @@ class PipeLine:
     def evaluate_cls(self, removed_inx=None):
         results = {}
 
-        y_score = self.cls.predict(self.dataset.into_evaluate()[0])
+        x_temp, y_one_hot = self.dataset.into_evaluate() #TODO -> RENAME!
+        y_score = self.cls.predict(x_temp)
         fpr = dict()
         tpr = dict()
+        off = 0
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             for inx in range(self.n_classes):
                 if inx == removed_inx:
+                    off = -1
                     continue
                 results[inx] = {}
 
                 loss, acc = self.cls.evaluate(*self.dataset.into_evaluate_one_class(inx))
                 results[inx]['accuracy'] = acc
 
-                fpr[inx], tpr[inx], _ = roc_curve(*self.dataset.into_roc_curve(y_score, inx))
+                fpr[inx], tpr[inx], _ = roc_curve(y_one_hot[:, inx + off], y_score[:, inx + off])
                 results[inx]['auc'] = auc(fpr[inx], tpr[inx])
 
         return results, fpr, tpr
@@ -57,27 +60,33 @@ class PipeLine:
         self.dataset.set_removed_class(inx)
 
         self.dataset.set_removed_class(class_index=inx, verbose=True)
-        cls.fit(*d.into_fit())
-        results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
-        self.create_cls_roc_plot(fpr, tpr, results, '%d - base line' % inx)
+        self.cls.fit(*self.dataset.into_fit())
+        #results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
 
         for n_examples in N_GIVEN_EXAMPLES:
             low_shot_learning_results[n_examples] = {}
-            #d.set_number_of_samples_to_use(n=n_examples)
-            #cls.fit(*d.into_fit())
-            #results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
-            #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generator' % (inx,n_examples))
-            #low_shot_learning_results[n_examples]['without'] = results[inx]
-            low_shot_learning_results[n_examples]['without'] = {'auc': 0.3, 'accuracy': 0.6}
+            self.dataset.set_number_of_samples_to_use(n=n_examples)
+
+            self.cls.fit(*self.dataset.into_fit())
+
+            results, fpr, tpr = self.evaluate_cls()
+            #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generated data' % (inx,n_examples))
+            low_shot_learning_results[n_examples]['without'] = results[inx]
 
             generated_data = d.get_generated_data_stub()
-            low_shot_learning_results[n_examples]['with'] = {'auc': 0.8, 'accuracy':0.1}
+            self.dataset.set_generated_data(generated_data)
+            self.cls.fit(*self.dataset.into_fit())
+
+            results, fpr, tpr = self.evaluate_cls()
+            #self.create_cls_roc_plot(fpr, tpr, results,
+            #                         '%d - with %d samples without generated data' % (inx, n_examples))
+            low_shot_learning_results[n_examples]['with'] = results[inx]
 
         return low_shot_learning_results
 
     def parse_results(self):
         _logger.info('parse results')
-        for inx in range(2):
+        for inx in range(self.n_classes):
             _logger.info('result for class %d' % inx)
             base_inx_results = self.base_results[inx]
             _logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
