@@ -302,7 +302,7 @@ class LowShotGenerator(object):
     @staticmethod
     def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=2, test=False):
         import requests
-        import concurrent.futures=
+        import concurrent.futures
 
         def slack_update(msg):
             print(msg)
