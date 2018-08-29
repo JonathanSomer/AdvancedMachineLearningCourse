@@ -11,8 +11,9 @@ from collections import defaultdict
 
 
 class DataObject(object):
-    def __init__(self, use_data_subset=False):
+    def __init__(self, use_data_subset=False, use_features=False):
         self.use_data_subset = use_data_subset
+        self.use_features = use_features
         (x_train, y_train), (x_test, y_test) = self._processed_data()
 
         self.n_classes = len(np.unique(y_test))
@@ -154,7 +155,7 @@ class DataObject(object):
 
     # this method overrides the disease removed paramater!
     def to_low_shot_dataset(self, verbose=False):
-        self.__init__(use_data_subset = False)
+        self.__init__(use_data_subset=False, use_features=self.use_features)
         if verbose:
             print("Note class removed paramater was overriden. re-Run d.set_removed_class() if needed")
         

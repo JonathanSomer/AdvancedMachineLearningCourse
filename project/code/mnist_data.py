@@ -17,8 +17,8 @@ MNIST_FEATURES_PICKLE_NAME = 'mnist_features'
 class MnistData(DataObject):
 
     def __init__(self, use_features=False, use_data_subset=False):
-        self.use_features = use_features
-        super().__init__(use_data_subset=use_data_subset)
+        # self.use_features = use_features
+        super().__init__(use_data_subset=use_data_subset, use_features=use_features)
 
 #####################################################################
 #
