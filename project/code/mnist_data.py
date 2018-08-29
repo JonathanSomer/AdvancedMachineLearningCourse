@@ -13,39 +13,23 @@ from sklearn.externals import joblib
 
 IMG_ROWS, IMG_COLS = 28, 28
 TRAIN_SIZE = 60000
-MNIST_FEATURES_PICKLE_NAME = 'mnist_features'
+# MNIST_FEATURES_PICKLE_NAME = 'mnist_features'
+MNIST = 'mnist'
 
 class MnistData(DataObject):
-
-    def __init__(self, use_features=False, use_data_subset=False):
-        self.use_features = use_features
-        super().__init__(use_data_subset=use_data_subset)
+    # use class_removed to only to load features generated without that class.
+    # NOTE THIS DOES NOT REMOVE THE CLASS FROM THE TRAINING DATA
+    def __init__(self, use_features=False, use_data_subset=False, class_removed=None):
+        # self.use_features = use_features
+        self.dataset = MNIST
+        self.train_size = TRAIN_SIZE if use_data_subset == False else round(FRACTION_FOR_SUBSET * TRAIN_SIZE)
+        super().__init__(use_data_subset=use_data_subset, use_features=use_features, class_removed=None)
 
 #####################################################################
 #
 #                       PRIVATE METHODS
 #
 #####################################################################
-
-    def _processed_data(self):
-        if self.use_features is True:
-            return self._load_features()
-        else:
-            return self._load_raw_data()
-
-    def _load_features(self):
-        dict = joblib.load(read_pickle_path(MNIST_FEATURES_PICKLE_NAME))
-        features = dict['features']
-        labels = dict['labels']
-
-        x_train = features[:TRAIN_SIZE]
-        y_train = labels[:TRAIN_SIZE]
-
-        x_test = features[TRAIN_SIZE:]
-        y_test = labels[TRAIN_SIZE:]
-
-        return (x_train, y_train), (x_test, y_test)
-
 
     def _load_raw_data(self):    
         (x_train, y_train), (x_test, y_test) = mnist.load_data()

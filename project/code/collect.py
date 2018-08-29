@@ -27,10 +27,6 @@ dataset_to_class = {'xray': None,
                     'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
-# dataset_to_lowshot_func = {'xray': to_low_shot_xray,
-#                            'mnist': MnistData().to_low_shot_dataset,
-#                            'cifar10': Cifar10Data().to_low_shot_dataset}
-
 
 def get_lowshot_func(dataset_name):
     if dataset_name in dataset_to_class:
@@ -50,7 +46,7 @@ def get_lowshot_func(dataset_name):
 
     def lowshot_func():
         DataClass = dataset_to_class[dataset_name]
-        return DataClass(use_features=use_features).to_low_shot_dataset(category_to_exclude=category_to_exclude)
+        return DataClass(use_features=use_features, class_removed=category_to_exclude).to_low_shot_dataset()
 
     return lowshot_func
 

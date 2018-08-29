@@ -266,11 +266,12 @@ class LowShotGenerator(object):
         return losses, accs, cat_to_n_unique
 
     @staticmethod
-    def benchmark_single(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=512):
+    def benchmark_single(Classifier, DataClass, dataset_name, n_clusters, λ, n_new=100, epochs=2, hidden_size=256):
         """
         runs a benchmark test on the one category from the given dataset.
-        :param Classifier: Classifier class (for creating classifiers)
-        :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
+        :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
+        :param DataClass: DataClass class (for creating data objects. i.e. MnistData)
+        :param dataset_name: The dataset name of the wanted dataset to run benchmark on. i.e. mnist_5
         :param n_clusters: number of clusters to use
         :param λ: lambda parameter
         :param n_new: number of new examples to test accuracy on
@@ -281,12 +282,13 @@ class LowShotGenerator(object):
         use_features = 'raw' not in dataset_name
         categories = collect.get_categories(dataset_name)
 
+        # raw_mnist_1 or mnist_1 etc
         try:
             split = dataset_name.split('_')
             if len(split) == 3:
-                dataset_name, category = split[1:]
+                dataset_name, category_to_exclude = split[1:]
             else:
-                raise ValueError('Given dataset does not fit.')
+                dataset_name, category_to_exclude = split
         except ValueError:
             raise ValueError('Given dataset does not fit.')
 
@@ -295,11 +297,12 @@ class LowShotGenerator(object):
                                                     categories=categories,
                                                     dataset_name=dataset_name)
 
-        data_object.set_removed_class(None)
+        data_object = DataClass(use_features=use_features, class_removed=category_to_exclude)
+
         all_classifier = Classifier(use_features=use_features)
         all_classifier.fit(*data_object.into_fit())
 
-        data_object.set_removed_class(category)
+        data_object.set_removed_class(category_to_exclude)
         all_but_one_classifier = Classifier(use_features=use_features)
         all_but_one_classifier.fit(*data_object.into_fit())
         all_but_one_classifier.set_trainability(is_trainable=False)
@@ -320,12 +323,12 @@ class LowShotGenerator(object):
 
         data_object.set_removed_class(None)
         X_new = new_examples
-        y_new = data_object._one_hot_encode(np.repeat(category, n_new))
+        y_new = data_object._one_hot_encode(np.repeat(category_to_exclude, n_new))
 
         print('Testing the ALL classifier on generated data:')
         loss, acc = all_classifier.evaluate(X_new, y_new)
 
-        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
+        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category_to_exclude, acc, n_unique, n_new))
 
         return loss, acc, n_unique
 
@@ -357,10 +360,10 @@ class LowShotGenerator(object):
             epochs = 1
             n_clusters = 10
         else:
-            # hidden_sizes = (16, 128, 512)
-            # lambdas = (.05, .25, .5, .75, .95)
-            hidden_sizes = (32, 64, 128, 256, 512)
-            lambdas = (.95,)
+            hidden_sizes = (16, 32, 64, 128, 256, 512)
+            lambdas = (.05, .1, .25, .5, .75, .9, .95)
+            # hidden_sizes = (32, 64, 128, 256, 512)
+            # lambdas = (.95,)
 
         avg_losses, avg_accs = {}, {}
 
@@ -368,31 +371,27 @@ class LowShotGenerator(object):
             args = (Classifier, data_object, dataset_name, n_clusters, _λ, n_new, epochs, _hs)
             return LowShotGenerator.benchmark(*args)
 
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
         for hs, λ in product(hidden_sizes, lambdas):
             losses, accs, cat_to_n_unique = _benchmark(hs, λ)
-            # future_to_res = {executor.submit(_benchmark, hs, λ): (hs, λ) for hs, λ in product(hidden_sizes, lambdas)}
-            # for future in concurrent.futures.as_completed(future_to_res):
-            #     hs, λ = future_to_res[future]
-            #     losses, accs, cat_to_n_unique = future.result()
-
             avg_losses[hs, λ] = sum(losses.values()) / len(losses)
             avg_accs[hs, λ] = sum(accs.values()) / len(accs)
 
             txt = 'category {0},\tloss = {1}\tacc = {2}\tunique = {3}'
             rows = [txt.format(k, losses[k], accs[k], cat_to_n_unique[k]) for k in sorted(losses.keys())]
-            msg = '*hidden_size = {0}, lambda = {1} [{2} clusters, {3} epochs, {4}]*\n```{4}```'.format(hs,
-                                                                                                        λ,
-                                                                                                        n_clusters,
-                                                                                                        epochs,
-                                                                                                        '\n'.join(rows),
-                                                                                                        dataset_name)
+            msg = '*hidden_size = {0}, lambda = {1} [{2} clusters, {3} epochs, {5}]*\navg loss = {6}, avg acc = {7}\n```{4}```'.format(
+                hs,
+                λ,
+                n_clusters,
+                epochs,
+                '\n'.join(rows),
+                dataset_name,
+                avg_losses[hs, λ],
+                avg_accs[hs, λ]
+            )
             slack_update(msg)
 
         hs, λ = min(avg_losses, key=lambda k: avg_losses[k])
-        txt = '*Best hidden_size = {0}, lambda = {1}*\navg loss = {2}, avg acc = {3} [%d clusters, %d epochs]' % (
-            n_clusters,
-            epochs)
-        slack_update(txt.format(hs, λ, avg_losses[hs, λ], avg_accs[hs, λ]))
+        txt = '*Best hidden_size = {0}, lambda = {1}*\navg loss = {2}, avg acc = {3} [{4} clusters, {5} epochs, {6}]'
+        slack_update(txt.format(hs, λ, avg_losses[hs, λ], avg_accs[hs, λ], n_clusters, epochs, dataset_name))
 
         return hs, λ
