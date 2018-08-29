@@ -9,8 +9,16 @@ data_obj_getters = {'mnist': MnistData}
 
 
 def main(dataset_name, n_clusters, epochs, test):
+    use_features = True
+    if 'raw' in dataset_name:
+        use_features = False
+        dataset_name = dataset_name[4:]
+
+    if '_' in dataset_name:
+        dataset_name, _ = dataset_name.split('_')
+
     LowShotGenerator.cross_validate(Classifiers[dataset_name],
-                                    data_obj_getters[dataset_name](),
+                                    data_obj_getters[dataset_name](use_features=use_features),
                                     dataset_name,
                                     n_clusters=n_clusters,
                                     epochs=epochs,
@@ -19,8 +27,8 @@ def main(dataset_name, n_clusters, epochs, test):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
-    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=40)
+    parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')
+    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-e', '--epochs', help='number of clusters to create', type=int, default=2)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
 

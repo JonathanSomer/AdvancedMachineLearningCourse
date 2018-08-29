@@ -1,10 +1,8 @@
 from itertools import combinations
-from collections import defaultdict
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cosine
 from sklearn.externals import joblib
 from concurrent.futures import ProcessPoolExecutor
-from sklearn.preprocessing import LabelEncoder
 from mnist_data import *
 from cifar_data import *
 
@@ -25,9 +23,46 @@ dataset_to_n_categories = {'xray': 15,
                            'mnist': MnistData().get_num_classes(),
                            'cifar10': Cifar10Data().get_num_classes()}
 
-dataset_to_lowshot_func = {'xray': to_low_shot_xray,
-                           'mnist': MnistData().to_low_shot_dataset,
-                           'cifar10': Cifar10Data().to_low_shot_dataset}
+dataset_to_class = {'xray': None,
+                    'mnist': MnistData,
+                    'cifar10': Cifar10Data}
+
+# dataset_to_lowshot_func = {'xray': to_low_shot_xray,
+#                            'mnist': MnistData().to_low_shot_dataset,
+#                            'cifar10': Cifar10Data().to_low_shot_dataset}
+
+
+def get_lowshot_func(dataset_name):
+    if dataset_name in dataset_to_class:
+        return dataset_to_class[dataset_name](use_features=True).to_low_shot_dataset
+
+    if 'raw' in dataset_name:
+        use_features = False
+        dataset_name = dataset_name[4:]
+    else:
+        use_features = True
+
+    if '_' in dataset_name:
+        dataset_name, category_to_exclude = dataset_name.split('_')
+        category_to_exclude = int(category_to_exclude)
+    else:
+        return dataset_to_class[dataset_name](use_features=use_features).to_low_shot_dataset
+
+    def lowshot_func():
+        DataClass = dataset_to_class[dataset_name]
+        return DataClass(use_features=use_features).to_low_shot_dataset(category_to_exclude=category_to_exclude)
+
+    return lowshot_func
+
+
+def get_categories(dataset_name):
+    dataset_name = dataset_name.replace('raw_', '')
+    if dataset_name in dataset_to_n_categories:
+        return list(range(dataset_to_n_categories[dataset_name]))
+
+    dataset_name, category_to_exclude = dataset_name.split('_')
+    s = set(range(dataset_to_n_categories[dataset_name]))
+    return list(s - {category_to_exclude})
 
 
 def update(msg):
@@ -60,7 +95,7 @@ def preprocess(dataset_name, n_files, verbose=False):
             update('Loaded dataset from file')
         return joblib.load(read_path)
     else:
-        dataset = dataset_to_lowshot_func[dataset_name]()
+        dataset = get_lowshot_func(dataset_name)()
 
     write_path = du.write_pickle_path(save_name)
     joblib.dump(dataset, write_path)
@@ -151,7 +186,7 @@ def load_quadruplets(n_clusters, categories='all', n_files=12, dataset_name='xra
     cat_to_centroids = process_centroids(dataset_name, n_files, n_clusters, cat_to_vectors, 1)
 
     if categories == 'all':
-        categories = list(range(dataset_to_n_categories[dataset_name]))
+        categories = get_categories(dataset_name)
 
     # filter unwanted categories
     cat_to_centroids = {category: cs for category, cs in cat_to_centroids.items() if category in categories}
@@ -218,8 +253,9 @@ def main(dataset_name, n_files, n_clusters, n_jobs, test):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
+    # parser.add_argument('-r', '--raw_data', help='whether to use the raw data (features by default)', action='store_true')
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
-    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=20)
+    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-j', '--n_jobs', help='number of jobs to do in parallel', type=int, default=8)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
     parser.add_argument('-cv', '--cross_validate', help='whether to run cross validation', action='store_true')
