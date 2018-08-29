@@ -19,8 +19,8 @@ def main(dataset_name, n_clusters, epochs, test):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
-    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=40)
+    parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')
+    parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-e', '--epochs', help='number of clusters to create', type=int, default=2)
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
 
