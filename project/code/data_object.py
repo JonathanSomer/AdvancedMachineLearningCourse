@@ -92,7 +92,7 @@ class DataObject(object):
 
     def set_removed_class(self, class_index, verbose=True):
         if self.class_removed != None:
-            self.__init__(use_data_subset=self.use_data_subset)
+            self.__init__(use_data_subset=self.use_data_subset, use_features=self.use_features)
 
         if class_index is not None:
             self.class_removed = class_index
