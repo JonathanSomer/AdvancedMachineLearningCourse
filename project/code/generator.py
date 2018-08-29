@@ -311,7 +311,7 @@ class LowShotGenerator(object):
 
         if test:
             hidden_sizes = (4, 8,)
-            lambdas = (.5, .75, .9, .95)
+            lambdas = (.95,)
             epochs = 1
             n_clusters = 10
         else:
@@ -326,22 +326,22 @@ class LowShotGenerator(object):
             args = (Classifier, data_object, dataset_name, n_clusters, _λ, n_new, epochs, _hs)
             return LowShotGenerator.benchmark(*args)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # for hs, λ in product(hidden_sizes, lambdas):
-            #     losses, accs, cat_to_n_unique = _benchmark(hs, λ)
-            future_to_res = {executor.submit(_benchmark, hs, λ): (hs, λ) for hs, λ in product(hidden_sizes, lambdas)}
-            for future in concurrent.futures.as_completed(future_to_res):
-                hs, λ = future_to_res[future]
-                losses, accs, cat_to_n_unique = future.result()
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        for hs, λ in product(hidden_sizes, lambdas):
+            losses, accs, cat_to_n_unique = _benchmark(hs, λ)
+            # future_to_res = {executor.submit(_benchmark, hs, λ): (hs, λ) for hs, λ in product(hidden_sizes, lambdas)}
+            # for future in concurrent.futures.as_completed(future_to_res):
+            #     hs, λ = future_to_res[future]
+            #     losses, accs, cat_to_n_unique = future.result()
 
-                avg_losses[hs, λ] = sum(losses.values()) / len(losses)
-                avg_accs[hs, λ] = sum(accs.values()) / len(accs)
+            avg_losses[hs, λ] = sum(losses.values()) / len(losses)
+            avg_accs[hs, λ] = sum(accs.values()) / len(accs)
 
-                txt = 'category {0},\tloss = {1}\tacc = {2}\tunique = {3} [%d clusters, %d epochs]' % (n_clusters,
-                                                                                                       epochs)
-                rows = [txt.format(k, losses[k], accs[k], cat_to_n_unique[k]) for k in sorted(losses.keys())]
-                msg = '*hidden_size = {0}, lambda = {1}*\n```{2}```'.format(hs, λ, '\n'.join(rows))
-                slack_update(msg)
+            txt = 'category {0},\tloss = {1}\tacc = {2}\tunique = {3} [%d clusters, %d epochs]' % (n_clusters,
+                                                                                                   epochs)
+            rows = [txt.format(k, losses[k], accs[k], cat_to_n_unique[k]) for k in sorted(losses.keys())]
+            msg = '*hidden_size = {0}, lambda = {1}*\n```{2}```'.format(hs, λ, '\n'.join(rows))
+            slack_update(msg)
 
         hs, λ = min(avg_losses, key=lambda k: avg_losses[k])
         txt = '*Best hidden_size = {0}, lambda = {1}*\navg loss = {2}, avg acc = {3} [%d clusters, %d epochs]' % (
