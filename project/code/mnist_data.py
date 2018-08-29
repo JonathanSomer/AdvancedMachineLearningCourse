@@ -8,130 +8,17 @@ from keras import backend as K
 import numpy as np
 from collections import defaultdict
 from data_object import *
+from data_utils import *
 
 IMG_ROWS, IMG_COLS = 28, 28
-
+TRAIN_SIZE = 60000
+MNIST_FEATURES_PICKLE_NAME = 'mnist_features'
 
 class MnistData(DataObject):
 
-    def __init__(self, use_data_subset=False):
+    def __init__(self, use_features=False, use_data_subset=False):
+        self.use_features = use_features
         super().__init__(use_data_subset=use_data_subset)
-
-    # number of samples from the removed class
-    def set_number_of_samples_to_use(self, n):
-        assert n >= 0
-        if self.class_removed is None:
-            raise Exception("must run d.set_removed_class(...) before setting number of samples to use")
-
-        if n == 0 or n is None:
-            self.number_of_samples_to_use = None
-        self.number_of_samples_to_use = n
-
-    def set_generated_data(self, generated_data):
-        assert self.class_removed != None
-        if self.number_of_samples_to_use is None:
-            raise Exception("must run d.set_number_of_samples_to_use(...) before setting generated_data")
-        self.generated_data = generated_data
-
-    def into_fit(self):
-        x_train, y_train, x_test, y_test = self._train_test()
-
-        if self.number_of_samples_to_use is not None:
-            n_samples = self.x_class_removed_train[:self.number_of_samples_to_use]
-            n_labels = self.y_class_removed_train[:self.number_of_samples_to_use]
-
-            x_train = np.concatenate((x_train, n_samples))
-            y_train = np.concatenate((y_train, n_labels))
-            x_train, y_train = self._unison_shuffle(x_train, y_train)
-
-            x_test = np.concatenate((x_test, self.x_class_removed_test))
-            y_test = np.concatenate((y_test, self.y_class_removed_test))
-            x_test, y_test = self._unison_shuffle(x_test, y_test)
-
-        if self.generated_data is not None:
-            assert self.number_of_samples_to_use is not None
-            x_train = np.concatenate((x_train, self.generated_data))
-            y_train = np.concatenate((y_train, np.repeat(self.class_removed, len(self.generated_data))))
-            x_train, y_train = self._unison_shuffle(x_train, y_train)
-
-        return x_train, self._one_hot_encode(y_train), x_test, self._one_hot_encode(y_test)
-
-    # solve this! need to remove 5
-    def into_evaluate(self):
-        if self.class_removed is not None and (self.number_of_samples_to_use is not None or self.generated_data is not None):
-            return self._unison_shuffle(
-                np.concatenate((self.x_test, self.x_class_removed_test)),
-                np.concatenate((self.y_test_one_hot, self._one_hot_encode(self.y_class_removed_test))))
-        else:
-            return self.x_test, self.y_test_one_hot
-
-
-    def set_removed_class(self, class_index, verbose=True):
-        if self.class_removed != None:
-            self.__init__(use_data_subset=self.use_data_subset)
-
-        if class_index is not None:
-            self.class_removed = class_index
-
-            class_subset_mask = self.y_train[:] == class_index
-            self.x_class_removed_train = self.x_train[class_subset_mask]
-            self.y_class_removed_train = self.y_train[class_subset_mask]
-
-            self.x_train = self.x_train[~class_subset_mask]
-            self.y_train = self.y_train[~class_subset_mask]
-
-            class_subset_mask = self.y_test[:] == class_index
-            self.x_class_removed_test = self.x_test[class_subset_mask]
-            self.y_class_removed_test = self.y_test[class_subset_mask]
-
-            self.x_test = self.x_test[~class_subset_mask]
-            self.y_test = self.y_test[~class_subset_mask]
-
-            self.y_train_one_hot = self._one_hot_encode(self.y_train)
-            self.y_test_one_hot = self._one_hot_encode(self.y_test)
-
-        train_unique, train_counts = np.unique(self.y_train, return_counts=True)
-        test_unique, test_counts = np.unique(self.y_test, return_counts=True)
-
-        if verbose:
-            print("current number of examples per class -- train:\n",
-                  dict(zip(train_unique, train_counts)))
-            print("\ncurrent number of examples per class -- test:\n",
-                  dict(zip(test_unique, test_counts)))
-
-    def get_n_samples(self, n):
-        if self.class_removed is None:
-            raise Exception(
-                "must run d.set_removed_class(...) in order to get n samples")
-        return self.x_class_removed_train[:n]
-
-    def get_num_classes(self):
-        return self.n_classes
-
-    def get_generated_data_stub(self):
-        if self.class_removed is None:
-            raise Exception(
-                "must run d.set_removed_class(...) in order to get get_generated_data_stub")
-        return self.x_class_removed_train[-50:]
-
-    # this method overrides the disease removed paramater!
-    def to_low_shot_dataset(self, verbose=False):
-        self.__init__(use_data_subset = False)
-        if verbose:
-            print("Note class removed paramater was overriden. re-Run d.set_removed_class() if needed")
-        
-        x, y = self._features_and_labels()
-
-        map_class_to_features = defaultdict(list)
-
-        for _class, features in zip(y, x):
-            map_class_to_features[_class].append(features.flatten())
-
-        map_class_to_features = {y: np.array(X)
-                                 for y, X in map_class_to_features.items()}
-
-        return map_class_to_features, x[0].shape
-
 
 #####################################################################
 #
@@ -139,12 +26,29 @@ class MnistData(DataObject):
 #
 #####################################################################
 
-    def _processed_data(self, use_data_subset):
-        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    def _processed_data(self):
+        if self.use_features is True:
+            return self._load_features()
+        else:
+            return self._load_raw_data()
 
-        if use_data_subset:
-            x_train, y_train = self._subset(x_train, y_train)
-            x_test, y_test = self._subset(x_test, y_test)
+    def _load_features(self):
+        from sklearn.externals import joblib
+        dict = joblib.load(read_pickle_path(MNIST_FEATURES_PICKLE_NAME))
+        features = dict['features']
+        labels = dict['labels']
+
+        x_train = features[:TRAIN_SIZE]
+        y_train = labels[:TRAIN_SIZE]
+
+        x_test = features[TRAIN_SIZE:]
+        y_test = labels[TRAIN_SIZE:]
+
+        return (x_train, y_train), (x_test, y_test)
+
+
+    def _load_raw_data(self):    
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
         if K.image_data_format() == 'channels_first':
             x_train = x_train.reshape(
@@ -162,29 +66,3 @@ class MnistData(DataObject):
         x_test /= 255
 
         return (x_train, y_train), (x_test, y_test)
-
-    def _one_hot_encode(self, y):
-        n_rows, n_cols = len(y), self.n_classes
-        enc = np.zeros((n_rows, self.n_classes))
-        enc[np.arange(n_rows), y] = 1.0
-        if self.class_removed is not None:
-            enc = np.delete(enc, [self.class_removed], axis=1)
-        return enc
-
-    def _train_test(self):
-        return self.x_train, self.y_train, self.x_test, self.y_test
-
-    def _unison_shuffle(self, x, y):
-        assert len(x) == len(y)
-        p = np.random.permutation(len(x))
-        return x[p], y[p]
-
-    def _subset(self, x, y):
-        assert len(x) == len(y)
-        n = len(x)
-        subset_size = round(0.1 * n)
-        return x[:subset_size], y[:subset_size]
-
-    def _features_and_labels(self):
-        x_train, y_train, x_test, y_test = self._train_test()
-        return np.concatenate((x_train, x_test)), np.concatenate((y_train, y_test))

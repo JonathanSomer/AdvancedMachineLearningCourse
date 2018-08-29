@@ -6,6 +6,7 @@ from sklearn.externals import joblib
 from concurrent.futures import ProcessPoolExecutor
 from sklearn.preprocessing import LabelEncoder
 from mnist_data import *
+from cifar_data import *
 
 import data_utils as du
 import numpy as np
@@ -21,10 +22,12 @@ def to_low_shot_xray():
 
 
 dataset_to_n_categories = {'xray': 15,
-                           'mnist': 10}
+                           'mnist': MnistData().get_num_classes(),
+                           'cifar10': Cifar10Data().get_num_classes()}
 
 dataset_to_lowshot_func = {'xray': to_low_shot_xray,
-                           'mnist': MnistData().to_low_shot_dataset}
+                           'mnist': MnistData().to_low_shot_dataset,
+                           'cifar10': Cifar10Data().to_low_shot_dataset}
 
 
 def update(msg):
