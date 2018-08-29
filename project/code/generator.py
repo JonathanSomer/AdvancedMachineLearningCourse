@@ -381,11 +381,12 @@ class LowShotGenerator(object):
 
             txt = 'category {0},\tloss = {1}\tacc = {2}\tunique = {3}'
             rows = [txt.format(k, losses[k], accs[k], cat_to_n_unique[k]) for k in sorted(losses.keys())]
-            msg = '*hidden_size = {0}, lambda = {1} [{2} clusters, {3} epochs]*\n```{4}```'.format(hs,
-                                                                                                   λ,
-                                                                                                   n_clusters,
-                                                                                                   epochs,
-                                                                                                   '\n'.join(rows))
+            msg = '*hidden_size = {0}, lambda = {1} [{2} clusters, {3} epochs, {4}]*\n```{4}```'.format(hs,
+                                                                                                        λ,
+                                                                                                        n_clusters,
+                                                                                                        epochs,
+                                                                                                        '\n'.join(rows),
+                                                                                                        dataset_name)
             slack_update(msg)
 
         hs, λ = min(avg_losses, key=lambda k: avg_losses[k])

@@ -9,8 +9,16 @@ data_obj_getters = {'mnist': MnistData}
 
 
 def main(dataset_name, n_clusters, epochs, test):
+    use_features = True
+    if 'raw' in dataset_name:
+        use_features = False
+        dataset_name = dataset_name[4:]
+
+    if '_' in dataset_name:
+        dataset_name, _ = dataset_name.split('_')
+
     LowShotGenerator.cross_validate(Classifiers[dataset_name],
-                                    data_obj_getters[dataset_name](),
+                                    data_obj_getters[dataset_name](use_features=use_features),
                                     dataset_name,
                                     n_clusters=n_clusters,
                                     epochs=epochs,
