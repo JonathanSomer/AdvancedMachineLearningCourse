@@ -23,7 +23,7 @@ class Cifar10Data(DataObject):
 #
 #####################################################################
 
-    def _processed_data(self):
+    def _processed_data(self, class_removed=None):
         (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
         if K.image_data_format() == 'channels_first':

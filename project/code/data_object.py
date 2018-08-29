@@ -11,10 +11,10 @@ from collections import defaultdict
 
 
 class DataObject(object):
-    def __init__(self, use_data_subset=False, use_features=False):
+    def __init__(self, use_data_subset=False, use_features=False, class_removed=None):
         self.use_data_subset = use_data_subset
         self.use_features = use_features
-        (x_train, y_train), (x_test, y_test) = self._processed_data()
+        (x_train, y_train), (x_test, y_test) = self._processed_data(class_removed=class_removed)
 
         self.n_classes = len(np.unique(y_test))
 
@@ -91,8 +91,9 @@ class DataObject(object):
         return a, b
 
     def set_removed_class(self, class_index, verbose=True):
-        if self.class_removed != None:
-            self.__init__(use_data_subset=self.use_data_subset, use_features=self.use_features)
+        self.__init__(use_data_subset=self.use_data_subset, 
+                      use_features=self.use_features,
+                      class_removed=class_index)
 
         if class_index is not None:
             self.class_removed = class_index
@@ -160,10 +161,10 @@ class DataObject(object):
         return self.x_class_removed_train[-50:]
 
     # this method overrides the disease removed paramater!
-    def to_low_shot_dataset(self, verbose=False):
-        self.__init__(use_data_subset=False, use_features=self.use_features)
+    def to_low_shot_dataset(self, verbose=False, class_removed=None):
+        self.__init__(use_data_subset=False, use_features=self.use_features, class_removed=class_removed)
         if verbose:
-            print("Note class removed paramater was overriden. re-Run d.set_removed_class() if needed")
+            print("Note class_removed paramater was overriden. re-Run d.set_removed_class() if needed")
         
         x, y = self._features_and_labels()
 
@@ -184,7 +185,7 @@ class DataObject(object):
 #####################################################################
 
     @abstractmethod
-    def _processed_data(self):
+    def _processed_data(self, class_removed=None):
         raise NotImplementedError("Implement a method which returns some -- (x_train, y_train), (x_test, y_test)")
 
     def _one_hot_encode(self, y):
