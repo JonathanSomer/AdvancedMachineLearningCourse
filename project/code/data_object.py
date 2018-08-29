@@ -64,25 +64,26 @@ class DataObject(object):
 
         return x_train, self._one_hot_encode(y_train), x_test, self._one_hot_encode(y_test)
 
-    def into_evaluate(self, inx=None):
+    # supply class_index if want only data for this class
+    def into_evaluate(self):
         if self.class_removed is not None and (
                 self.number_of_samples_to_use is not None or self.generated_data is not None):
             return self._unison_shuffle(
                 np.concatenate((self.x_test, self.x_class_removed_test)),
                 np.concatenate((self.y_test_one_hot, self._one_hot_encode(self.y_class_removed_test))))
         else:
-            if inx:
-                if self.class_removed and inx == self.class_removed:
-                    mask = self.y_test[:] == inx
-                    y_test_sub = self.y_class_removed_test[mask]
-                    X_test_sub = self.x_class_removed_test[mask]
-                else:
-                    mask = self.y_test[:] == inx
-                    y_test_sub = self.y_test[mask]
-                    X_test_sub = self.x_test[mask]
-                return X_test_sub, self._one_hot_encode(y_test_sub)
-
             return self.x_test, self.y_test_one_hot
+
+    def into_evaluate_one_class(self, class_index=None):
+        if class_index is not None:
+            if self.class_removed is not None and class_index == self.class_removed:
+                y_test_sub = self.y_class_removed_test
+                X_test_sub = self.x_class_removed_test
+            else:
+                is_in_class_subset = self.y_test[:] == class_index
+                y_test_sub = self.y_test[is_in_class_subset]
+                X_test_sub = self.x_test[is_in_class_subset]
+            return X_test_sub, self._one_hot_encode(y_test_sub)
 
     def into_roc_curve(self, y_score, inx):
         a = self.y_test[:] == inx
@@ -117,10 +118,15 @@ class DataObject(object):
         test_unique, test_counts = np.unique(self.y_test, return_counts=True)
 
         if verbose:
+            if class_index is not None:
+                print("Removed class # %d" % class_index)
+            else:
+                print("Reset to use all classes")
             print("current number of examples per class -- train:\n",
                   dict(zip(train_unique, train_counts)))
             print("\ncurrent number of examples per class -- test:\n",
                   dict(zip(test_unique, test_counts)))
+
 
     # number of samples from the removed class
     def set_number_of_samples_to_use(self, n):
