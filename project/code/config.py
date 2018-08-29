@@ -15,6 +15,8 @@ gcloud_python_path = ''
 # should be an absolute path
 # the dir should contain the subdirs: datasets, pickles, models
 local_data_dir = ''
+local_results_dir = ''
+
 
 # run get_resnet_model().summary() and check if last layer is a pooling layer
 resnet_version_performs_pooling = False

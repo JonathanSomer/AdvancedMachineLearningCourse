@@ -77,7 +77,7 @@ class Classifier(object):
     # supply file_path if want to save model to file
     def fit(self, X_train, y_train, model_weights_file_path=None, callbacks=[]):
         class_weight = Classifier.get_class_weights(y_train)
-        self.model.fit(X_train, y_train, batch_size=50, epochs=self.n_epochs, verbose=1, validation_split=0.1, callbacks=callbacks, class_weight=class_weight)
+        self.model.fit(X_train, y_train, batch_size=50, epochs=self.n_epochs, verbose=1, callbacks=callbacks, class_weight=class_weight)
 
         if model_weights_file_path:
             self.model.save(model_weights_file_path)
