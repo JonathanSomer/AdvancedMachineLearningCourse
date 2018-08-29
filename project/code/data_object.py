@@ -99,10 +99,15 @@ class DataObject(object):
         test_unique, test_counts = np.unique(self.y_test, return_counts=True)
 
         if verbose:
+            if class_index is not None:
+                print("Removed class # %d" % class_index)
+            else:
+                print("Reset to use all classes")
             print("current number of examples per class -- train:\n",
                   dict(zip(train_unique, train_counts)))
             print("\ncurrent number of examples per class -- test:\n",
                   dict(zip(test_unique, test_counts)))
+
 
     # number of samples from the removed class
     def set_number_of_samples_to_use(self, n):
