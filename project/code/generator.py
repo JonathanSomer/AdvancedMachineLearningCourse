@@ -292,6 +292,8 @@ class LowShotGenerator(object):
         except ValueError:
             raise ValueError('Given dataset does not fit.')
 
+        category_to_exclude = int(category_to_exclude)
+
         # get all the quadruplets without the excluded category
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
                                                     categories=categories,
