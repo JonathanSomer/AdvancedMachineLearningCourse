@@ -266,11 +266,12 @@ class LowShotGenerator(object):
         return losses, accs, cat_to_n_unique
 
     @staticmethod
-    def benchmark_single(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=512):
+    def benchmark_single(Classifier, DataClass, dataset_name, n_clusters, λ, n_new=100, epochs=2, hidden_size=256):
         """
         runs a benchmark test on the one category from the given dataset.
-        :param Classifier: Classifier class (for creating classifiers)
-        :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
+        :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
+        :param DataClass: DataClass class (for creating data objects. i.e. MnistData)
+        :param dataset_name: The dataset name of the wanted dataset to run benchmark on. i.e. mnist_5
         :param n_clusters: number of clusters to use
         :param λ: lambda parameter
         :param n_new: number of new examples to test accuracy on
@@ -281,12 +282,13 @@ class LowShotGenerator(object):
         use_features = 'raw' not in dataset_name
         categories = collect.get_categories(dataset_name)
 
+        # raw_mnist_1 or mnist_1 etc
         try:
             split = dataset_name.split('_')
             if len(split) == 3:
-                dataset_name, category = split[1:]
+                dataset_name, category_to_exclude = split[1:]
             else:
-                raise ValueError('Given dataset does not fit.')
+                dataset_name, category_to_exclude = split
         except ValueError:
             raise ValueError('Given dataset does not fit.')
 
@@ -295,22 +297,12 @@ class LowShotGenerator(object):
                                                     categories=categories,
                                                     dataset_name=dataset_name)
 
-        #                  EXAMPLE:
-        # data_object = MnistData(use_features = True,
-        #                         class_removed=category)
-        # all_classifier = Classifier(use_features=use_features)
-        # all_classifier.fit(*data_object.into_fit())
-        # 
-        # data_object.set_removed_class(category)
-        # all_but_one_classifier = Classifier(use_features=use_features)
-        # all_but_one_classifier.fit(*data_object.into_fit())
-        # all_but_one_classifier.set_trainability(is_trainable=False)
+        data_object = DataClass(use_features=use_features, class_removed=category_to_exclude)
 
-        data_object.set_removed_class(None)
         all_classifier = Classifier(use_features=use_features)
         all_classifier.fit(*data_object.into_fit())
 
-        data_object.set_removed_class(category)
+        data_object.set_removed_class(category_to_exclude)
         all_but_one_classifier = Classifier(use_features=use_features)
         all_but_one_classifier.fit(*data_object.into_fit())
         all_but_one_classifier.set_trainability(is_trainable=False)
@@ -331,12 +323,12 @@ class LowShotGenerator(object):
 
         data_object.set_removed_class(None)
         X_new = new_examples
-        y_new = data_object._one_hot_encode(np.repeat(category, n_new))
+        y_new = data_object._one_hot_encode(np.repeat(category_to_exclude, n_new))
 
         print('Testing the ALL classifier on generated data:')
         loss, acc = all_classifier.evaluate(X_new, y_new)
 
-        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category, acc, n_unique, n_new))
+        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category_to_exclude, acc, n_unique, n_new))
 
         return loss, acc, n_unique
 
