@@ -9,6 +9,7 @@ import numpy as np
 from collections import defaultdict
 from data_object import *
 from data_utils import *
+from sklearn.externals import joblib
 
 IMG_ROWS, IMG_COLS = 28, 28
 TRAIN_SIZE = 60000
@@ -25,28 +26,6 @@ class MnistData(DataObject):
 #                       PRIVATE METHODS
 #
 #####################################################################
-    # solve this! need to remove 5
-
-    def set_removed_class(self, class_index, verbose=True):
-        if self.class_removed != None:
-            self.__init__(use_data_subset=self.use_data_subset)
-
-        if class_index is not None:
-            self.class_removed = class_index
-
-            class_subset_mask = self.y_train[:] == class_index
-            self.x_class_removed_train = self.x_train[class_subset_mask]
-            self.y_class_removed_train = self.y_train[class_subset_mask]
-
-            self.x_train = self.x_train[~class_subset_mask]
-            self.y_train = self.y_train[~class_subset_mask]
-
-            class_subset_mask = self.y_test[:] == class_index
-            self.x_class_removed_test = self.x_test[class_subset_mask]
-            self.y_class_removed_test = self.y_test[class_subset_mask]
-
-            self.x_test = self.x_test[~class_subset_mask]
-            self.y_test = self.y_test[~class_subset_mask]
 
     def _processed_data(self):
         if self.use_features is True:
@@ -55,7 +34,6 @@ class MnistData(DataObject):
             return self._load_raw_data()
 
     def _load_features(self):
-        from sklearn.externals import joblib
         dict = joblib.load(read_pickle_path(MNIST_FEATURES_PICKLE_NAME))
         features = dict['features']
         labels = dict['labels']

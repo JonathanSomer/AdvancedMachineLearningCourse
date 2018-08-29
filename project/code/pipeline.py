@@ -36,7 +36,7 @@ class PipeLine:
             for inx in range(n_classes):
                 results[inx] = {}
 
-                loss, acc = self.cls.evaluate(*self.dataset.into_evaluate(inx))
+                loss, acc = self.cls.evaluate(*self.dataset.into_evaluate_one_class(inx))
                 results[inx]['accuracy'] = acc
 
                 fpr[inx], tpr[inx], _ = roc_curve(*self.dataset.into_roc_curve(y_score, inx))
