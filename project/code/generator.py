@@ -302,7 +302,7 @@ class LowShotGenerator(object):
     @staticmethod
     def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=2, test=False):
         import requests
-        from concurrent.futures import ProcessPoolExecutor
+        import concurrent.futures=
 
         def slack_update(msg):
             print(msg)
@@ -326,12 +326,14 @@ class LowShotGenerator(object):
             args = (Classifier, data_object, dataset_name, n_clusters, _λ, n_new, epochs, _hs)
             return LowShotGenerator.benchmark(*args)
 
-        with ProcessPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
             # for hs, λ in product(hidden_sizes, lambdas):
             #     losses, accs, cat_to_n_unique = _benchmark(hs, λ)
+            future_to_res = {executor.submit(_benchmark, hs, λ): (hs, λ) for hs, λ in product(hidden_sizes, lambdas)}
+            for future in concurrent.futures.as_completed(future_to_res):
+                hs, λ = future_to_res[future]
+                losses, accs, cat_to_n_unique = future.result()
 
-            for hs, λ, (losses, accs, cat_to_n_unique) in zip(hidden_sizes, lambdas,
-                                                              executor.map(_benchmark, hidden_sizes, lambdas)):
                 avg_losses[hs, λ] = sum(losses.values()) / len(losses)
                 avg_accs[hs, λ] = sum(accs.values()) / len(accs)
 
