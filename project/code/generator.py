@@ -18,9 +18,18 @@ import config
 
 
 class LowShotGenerator(object):
-    def __init__(self, trained_classifier, quadruplets_data, data_object, n_layers=3, hidden_size=512,
-                 batch_size=128, epochs=10, activation='relu', n_examples=None, callbacks=[],
-                 name='LowShotGenerator', λ=10., lr=.1, momentum=.9, decay=1e-4):
+    def __init__(self, trained_classifier, data_object, n_layers=3, hidden_size=256,
+                 batch_size=128, epochs=10, activation='relu', callbacks=[],
+                 name='LowShotGenerator', λ=.95, lr=.1, momentum=.9, decay=1e-4, n_clusters=30):
+
+        self.n_clusters = n_clusters
+        self.novel_category = data_object.class_removed
+        if self.novel_category is not None:
+            self.dataset_name = '{0}_{1}'.format(data_object.name, self.novel_category)
+
+        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+                                                    categories='all',  # we work with dataset_name so it's fine
+                                                    dataset_name=self.dataset_name)
 
         self.n_layers = n_layers
         self.quadruplets, self.centroids, self.cat_to_vectors, self.original_shape = quadruplets_data
@@ -28,6 +37,7 @@ class LowShotGenerator(object):
         self.n_classes = len(self.categories)
         self.hidden_size = hidden_size
         self.W = self.trained_classifier = trained_classifier
+        self.trained_classifier.set_trainability(False)
         self.activation = activation
         self.batch_size = batch_size
         self.epochs = epochs
@@ -56,12 +66,6 @@ class LowShotGenerator(object):
         self.input_dim = len(self.x_train[0])
         self.generator_output_dim = len(self.y_train['generator'][0])
 
-        # n_examples is the maximum number to generate per class
-        # if n_examples:
-        #     self.n_examples = n_examples
-        # else:
-        #     self.n_examples = min(len(vs) for vs in self.cat_to_vectors.values())
-
         self.model, self.generator = self.build(self.trained_classifier,
                                                 self.original_shape,
                                                 self.input_dim,
@@ -74,6 +78,8 @@ class LowShotGenerator(object):
                                                 self.momentum,
                                                 self.decay)
 
+        self.fit()
+
         # self.weights_file_path = du.read_model_path('{0}'.format(self.name))
         # if os.path.exists(self.weights_file_path):
         #     self.model.load_weights(self.weights_file_path)
@@ -85,12 +91,9 @@ class LowShotGenerator(object):
         # else:
         #     self.fit()
 
-        self.fit()
-
     @staticmethod
     def build(trained_classifier, original_shape, input_dim, generator_output_dim, n_layers, hidden_size,
-              activation,
-              λ=10., lr=.1, momentum=.9, decay=1e-4):
+              activation, λ=10., lr=.1, momentum=.9, decay=1e-4):
         # verify that the trained classifier is not trainable
         n_trainable_params = np.sum(K.count_params(p) for p in set(trained_classifier.trainable_weights))
         if n_trainable_params > 0:
@@ -158,57 +161,45 @@ class LowShotGenerator(object):
 
         # self.model.save(self.weights_file_path)
 
-    def generate(self, ϕ, n_new=1):
+    def generate(self, ϕ, n_new=1, smart=False):
         """
         :param ϕ: "seed" example for some novel category
         :param n_new: number of new examples to return. should be less than self.n_examples
+        :param smart: whether to use smart selection or not
         :return: list of hallucinated feature vectors G([ϕ, c1a , c2a]) of size n_new
         """
-        X = []
-        for _ in range(n_new):
-            # this is a list of lists, each list is centroids of cat
-            centroids_all_categories = list(self.centroids.values())
-            idx = np.random.choice(len(centroids_all_categories))
+        ϕ = ϕ.flatten()
 
-            category_centroids = centroids_all_categories[idx]
+        def select_category():
+            if smart:
+                raise NotImplementedError('Under construction')
+            else:  # random choice
+                available_categories = list(self.centroids.keys())
+                return np.random.choice(available_categories)
 
-            idx = np.random.choice(len(category_centroids), 2)
-            c1a, c2a = category_centroids[idx]
+        def select_couples_of_centroids(category):
+            if smart:
+                raise NotImplementedError('Under construction')
+            else:
+                available_centroids = self.centroids[category]
+                idxs = np.random.choice(len(available_centroids), n_new * 2)
+                chosen_centroids = available_centroids[idxs]
+                c1as, c2as = np.split(chosen_centroids, 2)
+                return zip(c1as, c2as)
 
-            # print(ϕ.shape)
-            # print(c1a.shape)
-            x = np.concatenate((ϕ.flatten(), c1a, c2a))
-            X.append(x)
+        category = select_category()
+        X = [np.concatenate((ϕ, c1a, c2a)) for c1a, c2a in select_couples_of_centroids(category)]
 
         return self.generator.predict(np.array(X))
 
-    @staticmethod
-    def get_generated_features(classifier, novel_category_label, seed_examples_of_novel_category, n_clusters, λ,
-                               n_new=20, dataset_name='xray'):
-        name = '{3}.{0}.{1}_lambda.{2}_clusters'.format(novel_category_label, λ, n_clusters, dataset_name)
-
-        if classifier.trainable:
-            classifier.toggle_trainability()
-
-        all_labels = list(range(10 if dataset_name == 'mnist' else 15))
-        trained_categories = [d for d in all_labels if d != novel_category_label]
-
-        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
-                                                    categories=trained_categories,
-                                                    dataset_name=dataset_name)
-
-        generator = LowShotGenerator(classifier.model,
-                                     quadruplets_data,
-                                     λ=λ,
-                                     name=name)
-
-        n_new_per_example = (n_new - len(seed_examples_of_novel_category)) // len(seed_examples_of_novel_category)
-        new_examples = [generator.generate(ϕ, n_new=n_new_per_example) for ϕ in seed_examples_of_novel_category]
+    def generate_from_samples(self, samples, n_total=20, smart=False):
+        n_new_per_sample = (n_total - len(samples)) // len(samples)
+        new_examples = [self.generate(ϕ, n_new=n_new_per_sample, smart=smart) for ϕ in samples]
 
         return np.concatenate(new_examples)
 
     @staticmethod
-    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=512):
+    def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=256):
         """
         :param Classifier: Classifier class (for creating classifiers)
         :param dataset_name: the dataset name of the dataset for the Classifier, mnist or xray
@@ -222,10 +213,10 @@ class LowShotGenerator(object):
         use_features = 'raw' not in dataset_name
         categories = collect.get_categories(dataset_name)
 
-        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
-                                                    categories=categories,  # can be 'all' as well
-                                                    dataset_name=dataset_name)
-        quadruplets, cat_to_centroids, cat_to_vectors, original_shape = quadruplets_data
+        # quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+        #                                             categories=categories,  # can be 'all' as well
+        #                                             dataset_name=dataset_name)
+        # quadruplets, cat_to_centroids, cat_to_vectors, original_shape = quadruplets_data
 
         data_object.set_removed_class(None)
         all_classifier = Classifier(use_features=use_features)
@@ -240,16 +231,16 @@ class LowShotGenerator(object):
             all_but_one_classifier.set_trainability(is_trainable=False)
 
             g = LowShotGenerator(all_but_one_classifier.model,
-                                 quadruplets_data,
                                  data_object,
                                  λ=λ,
                                  epochs=epochs,
-                                 hidden_size=hidden_size)
+                                 hidden_size=hidden_size,
+                                 n_clusters=n_clusters)
 
             n_real_examples = 10
+            samples = data_object.get_n_samples(n=n_real_examples)
             n_new_per_example = n_new // n_real_examples
-            n_examples = data_object.get_n_samples(n=n_real_examples)
-            new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
+            new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in samples])
 
             cat_to_n_unique[category] = n_unique = len(np.unique(new_examples, axis=0))
 
@@ -266,7 +257,8 @@ class LowShotGenerator(object):
         return losses, accs, cat_to_n_unique
 
     @staticmethod
-    def benchmark_single(Classifier, DataClass, dataset_name, n_clusters, λ, n_new=100, epochs=2, hidden_size=256):
+    def benchmark_single(Classifier, DataClass, dataset_name, n_clusters=30, λ=.95, n_new=100, epochs=2,
+                         hidden_size=256):
         """
         runs a benchmark test on the one category from the given dataset.
         :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
@@ -280,7 +272,7 @@ class LowShotGenerator(object):
         :return: dict mapping category to accuracy
         """
         use_features = 'raw' not in dataset_name
-        categories = collect.get_categories(dataset_name)
+        # categories = collect.get_categories(dataset_name)
 
         # raw_mnist_1 or mnist_1 etc
         try:
@@ -295,11 +287,11 @@ class LowShotGenerator(object):
         category_to_exclude = int(category_to_exclude)
 
         # get all the quadruplets without the excluded category
-        quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
-                                                    categories=categories,
-                                                    dataset_name=dataset_name)
+        # quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
+        #                                             categories=categories,
+        #                                             dataset_name=dataset_name)
 
-        data_object = DataClass(use_features=use_features, class_removed=category_to_exclude)
+        data_object = DataClass(use_features=use_features)
 
         all_classifier = Classifier(use_features=use_features)
         all_classifier.fit(*data_object.into_fit())
@@ -310,11 +302,11 @@ class LowShotGenerator(object):
         all_but_one_classifier.set_trainability(is_trainable=False)
 
         g = LowShotGenerator(all_but_one_classifier.model,
-                             quadruplets_data,
                              data_object,
                              λ=λ,
                              epochs=epochs,
-                             hidden_size=hidden_size)
+                             hidden_size=hidden_size,
+                             n_clusters=n_clusters)
 
         n_real_examples = 10
         n_new_per_example = n_new // n_real_examples
@@ -335,21 +327,8 @@ class LowShotGenerator(object):
         return loss, acc, n_unique
 
     @staticmethod
-    def onehot_encode(y, n_classes=None):
-        yy = y.reshape(-1, 1)
-        encoder = OneHotEncoder(n_values=n_classes) if n_classes else OneHotEncoder()
-        encoder.fit(yy)
-        one_hot_labels = encoder.transform(yy).toarray()
-
-        def encode_func(z):
-            return encoder.transform(z.reshape(-1, 1)).toarray()
-
-        return encode_func, one_hot_labels
-
-    @staticmethod
-    def cross_validate(Classifier, data_object, dataset_name, n_clusters=40, n_new=100, epochs=2, test=False):
+    def cross_validate(Classifier, data_object, dataset_name, n_clusters=30, n_new=100, epochs=2, test=False):
         import requests
-        import concurrent.futures
 
         def slack_update(msg):
             print(msg)

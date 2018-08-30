@@ -232,7 +232,7 @@ def main(dataset_name, n_files, n_clusters, n_jobs, test):
         n_files = 1
         n_clusters = 5
 
-    update('*Generating low shot data procedure has just started* :weight_lifter:')
+    update('Generating low shot data procedure started')
 
     cat_to_vectors, original_shape = preprocess(dataset_name, n_files)
     cat_to_centroids = process_centroids(dataset_name, n_files, n_clusters, cat_to_vectors, n_jobs)
