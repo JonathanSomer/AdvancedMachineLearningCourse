@@ -10,9 +10,10 @@ from config import *
 from sklearn.metrics import roc_curve, auc
 from mnist_classifier import *
 from mnist_data import *
+from generator import *
 
 _logger = logger.get_logger(__name__)
-N_GIVEN_EXAMPLES = [5, 10, 20, 40, 60, 80, 100, 150 ,200,300]
+N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20, 40, 60, 80, 100]
 
 
 class PipeLine:
@@ -64,9 +65,11 @@ class PipeLine:
         self.dataset.set_removed_class(class_index=inx, verbose=True)
         self.cls.fit(*self.dataset.into_fit())
         #results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
+        generator = LowShotGenerator(self.cls, self.dataset)
 
         for n_examples in N_GIVEN_EXAMPLES:
             low_shot_learning_results[n_examples] = {}
+
             self.dataset.set_number_of_samples_to_use(n=n_examples)
 
             self.cls.fit(*self.dataset.into_fit())
@@ -75,14 +78,28 @@ class PipeLine:
             #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generated data' % (inx,n_examples))
             low_shot_learning_results[n_examples]['without'] = results[inx]
 
-            generated_data = d.get_generated_data_stub()
+            n_examples = self.dataset.x_class_removed_train[:self.n_examples]
+
+            generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
+                                                             smart_category=False, smart_centroids=False)
             self.dataset.set_generated_data(generated_data)
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
             #self.create_cls_roc_plot(fpr, tpr, results,
             #                         '%d - with %d samples without generated data' % (inx, n_examples))
-            low_shot_learning_results[n_examples]['with'] = results[inx]
+            low_shot_learning_results[n_examples]['with no category'] = results[inx]
+
+            generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
+                                                             smart_category=True, smart_centroids=False)
+            self.dataset.set_generated_data(generated_data)
+            self.cls.fit(*self.dataset.into_fit())
+
+            results, fpr, tpr = self.evaluate_cls()
+            # self.create_cls_roc_plot(fpr, tpr, results,
+            #                         '%d - with %d samples without generated data' % (inx, n_examples))
+            low_shot_learning_results[n_examples]['with true category'] = results[inx]
+
             self.dataset.set_generated_data(None)
 
         self.export_one_shot_learning_result(low_shot_learning_results, inx)
@@ -95,15 +112,21 @@ class PipeLine:
         for n_examples in N_GIVEN_EXAMPLES:
             _logger.info('low shot results:')
 
-            results_n_with = results[n_examples]['with']
             results_n_without = results[n_examples]['without']
+            results_n_with_f = results[n_examples]['with no category']
+            results_n_with_t = results[n_examples]['with true category']
+
             _logger.info('%d samples without generator accuracy %f, auc %f' % (n_examples,
-                                                                               results_n_without[
-                                                                                   'accuracy'],
+                                                                               results_n_without['accuracy'],
                                                                                results_n_without['auc']))
-            _logger.info('%d samples with generator accuracy %f, auc %f' % (n_examples,
-                                                                            results_n_with['accuracy'],
-                                                                            results_n_with['auc']))
+            _logger.info('%d samples with generator no category accuracy %f, auc %f' % (n_examples,
+                                                                            results_n_with_f['accuracy'],
+                                                                            results_n_with_f['auc']))
+
+            _logger.info('%d samples with generator true category accuracy %f, auc %f' % (n_examples,
+                                                                                          results_n_with_t['accuracy'],
+                                                                                          results_n_with_t['auc']))
+
 
         self.create_low_shot_results_plot(base_inx_results, results, '%d low shot results' % inx)
         _logger.info('\n')
@@ -132,17 +155,26 @@ class PipeLine:
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
     def create_low_shot_results_plot(self, base_results, low_shot_results, figure_name):
-        auc_with = [low_shot_results[n]['with']['auc'] for n in N_GIVEN_EXAMPLES]
         auc_without = [low_shot_results[n]['without']['auc'] for n in N_GIVEN_EXAMPLES]
-        accuracy_with = [low_shot_results[n]['with']['accuracy'] for n in N_GIVEN_EXAMPLES]
         accuracy_without = [low_shot_results[n]['without']['accuracy'] for n in N_GIVEN_EXAMPLES]
+
+        auc_with_f = [low_shot_results[n]['with no category']['auc'] for n in N_GIVEN_EXAMPLES]
+        accuracy_with_f = [low_shot_results[n]['with no category']['accuracy'] for n in N_GIVEN_EXAMPLES]
+
+        auc_with_t = [low_shot_results[n]['with true category']['auc'] for n in N_GIVEN_EXAMPLES]
+        accuracy_with_t = [low_shot_results[n]['with true category']['accuracy'] for n in N_GIVEN_EXAMPLES]
+
 
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
         plt.plot(N_GIVEN_EXAMPLES, auc_without, marker='o', label='auc without generated data')
         plt.plot(N_GIVEN_EXAMPLES, accuracy_without, marker='o', label='accuracy without generated data')
-        plt.plot(N_GIVEN_EXAMPLES, auc_with, marker='o', label='auc with generated data')
-        plt.plot(N_GIVEN_EXAMPLES, accuracy_with, marker='o', label='accuracy with generated data')
+
+        plt.plot(N_GIVEN_EXAMPLES, auc_with_f, marker='o', label='auc with generated data not category')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_f, marker='o', label='accuracy with generated data not category')
+
+        plt.plot(N_GIVEN_EXAMPLES, auc_with_t, marker='o', label='auc with generated data true category')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_t, marker='o', label='accuracy with generated data true category')
 
         plt.xlabel('number of examples')
         plt.ylabel('True Positive Rate')
