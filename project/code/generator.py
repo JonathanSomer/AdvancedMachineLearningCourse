@@ -321,7 +321,9 @@ class LowShotGenerator(object):
         print('Testing the ALL classifier on generated data:')
         loss, acc = all_classifier.evaluate(X_new, y_new)
 
-        print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category_to_exclude, acc, n_unique, n_new))
+        # print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category_to_exclude, acc, n_unique, n_new))
+        print('Unique new examples: {0}/{1}'.format(n_unique, n_new))
+
 
         return loss, acc, n_unique
 
