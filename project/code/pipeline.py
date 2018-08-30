@@ -83,6 +83,7 @@ class PipeLine:
             #self.create_cls_roc_plot(fpr, tpr, results,
             #                         '%d - with %d samples without generated data' % (inx, n_examples))
             low_shot_learning_results[n_examples]['with'] = results[inx]
+            self.dataset.set_generated_data(None)
 
         self.export_one_shot_learning_result(low_shot_learning_results, inx)
 
