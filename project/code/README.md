@@ -4,9 +4,11 @@
 	
 	```bash
 	cd /some/path/to/project/code/
-	python3 feature_extraction.py -d mnist
+	python3 feature_extraction.py -d mnist -e 12
+    python3 feature_extraction.py -d cifar10 -e 100
 	cd ../data/pickles/write
 	find . -name "*mnist*" -exec mv {} ../read/ \;
+    find . -name "*cifar10*" -exec mv {} ../read/ \;
 	```
 
 2. Generate quadruplets:
