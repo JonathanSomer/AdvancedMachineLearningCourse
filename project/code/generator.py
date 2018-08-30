@@ -257,7 +257,7 @@ class LowShotGenerator(object):
 
     @staticmethod
     def benchmark_single(Classifier, DataClass, dataset_name, n_clusters=30, λ=.95, n_new=100, epochs=2,
-                         hidden_size=256):
+                         hidden_size=256, classifier_epochs=1):
         """
         runs a benchmark test on the one category from the given dataset.
         :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
@@ -296,7 +296,7 @@ class LowShotGenerator(object):
         all_classifier.fit(*data_object.into_fit())
 
         data_object.set_removed_class(category_to_exclude)
-        all_but_one_classifier = Classifier(use_features=use_features)
+        all_but_one_classifier = Classifier(use_features=use_features, epochs=classifier_epochs)
         all_but_one_classifier.fit(*data_object.into_fit())
         all_but_one_classifier.set_trainability(is_trainable=False)
 
