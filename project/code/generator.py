@@ -37,7 +37,6 @@ class LowShotGenerator(object):
         self.n_classes = len(self.categories)
         self.hidden_size = hidden_size
         self.W = self.trained_classifier = trained_classifier
-        self.trained_classifier.set_trainability(False)
         self.activation = activation
         self.batch_size = batch_size
         self.epochs = epochs
