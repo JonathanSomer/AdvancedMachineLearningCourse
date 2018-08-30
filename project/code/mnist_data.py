@@ -22,7 +22,7 @@ class MnistData(DataObject):
     def __init__(self, use_features=False, use_data_subset=False, class_removed=None):
         self.train_size = TRAIN_SIZE
         self.name = MNIST
-        super().__init__(use_data_subset=use_data_subset, use_features=use_features, class_removed=None)
+        super().__init__(use_data_subset=use_data_subset, use_features=use_features, class_removed=class_removed)
 
 #####################################################################
 #
