@@ -280,7 +280,7 @@ class LowShotGenerator(object):
 
     @staticmethod
     def benchmark_single(Classifier, DataClass, dataset_name, n_clusters=30, λ=.95, n_new=100, epochs=2,
-                         hidden_size=256, classifier_epochs=1):
+                         hidden_size=256, classifier_epochs=1, smart_category=False):
         """
         runs a benchmark test on the one category from the given dataset.
         :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
@@ -333,7 +333,11 @@ class LowShotGenerator(object):
         n_real_examples = 10
         n_new_per_example = n_new // n_real_examples
         n_examples = data_object.get_n_samples(n=n_real_examples)
-        new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
+        # new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
+
+        new_examples = g.generate_from_samples(n_examples,
+                                               n_total=n_new,
+                                               smart_category=smart_category)
 
         n_unique = len(np.unique(new_examples, axis=0))
 
@@ -346,7 +350,6 @@ class LowShotGenerator(object):
 
         # print('{0} => accuracy: {1}, unique new examples: {2}/{3}'.format(category_to_exclude, acc, n_unique, n_new))
         print('Unique new examples: {0}/{1}'.format(n_unique, n_new))
-
 
         return loss, acc, n_unique
 
