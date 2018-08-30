@@ -160,7 +160,7 @@ class LowShotGenerator(object):
 
         # self.model.save(self.weights_file_path)
 
-    def generate(self, ϕ, n_new=1, smart=False):
+    def generate(self, ϕ, n_new=1):
         """
         :param ϕ: "seed" example for some novel category
         :param n_new: number of new examples to return. should be less than self.n_examples
@@ -170,32 +170,55 @@ class LowShotGenerator(object):
         ϕ = ϕ.flatten()
 
         def select_category():
-            if smart:
-                raise NotImplementedError('Under construction')
-            else:  # random choice
-                available_categories = list(self.centroids.keys())
-                return np.random.choice(available_categories)
+            available_categories = list(self.centroids.keys())
+            return np.random.choice(available_categories)
 
         def select_couples_of_centroids(category):
-            if smart:
-                raise NotImplementedError('Under construction')
-            else:
-                available_centroids = self.centroids[category]
-                idxs = np.random.choice(len(available_centroids), n_new * 2)
-                chosen_centroids = available_centroids[idxs]
-                c1as, c2as = np.split(chosen_centroids, 2)
-                return zip(c1as, c2as)
+            available_centroids = self.centroids[category]
+            idxs = np.random.choice(len(available_centroids), n_new * 2)
+            chosen_centroids = available_centroids[idxs]
+            c1as, c2as = np.split(chosen_centroids, 2)
+            return zip(c1as, c2as)
 
         category = select_category()
         X = [np.concatenate((ϕ, c1a, c2a)) for c1a, c2a in select_couples_of_centroids(category)]
 
         return self.generator.predict(np.array(X))
 
-    def generate_from_samples(self, samples, n_total=20, smart=False):
+    def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False):
         n_new_per_sample = (n_total - len(samples)) // len(samples)
-        new_examples = [self.generate(ϕ, n_new=n_new_per_sample, smart=smart) for ϕ in samples]
 
-        return np.concatenate(new_examples)
+        def select_category():
+            if smart_category:
+                'Finding "closest" category to {0}'.format(self.novel_category)
+                preds = self.trained_classifier.predict(np.array(samples))
+                y_preds = np.argmax(preds, axis=2)
+                print(y_preds)
+                categories, counts = np.unique(y_preds, return_counts=True)
+                cnt = dict(zip(categories, counts))
+                print(cnt)
+                return max(categories, key=lambda c: cnt[c])
+
+            else:  # random choice
+                available_categories = list(self.centroids.keys())
+                return np.random.choice(available_categories)
+
+        def select_couples_of_centroids(category):
+            if smart_centroids:
+                raise NotImplementedError('Under construction')
+            else:
+                available_centroids = self.centroids[category]
+                idxs = np.random.choice(len(available_centroids), n_total * 2)
+                selected_centroids = available_centroids[idxs]
+                c1as, c2as = np.split(selected_centroids, 2)
+                return zip(c1as, c2as)
+
+        category = select_category()
+        c1as, c2as = select_couples_of_centroids(category)
+        triplets = zip(np.repeat(samples, n_new_per_sample), c1as, c2as)
+
+        X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
+        return self.generator.predict(np.array(X))
 
     @staticmethod
     def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=256):
