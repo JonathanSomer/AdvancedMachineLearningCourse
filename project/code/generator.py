@@ -192,11 +192,9 @@ class LowShotGenerator(object):
             if smart_category:
                 'Finding "closest" category to {0}'.format(self.novel_category)
                 preds = self.trained_classifier.predict(np.array(samples))
-                y_preds = np.argmax(preds, axis=2)
-                print(y_preds)
+                y_preds = np.argmax(preds, axis=1)
                 categories, counts = np.unique(y_preds, return_counts=True)
                 cnt = dict(zip(categories, counts))
-                print(cnt)
                 return max(categories, key=lambda c: cnt[c])
 
             else:  # random choice
@@ -211,13 +209,13 @@ class LowShotGenerator(object):
                 idxs = np.random.choice(len(available_centroids), n_total * 2)
                 selected_centroids = available_centroids[idxs]
                 c1as, c2as = np.split(selected_centroids, 2)
-                return zip(c1as, c2as)
+                return c1as, c2as
 
         category = select_category()
         c1as, c2as = select_couples_of_centroids(category)
-        triplets = zip(np.repeat(samples, n_new_per_sample), c1as, c2as)
+        triplets = zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as)
 
-        X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
+        X = [np.concatenate((ϕ.flatten(), c1a, c2a)) for ϕ, c1a, c2a in triplets]
         return self.generator.predict(np.array(X))
 
     @staticmethod
@@ -336,7 +334,7 @@ class LowShotGenerator(object):
         # new_examples = np.concatenate([g.generate(ϕ, n_new_per_example) for ϕ in n_examples])
 
         new_examples = g.generate_from_samples(n_examples,
-                                               n_total=n_new,
+                                               n_total=n_new + n_real_examples,
                                                smart_category=smart_category)
 
         n_unique = len(np.unique(new_examples, axis=0))
