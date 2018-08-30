@@ -1,20 +1,29 @@
 import os
 import logger
 import warnings
+import matplotlib as mpl
+
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+
 from config import *
 from sklearn.metrics import roc_curve, auc
 from mnist_classifier import *
 from mnist_data import *
 
 _logger = logger.get_logger(__name__)
+N_GIVEN_EXAMPLES = [5, 10, 20, 40, 60, 80, 100, 150 ,200,300]
 
 
 class PipeLine:
     def __init__(self, dataset, cls):
         self.dataset = dataset
         self.cls = cls
+        self.n_classes = self.dataset.get_num_classes()
         self.base_results = self._base_results()
+        self.low_shot_results = {}
+        for i in range(self.n_classes):
+            self.low_shot_results[i] = self.get_low_shot_results(i)
 
     def _base_results(self):
         _logger.info('get base results')
@@ -27,29 +36,86 @@ class PipeLine:
     def evaluate_cls(self, removed_inx=None):
         results = {}
 
-        y_score = self.cls.model.predict(self.dataset.into_evaluate()[0])
+        x_temp, y_one_hot = self.dataset.into_evaluate() #TODO -> RENAME!
+        y_score = self.cls.predict(x_temp)
         fpr = dict()
         tpr = dict()
-        n_classes = self.dataset.get_num_classes()
+        off = 0
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            for inx in range(n_classes):
+            for inx in range(self.n_classes):
+                if inx == removed_inx:
+                    off = -1
+                    continue
                 results[inx] = {}
 
                 loss, acc = self.cls.evaluate(*self.dataset.into_evaluate_one_class(inx))
                 results[inx]['accuracy'] = acc
 
-                fpr[inx], tpr[inx], _ = roc_curve(*self.dataset.into_roc_curve(y_score, inx))
+                fpr[inx], tpr[inx], _ = roc_curve(y_one_hot[:, inx + off], y_score[:, inx + off])
                 results[inx]['auc'] = auc(fpr[inx], tpr[inx])
 
         return results, fpr, tpr
 
-    def create_cls_roc_plot(self, fpr, tpr, results, figure_name, sub_directory=None):
+    def get_low_shot_results(self, inx):
+        low_shot_learning_results = {}
+        self.dataset.set_removed_class(inx)
+
+        self.dataset.set_removed_class(class_index=inx, verbose=True)
+        self.cls.fit(*self.dataset.into_fit())
+        #results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
+
+        for n_examples in N_GIVEN_EXAMPLES:
+            low_shot_learning_results[n_examples] = {}
+            self.dataset.set_number_of_samples_to_use(n=n_examples)
+
+            self.cls.fit(*self.dataset.into_fit())
+
+            results, fpr, tpr = self.evaluate_cls()
+            #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generated data' % (inx,n_examples))
+            low_shot_learning_results[n_examples]['without'] = results[inx]
+
+            generated_data = d.get_generated_data_stub()
+            self.dataset.set_generated_data(generated_data)
+            self.cls.fit(*self.dataset.into_fit())
+
+            results, fpr, tpr = self.evaluate_cls()
+            #self.create_cls_roc_plot(fpr, tpr, results,
+            #                         '%d - with %d samples without generated data' % (inx, n_examples))
+            low_shot_learning_results[n_examples]['with'] = results[inx]
+            self.dataset.set_generated_data(None)
+
+        self.export_one_shot_learning_result(low_shot_learning_results, inx)
+
+    def export_one_shot_learning_result(self, results, inx):
+        _logger.info('export results for %d' % inx)
+        base_inx_results = self.base_results[inx]
+        _logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
+
+        for n_examples in N_GIVEN_EXAMPLES:
+            _logger.info('low shot results:')
+
+            results_n_with = results[n_examples]['with']
+            results_n_without = results[n_examples]['without']
+            _logger.info('%d samples without generator accuracy %f, auc %f' % (n_examples,
+                                                                               results_n_without[
+                                                                                   'accuracy'],
+                                                                               results_n_without['auc']))
+            _logger.info('%d samples with generator accuracy %f, auc %f' % (n_examples,
+                                                                            results_n_with['accuracy'],
+                                                                            results_n_with['auc']))
+
+        self.create_low_shot_results_plot(base_inx_results, results, '%d low shot results' % inx)
+        _logger.info('\n')
+
+
+    def create_cls_roc_plot(self, fpr, tpr, results, figure_name):
         plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
         lw = 2
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
-        n_classes = self.dataset.get_num_classes()
-        for inx in range(n_classes):
+        for inx in range(self.n_classes):
+            if inx not in fpr:
+                continue
             plt.plot(fpr[inx], tpr[inx], lw=lw,
                      label='{0} (area = {1:0.5f})'.format(inx, results[inx]['auc']))
 
@@ -61,71 +127,30 @@ class PipeLine:
         plt.title('ROC curves %s' % figure_name)
         plt.legend(loc="lower right")
 
-        if sub_directory:
-            abs_path = os.path.join(local_results_dir, sub_directory)
-        else:
-            abs_path = local_results_dir
+        figure_save_name = '%s.png' % figure_name.replace(" ", "_")
 
-        fig.savefig('%s.png' % figure_name.replace(" ", "_"), dpi=fig.dpi)
+        fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
-    def get_low_shot_results(self, inx):
-        low_shot_learning_results = {}
-        X, y = get_features_and_labels(raw_data)
-        le = get_label_encoder(raw_data)
+    def create_low_shot_results_plot(self, base_results, low_shot_results, figure_name):
+        auc_with = [low_shot_results[n]['with']['auc'] for n in N_GIVEN_EXAMPLES]
+        auc_without = [low_shot_results[n]['without']['auc'] for n in N_GIVEN_EXAMPLES]
+        accuracy_with = [low_shot_results[n]['with']['accuracy'] for n in N_GIVEN_EXAMPLES]
+        accuracy_without = [low_shot_results[n]['without']['accuracy'] for n in N_GIVEN_EXAMPLES]
 
-        for disease in queries_diseases:
-            disease_path = os.path.join('low_shot', disease)
-            _logger.info('\t %s' % disease)
-            low_shot_learning_results[disease] = {}
+        fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
-            novel_disease_label = le.transform((disease,))[0]
-            X_train, X_test, y_train, y_test = new_get_train_test_split_without_disease(X, y, disease, raw_data)
-            disease_base_cls = Classifier(n_classes=N_CLASSES - 1, n_epochs=1)
-            disease_base_cls.fit(X_train, new_onehot_encode(y_train, [novel_disease_label]))
-            cls_results, fpr, tpr = evaluate_cls(disease_base_cls, X_test, y_test,
-                                                 diseases_removed=[novel_disease_label])
-            create_cls_roc_plot(fpr, tpr, cls_results, '%s base cls' % disease, disease_path)
+        plt.plot(N_GIVEN_EXAMPLES, auc_without, marker='o', label='auc without generated data')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_without, marker='o', label='accuracy without generated data')
+        plt.plot(N_GIVEN_EXAMPLES, auc_with, marker='o', label='auc with generated data')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_with, marker='o', label='accuracy with generated data')
 
-            temp = get_all_disease_samples_and_rest(X, y, novel_disease_label, raw_data)
-            all_samples_features, all_samples_labels, rest_features, rest_labels = temp
-            X_test_with_disease, y_test_with_disease = add_disease_to_test_data(X_test, y_test, rest_features,
-                                                                                rest_labels)
-            for n_examples in N_GIVEN_EXAMPLES:
-                temp = add_n_samples_to_train_data(X_train, y_train, all_samples_features, all_samples_labels,
-                                                   n_examples)
-                X_train_with_disease_samples, y_train_with_disease_samples, n_samples_features = temp
+        plt.xlabel('number of examples')
+        plt.ylabel('True Positive Rate')
+        plt.legend()
+        plt.title('%s - base results: auc %f accuracy %f' % (figure_name, base_results['auc'], base_results['accuracy']))
 
-                cls_without_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
-                cls_without_generator.fit(X_train_with_disease_samples, new_onehot_encode(y_train_with_disease_samples))
-                results_without_generator, fpr_without, tpr_without = evaluate_cls(cls_without_generator,
-                                                                                   X_test_with_disease,
-                                                                                   y_test_with_disease)
-                plt_name = '%d examples without generated samples' % n_examples
-                create_cls_roc_plot(fpr_without, tpr_without, results_without_generator, plt_name, disease_path)
-
-                generated_features = LowShotGenerator.get_generated_features(disease_base_cls,
-                                                                             novel_disease_label,
-                                                                             n_samples_features,
-                                                                             NUMBER_OF_CLUSTERS,
-                                                                             λ,
-                                                                             NUMBER_OF_TOTAL_GENRATED_EXAMPLES)
-
-                temp = add_generated_data_to_train_data(X_train_with_disease_samples, y_train_with_disease_samples,
-                                                        generated_features, novel_disease_label)
-                X_train_with_generated_data, y_train_with_generated_data = temp
-
-                cls_with_generator = Classifier(n_classes=N_CLASSES, n_epochs=1)
-                cls_with_generator.fit(X_train_with_generated_data, new_onehot_encode(y_train_with_generated_data))
-
-                results_with_generator, fpr_with, tpr_with = evaluate_cls(cls_with_generator, X_test_with_disease,
-                                                                          y_test_with_disease)
-                create_cls_roc_plot(fpr_with, tpr_with, results_with_generator,
-                                    '%d examples with generated samples' % n_examples, disease_path)
-
-                low_shot_learning_results[disease][n_examples] = {'with': results_with_generator[disease],
-                                                                  'without': results_without_generator[disease]}
-
-        return low_shot_learning_results
+        figure_save_name = '%s.png' % figure_name.replace(" ", "_")
+        fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
 if __name__ == "__main__":
     cls = MnistClassifier()

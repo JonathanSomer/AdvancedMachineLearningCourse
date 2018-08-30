@@ -20,8 +20,8 @@ class MnistData(DataObject):
     # use class_removed to only to load features generated without that class.
     # NOTE THIS DOES NOT REMOVE THE CLASS FROM THE TRAINING DATA
     def __init__(self, use_features=False, use_data_subset=False, class_removed=None):
-        self.dataset = MNIST
         self.train_size = TRAIN_SIZE
+        self.name = MNIST
         super().__init__(use_data_subset=use_data_subset, use_features=use_features, class_removed=None)
 
 #####################################################################

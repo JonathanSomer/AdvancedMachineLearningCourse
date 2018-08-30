@@ -79,21 +79,15 @@ class DataObject(object):
         else:
             return self.x_test, self.y_test_one_hot
 
-    def into_evaluate_one_class(self, class_index=None):
-        if class_index is not None:
-            if self.class_removed is not None and class_index == self.class_removed:
-                y_test_sub = self.y_class_removed_test
-                X_test_sub = self.x_class_removed_test
-            else:
-                is_in_class_subset = self.y_test[:] == class_index
-                y_test_sub = self.y_test[is_in_class_subset]
-                X_test_sub = self.x_test[is_in_class_subset]
-            return X_test_sub, self._one_hot_encode(y_test_sub)
-
-    def into_roc_curve(self, y_score, inx):
-        a = self.y_test[:] == inx
-        b = y_score[:, inx]
-        return a, b
+    def into_evaluate_one_class(self, class_index):
+        if self.class_removed is not None and class_index == self.class_removed:
+            y_test_sub = self.y_class_removed_test
+            X_test_sub = self.x_class_removed_test
+        else:
+            is_in_class_subset = self.y_test[:] == class_index
+            y_test_sub = self.y_test[is_in_class_subset]
+            X_test_sub = self.x_test[is_in_class_subset]
+        return X_test_sub, self._one_hot_encode(y_test_sub)
 
     def set_removed_class(self, class_index, verbose=True):
         self.__init__(use_data_subset=self.use_data_subset, 
@@ -142,13 +136,18 @@ class DataObject(object):
 
         if n == 0 or n is None:
             self.number_of_samples_to_use = None
+            return
         self.number_of_samples_to_use = n
+        self.y_train_one_hot = self._one_hot_encode(self.y_train)
+        self.y_test_one_hot = self._one_hot_encode(self.y_test)
 
     def set_generated_data(self, generated_data):
         assert self.class_removed != None
         if self.number_of_samples_to_use is None:
             raise Exception("must run d.set_number_of_samples_to_use(...) before setting generated_data")
         self.generated_data = generated_data
+        self.y_train_one_hot = self._one_hot_encode(self.y_train)
+        self.y_test_one_hot = self._one_hot_encode(self.y_test)
 
     def get_n_samples(self, n):
         if self.class_removed is None:
@@ -197,9 +196,9 @@ class DataObject(object):
 
     def _load_features(self, class_removed=None):
         if class_removed is None:
-            read_path = read_features_from_all_classes_path(dataset=self.dataset)
+            read_path = read_features_from_all_classes_path(dataset=self.name)
         else:
-            read_path = read_features_from_all_classes_but_one_path(dataset=self.dataset, 
+            read_path = read_features_from_all_classes_but_one_path(dataset=self.name,
                                                                     class_removed=class_removed)
 
         dict = joblib.load(read_path)
@@ -218,7 +217,7 @@ class DataObject(object):
         n_rows, n_cols = len(y), self.n_classes
         enc = np.zeros((n_rows, self.n_classes))
         enc[np.arange(n_rows), y] = 1.0
-        if self.class_removed is not None:
+        if self.class_removed is not None and self.number_of_samples_to_use is None and self.generated_data is None:
             enc = np.delete(enc, [self.class_removed], axis=1)
         return enc
 
