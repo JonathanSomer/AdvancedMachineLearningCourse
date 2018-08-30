@@ -14,6 +14,8 @@ from data_utils import *
 from cifar_data import *
 import argparse
 from keras.models import model_from_json
+from keras.callbacks import ModelCheckpoint
+
 
 MNIST = 'mnist'
 CIFAR10 = 'cifar10'
@@ -59,15 +61,17 @@ def generate_features(d, cls, dataset_name, class_removed=None):
 	else:
 		print("################# START -- generate features using all classes except %d ##################" % class_removed)
 
-	d.set_removed_class(class_index=class_removed)
-	cls.fit(*d.into_fit())
-
 	model_name = generate_model_name(dataset_name, class_removed = class_removed)
+	
+	checkpoint = ModelCheckpoint(write_model_path(model_name), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+
+	d.set_removed_class(class_index=class_removed)
+	cls.fit(*d.into_fit(), callbacks = [checkpoint])
 
 	with open(write_model_json_path(model_name), "w") as json_file:
 	    json_file.write(cls.model.to_json())
 
-	cls.model.save_weights(write_model_path(model_name))
+	# cls.model.save_weights()
 	print("Saved model to disk")
 
 	predictor = cls.model
