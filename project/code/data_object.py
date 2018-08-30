@@ -8,7 +8,9 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
 from collections import defaultdict
-from feature_extraction import *
+from data_utils import *
+from sklearn.externals import joblib
+
 
 FRACTION_FOR_SUBSET = 0.05
 

@@ -17,7 +17,7 @@ class Classifier(object):
         self.trainable = True
 
     # must get one hot encoded labels
-    def fit(self, x_train, y_train, x_test, y_test):
+    def fit(self, x_train, y_train, x_test, y_test, callbacks=None):
         assert len(y_train[0]) == len(y_test[0])
         assert x_train[0].shape == x_test[0].shape
         self.input_shape = x_train[0].shape
@@ -26,7 +26,8 @@ class Classifier(object):
           batch_size=self.batch_size,
           epochs=self.epochs,
           verbose=1,
-          validation_data=(x_test, y_test))
+          validation_data=(x_test, y_test),
+          callbacks=callbacks)
 
     def evaluate(self, x_test, y_test, verbose=True):
         if self.model is None:

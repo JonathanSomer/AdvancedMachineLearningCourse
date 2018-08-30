@@ -51,6 +51,18 @@ DEFAULT_MODEL_FILE = 'model'
 # local_data_dir is the data directory and should contain the following directories: datasets, pickles, models, images
 # for instance: '~/amldata
 
+def write_features_from_all_classes_path(dataset):
+    return write_pickle_path(dataset + '_features')
+
+def write_features_from_all_classes_but_one_path(dataset, class_removed):
+    return write_pickle_path(dataset + '_features' + '_no_' + str(class_removed))
+
+def read_features_from_all_classes_path(dataset):
+    return read_pickle_path(dataset + '_features')
+
+def read_features_from_all_classes_but_one_path(dataset, class_removed):
+    return read_pickle_path(dataset + '_features' + '_no_' + str(class_removed))
+
 def read_pickle_path(name):
     return os.path.join(config.local_data_dir, 'pickles', 'read', '{0}.pickle'.format(name))
 
@@ -68,6 +80,11 @@ def is_model_file_exists(name=DEFAULT_MODEL_FILE):
 def write_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'write', '{0}.h5'.format(name))
 
+def write_model_json_path(name):
+    return os.path.join(config.local_data_dir, 'models', 'write', '{0}.json'.format(name))
+
+def read_model_json_path(name=DEFAULT_MODEL_FILE):
+    return os.path.join(config.local_data_dir, 'models', 'read', '{0}.json'.format(name))
 
 def generator_model_path(name):
     return os.path.join(config.local_data_dir, 'models', 'generators', '{0}.h5'.format(name))
