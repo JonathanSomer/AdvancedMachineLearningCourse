@@ -12,7 +12,7 @@ IMG_ROWS, IMG_COLS = 28, 28
 
 # acheives 98% accuracy within 2 epochs
 class MnistClassifier(Classifier):
-    def __init__(self, use_features = False, batch_size = 128, epochs = 1):
+    def __init__(self, use_features = False, batch_size = 128, epochs = 12):
         super().__init__(use_features = use_features, 
                          batch_size = batch_size, 
                          epochs = epochs)

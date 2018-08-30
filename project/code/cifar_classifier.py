@@ -15,7 +15,7 @@ IMG_ROWS, IMG_COLS = 32, 32
 N_CHANNELS = 3
 
 class Cifar10Classifier(Classifier):
-    def __init__(self, use_features = False, batch_size = 128, epochs = 1):
+    def __init__(self, use_features = False, batch_size = 128, epochs = 125):
         super().__init__(use_features = use_features, 
                          batch_size = batch_size, 
                          epochs = epochs)
