@@ -196,9 +196,9 @@ class DataObject(object):
 
     def _load_features(self, class_removed=None):
         if class_removed is None:
-            read_path = read_features_from_all_classes_path(dataset=self.dataset)
+            read_path = read_features_from_all_classes_path(dataset=self.name)
         else:
-            read_path = read_features_from_all_classes_but_one_path(dataset=self.dataset, 
+            read_path = read_features_from_all_classes_but_one_path(dataset=self.name,
                                                                     class_removed=class_removed)
 
         dict = joblib.load(read_path)

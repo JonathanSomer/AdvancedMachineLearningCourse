@@ -139,7 +139,6 @@ class PipeLine:
 
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
-
         plt.plot(N_GIVEN_EXAMPLES, auc_without, marker='o', label='auc without generated data')
         plt.plot(N_GIVEN_EXAMPLES, accuracy_without, marker='o', label='accuracy without generated data')
         plt.plot(N_GIVEN_EXAMPLES, auc_with, marker='o', label='auc with generated data')
