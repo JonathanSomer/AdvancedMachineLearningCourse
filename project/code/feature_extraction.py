@@ -14,7 +14,7 @@ MNIST = 'mnist'
 CIFAR10 = 'cifar10'
 XRAY = 'xray'
 
-def main(dataset_name, use_data_subset):
+def main(dataset_name, use_data_subset=False):
 	
 	d, cls = get_data_obj_and_classifier(dataset_name=dataset_name, 
 										 use_data_subset=use_data_subset)
@@ -42,7 +42,7 @@ def read_features_from_all_classes_but_one_path(dataset, class_removed):
 def get_data_obj_and_classifier(dataset_name, use_data_subset):
 	return {
 		MNIST : (MnistData(use_data_subset=use_data_subset), MnistClassifier()),
-	
+		CIFAR10 : (Cifar10Data(use_data_subset=use_data_subset), Cifar10Classifier())
 	}[dataset_name]
 
 def generate_features(d, cls, dataset_name, class_removed=None):

@@ -14,8 +14,8 @@ N_CHANNELS = 3
 
 class Cifar10Data(DataObject):
 
-    def __init__(self, use_data_subset=False):
-        super().__init__(use_data_subset=use_data_subset)
+    def __init__(self, use_data_subset=False, use_features=False, class_removed=None):
+        super().__init__(use_data_subset=use_data_subset, use_features = use_features, class_removed = class_removed)
 
 #####################################################################
 #
