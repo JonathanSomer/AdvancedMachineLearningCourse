@@ -49,7 +49,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-ge', '--generator_epochs', help='number of epcohs to train the generator with', type=int,
                         default=2)
-    parser.add_argument('-ce', '--classfier_epochs', help='number of epcohs to train the classifier with', type=int,
+    parser.add_argument('-ce', '--classifier_epochs', help='number of epcohs to train the classifier with', type=int,
                         default=1)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
     parser.add_argument('-cv', '--cross_validate', help='where to do a cross validation', action='store_true')
