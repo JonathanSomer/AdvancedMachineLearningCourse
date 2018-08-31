@@ -14,14 +14,21 @@ from mnist_data import *
 from generator import *
 
 _logger = logger.get_logger(__name__)
-N_GIVEN_EXAMPLES = [2, 5, 10, 20, 50, 100]
+N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
+
 
 
 class PipeLine:
-    def __init__(self, dataset, cls_class):
-        self.dataset = dataset
-        self.cls_class = cls_class
-        self.cls = cls_class(use_features=True)
+    def __init__(self, dataset_type, cls_type, use_data_subset=False, use_features=True):
+        self.dataset_type = dataset_type
+        self.use_data_subset = use_data_subset
+        self.use_features = use_features
+        self.cls_type = cls_type
+
+
+        self.dataset = dataset_type(use_features=self.use_features, use_data_subset=use_data_subset)
+        self.cls = cls_type(use_features=self.use_features)
+
         self.n_classes = self.dataset.get_num_classes()
         self.base_results = self._base_results()
         self.low_shot_results = {}
@@ -39,7 +46,7 @@ class PipeLine:
     def evaluate_cls(self, removed_inx=None):
         results = {}
 
-        x_temp, y_one_hot = self.dataset.into_evaluate() #TODO -> RENAME!
+        x_temp, y_one_hot = self.dataset.into_evaluate()
         y_score = self.cls.predict(x_temp)
         fpr = dict()
         tpr = dict()
@@ -64,16 +71,16 @@ class PipeLine:
         low_shot_learning_results = {}
 
         _logger.info('fit a classifier without label %d' % inx)
-        temp_data_object = MnistData(use_features=True, class_removed=inx) #TODO -> refactor
+        temp_data_object = self.dataset_type(use_features=self.use_features, class_removed=inx) #TODO -> refactor
         temp_data_object.set_removed_class(class_index=inx, verbose=True)
         self.dataset.set_removed_class(class_index=inx, verbose=True)
 
-        all_but_one_classifier = MnistClassifier(use_features=True)
+        all_but_one_classifier = self.cls_type(use_features=self.use_features)
         all_but_one_classifier.fit(*temp_data_object.into_fit())
         all_but_one_classifier.set_trainability(is_trainable=False)
 
         _logger.info('create generator')
-        generator = LowShotGenerator(all_but_one_classifier.model, temp_data_object, epochs=1)
+        generator = LowShotGenerator(all_but_one_classifier.model, temp_data_object, epochs=2)
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d'%n)
@@ -84,7 +91,6 @@ class PipeLine:
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
-            #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generated data' % (inx,n_examples))
             low_shot_learning_results[n]['without'] = results[inx]
 
             n_examples = self.dataset.x_class_removed_train[:n]
@@ -95,19 +101,16 @@ class PipeLine:
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
-            #self.create_cls_roc_plot(fpr, tpr, results,
-            #                         '%d - with %d samples without generated data' % (inx, n_examples))
             low_shot_learning_results[n]['with no category'] = results[inx]
 
             if n != N_GIVEN_EXAMPLES[-1]:
                 generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
                                                                  smart_category=True, smart_centroids=False)
                 self.dataset.set_generated_data(generated_data)
+
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
-            # self.create_cls_roc_plot(fpr, tpr, results,
-            #                         '%d - with %d samples without generated data' % (inx, n_examples))
             low_shot_learning_results[n]['with true category'] = results[inx]
 
             self.dataset.set_generated_data(None)
@@ -166,26 +169,16 @@ class PipeLine:
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
     def create_low_shot_results_plot(self, base_results, low_shot_results, figure_name):
-        auc_without = [low_shot_results[n]['without']['auc'] for n in N_GIVEN_EXAMPLES]
         accuracy_without = [low_shot_results[n]['without']['accuracy'] for n in N_GIVEN_EXAMPLES]
-
-        auc_with_f = [low_shot_results[n]['with no category']['auc'] for n in N_GIVEN_EXAMPLES]
         accuracy_with_f = [low_shot_results[n]['with no category']['accuracy'] for n in N_GIVEN_EXAMPLES]
-
-        auc_with_t = [low_shot_results[n]['with true category']['auc'] for n in N_GIVEN_EXAMPLES]
         accuracy_with_t = [low_shot_results[n]['with true category']['accuracy'] for n in N_GIVEN_EXAMPLES]
 
 
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
-        plt.plot(N_GIVEN_EXAMPLES, auc_without, marker='o', label='auc without generated data')
-        plt.plot(N_GIVEN_EXAMPLES, accuracy_without, marker='o', label='accuracy without generated data')
-
-        plt.plot(N_GIVEN_EXAMPLES, auc_with_f, marker='o', label='auc with generated data not category')
-        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_f, marker='o', label='accuracy with generated data not category')
-
-        plt.plot(N_GIVEN_EXAMPLES, auc_with_t, marker='o', label='auc with generated data true category')
-        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_t, marker='o', label='accuracy with generated data true category')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_without, marker='o', label='baseline')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_f, marker='o', label='baseline + gen')
+        plt.plot(N_GIVEN_EXAMPLES, accuracy_with_t, marker='o', label='smart-category')
 
         plt.xlabel('number of examples')
         plt.ylabel('True Positive Rate')
@@ -207,8 +200,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.dataset in DATA_SETS and args.dataset in CLSES:
-        dataset = DATA_SETS[args.dataset](use_features=True, use_data_subset=args.test)
-        PipeLine(dataset, CLSES[args.dataset])
-
+        PipeLine(DATA_SETS[args.dataset], CLSES[args.dataset], use_data_subset=args.test, use_features=True)
     else:
         _logger.error('unknown dataset %s' % args.dataset)
