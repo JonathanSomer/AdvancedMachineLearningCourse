@@ -369,7 +369,7 @@ class LowShotGenerator(object):
 
         data_object = DataClass(use_features=use_features, class_removed=category_to_exclude)
 
-        all_classifier = Classifier(use_features=use_features)
+        all_classifier = Classifier(use_features=use_features, epochs=classifier_epochs)
         all_classifier.fit(*data_object.into_fit())
 
         data_object.set_removed_class(category_to_exclude)
