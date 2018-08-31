@@ -169,8 +169,11 @@ class Pipeline(object):
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
 
-DATA_SETS = {'mnist': MnistData}
-CLSES = {'mnist': MnistClassifier}
+DATA_SETS = {'mnist': MnistData,
+             'cifar10': Cifar10Data}
+             
+CLSES = {'mnist': MnistClassifier,
+         'cifar10': Cifar10Classifier}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
