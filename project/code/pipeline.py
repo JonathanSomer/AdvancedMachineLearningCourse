@@ -14,13 +14,14 @@ from mnist_data import *
 from generator import *
 
 _logger = logger.get_logger(__name__)
-N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20, 40, 60, 80, 100]
+N_GIVEN_EXAMPLES = [2, 5, 10, 20, 50, 100]
 
 
 class PipeLine:
-    def __init__(self, dataset, cls):
+    def __init__(self, dataset, cls_class):
         self.dataset = dataset
-        self.cls = cls
+        self.cls_class = cls_class
+        self.cls = cls_class(use_features=True)
         self.n_classes = self.dataset.get_num_classes()
         self.base_results = self._base_results()
         self.low_shot_results = {}
@@ -61,47 +62,57 @@ class PipeLine:
 
     def get_low_shot_results(self, inx):
         low_shot_learning_results = {}
-        self.dataset.set_removed_class(inx)
 
+        _logger.info('fit a classifier without label %d' % inx)
+        temp_data_object = MnistData(use_features=True, class_removed=inx) #TODO -> refactor
+        temp_data_object.set_removed_class(class_index=inx, verbose=True)
         self.dataset.set_removed_class(class_index=inx, verbose=True)
-        self.cls.fit(*self.dataset.into_fit())
-        generator = LowShotGenerator(self.cls, self.dataset)
 
-        for n_examples in N_GIVEN_EXAMPLES:
-            low_shot_learning_results[n_examples] = {}
+        all_but_one_classifier = MnistClassifier(use_features=True)
+        all_but_one_classifier.fit(*temp_data_object.into_fit())
+        all_but_one_classifier.set_trainability(is_trainable=False)
 
-            self.dataset.set_number_of_samples_to_use(n=n_examples)
+        _logger.info('create generator')
+        generator = LowShotGenerator(all_but_one_classifier.model, temp_data_object, epochs=1)
+
+        for n in N_GIVEN_EXAMPLES:
+            _logger.info('number of examples is %d'%n)
+            low_shot_learning_results[n] = {}
+
+            self.dataset.set_number_of_samples_to_use(n=n)
 
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
             #self.create_cls_roc_plot(fpr, tpr, results, '%d - with %d samples without generated data' % (inx,n_examples))
-            low_shot_learning_results[n_examples]['without'] = results[inx]
+            low_shot_learning_results[n]['without'] = results[inx]
 
-            n_examples = self.dataset.x_class_removed_train[:self.n_examples]
-
-            generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
-                                                             smart_category=False, smart_centroids=False)
-            self.dataset.set_generated_data(generated_data)
+            n_examples = self.dataset.x_class_removed_train[:n]
+            if n != N_GIVEN_EXAMPLES[-1]:
+                generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
+                                                                 smart_category=False, smart_centroids=False)
+                self.dataset.set_generated_data(generated_data)
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
             #self.create_cls_roc_plot(fpr, tpr, results,
             #                         '%d - with %d samples without generated data' % (inx, n_examples))
-            low_shot_learning_results[n_examples]['with no category'] = results[inx]
+            low_shot_learning_results[n]['with no category'] = results[inx]
 
-            generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
-                                                             smart_category=True, smart_centroids=False)
-            self.dataset.set_generated_data(generated_data)
+            if n != N_GIVEN_EXAMPLES[-1]:
+                generated_data = generator.generate_from_samples(n_examples, n_total=N_GIVEN_EXAMPLES[-1],
+                                                                 smart_category=True, smart_centroids=False)
+                self.dataset.set_generated_data(generated_data)
             self.cls.fit(*self.dataset.into_fit())
 
             results, fpr, tpr = self.evaluate_cls()
             # self.create_cls_roc_plot(fpr, tpr, results,
             #                         '%d - with %d samples without generated data' % (inx, n_examples))
-            low_shot_learning_results[n_examples]['with true category'] = results[inx]
+            low_shot_learning_results[n]['with true category'] = results[inx]
 
             self.dataset.set_generated_data(None)
 
+        _logger.info('export results for %d' % inx)
         self.export_one_shot_learning_result(low_shot_learning_results, inx)
 
     def export_one_shot_learning_result(self, results, inx):
@@ -188,19 +199,16 @@ DATA_SETS = {'mnist':MnistData}
 CLSES = {'mnist':MnistClassifier}
 
 if __name__ == "__main__":
-
-
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
     parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
+    parser.add_argument('-e', '--epochs', help='number if epochs', type=int, default=1)
 
     args = parser.parse_args()
 
     if args.dataset in DATA_SETS and args.dataset in CLSES:
-        dataset = DATA_SETS[args.dataset](use_data_subset=args.test)
-        cls = CLSES[args.dataset]()
-        PipeLine(dataset, cls)
+        dataset = DATA_SETS[args.dataset](use_features=True, use_data_subset=args.test)
+        PipeLine(dataset, CLSES[args.dataset])
 
     else:
         _logger.error('unknown dataset %s' % args.dataset)
