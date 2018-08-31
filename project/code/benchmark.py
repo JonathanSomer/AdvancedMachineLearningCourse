@@ -12,7 +12,8 @@ data_obj_getters = {'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
 
-def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate, smart_category):
+def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate, smart_category,
+         smart_centroids):
     dataset_key = dataset.replace('raw_', '')
     dataset_name = '{0}_{1}'.format(dataset, category)
 
@@ -26,7 +27,8 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
                                                  n_new=n_new,
                                                  epochs=generator_epochs,
                                                  classifier_epochs=classifier_epochs,
-                                                 smart_category=smart_category)
+                                                 smart_category=smart_category,
+                                                 smart_centroids=smart_centroids)
 
     if to_cross_validate:
         raise NotImplementedError('Still does not work.')
@@ -53,9 +55,11 @@ if __name__ == "__main__":
                         default=1)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
     parser.add_argument('-cv', '--cross_validate', help='where to do a cross validation', action='store_true')
-    parser.add_argument('-s', '--smart_category', help='wether to generate with samrt category', action='store_true')
+    parser.add_argument('-sca', '--smart_category', help='wether to generate with samrt category', action='store_true')
+    parser.add_argument('-sce', '--smart_centroids', help='wether to generate with samrt centroids',
+                        type=str, default='none')
 
     args = parser.parse_args()
 
     main(args.dataset, args.category, args.n_clusters, args.generator_epochs, args.classifier_epochs, args.n_new,
-         args.cross_validate, args.smart_category)
+         args.cross_validate, args.smart_category, args.smart_centroids)
