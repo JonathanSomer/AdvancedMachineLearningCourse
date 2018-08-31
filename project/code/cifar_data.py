@@ -12,9 +12,14 @@ from data_object import *
 IMG_ROWS, IMG_COLS = 32, 32
 N_CHANNELS = 3
 
+CIFAR10 = 'cifar10'
+TRAIN_SIZE = 50000
+
 class Cifar10Data(DataObject):
 
     def __init__(self, use_data_subset=False, use_features=False, class_removed=None):
+        self.train_size = TRAIN_SIZE
+        self.name = CIFAR10
         super().__init__(use_data_subset=use_data_subset, use_features = use_features, class_removed = class_removed)
 
 #####################################################################
@@ -23,7 +28,7 @@ class Cifar10Data(DataObject):
 #
 #####################################################################
 
-    def _processed_data(self, class_removed=None):
+    def _load_raw_data(self, class_removed=None):
         (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
         if K.image_data_format() == 'channels_first':

@@ -1,27 +1,51 @@
 from generator import LowShotGenerator
 from mnist_classifier import *
 from mnist_data import *
+from cifar_classifier import *
 from cifar_data import *
 from itertools import product
+from collections import defaultdict
 
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 
-Classifiers = {'mnist': MnistClassifier}
+plt.switch_backend('agg')
+
+Classifiers = {'mnist': MnistClassifier,
+               'cifar10': Cifar10Classifier}
 
 data_obj_getters = {'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
 
-def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate, smart_category,
-         smart_centroids, plot):
+def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate,
+         category_selection,
+         centroids_selection, plot):
     categories = range(data_obj_getters[dataset]().get_num_classes()) if category == 'all' else [category]
-    results = {}
 
-    for category in categories:
+    all_accs = defaultdict(dict)
+
+    if category_selection == 'all':
+        category_selection_types = (True, False)
+    elif category_selection == 'smart':
+        category_selection_types = (True,)
+    else:
+        category_selection_types = (False,)
+
+    if centroids_selection == 'all':
+        centroids_selection_types = ('random', 'cosine_both', 'cosine', 'norm', 'norm_both')
+    else:
+        centroids_selection_types = (centroids_selection,)
+
+    all_acc_keys = []
+    for category, category_selection, centroids_selection in product(categories,
+                                                                     category_selection_types,
+                                                                     centroids_selection_types):
         dataset_key = dataset.replace('raw_', '')
         dataset_name = '{0}_{1}'.format(dataset, category)
+        acc_key = '{0}_category.{1}_centroids'.format(category_selection, centroids_selection)
+        all_acc_keys += [acc_key]
 
         def _benchmark(_hs, _λ):
             return LowShotGenerator.benchmark_single(Classifiers[dataset_key],
@@ -33,8 +57,8 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
                                                      n_new=n_new,
                                                      epochs=generator_epochs,
                                                      classifier_epochs=classifier_epochs,
-                                                     smart_category=smart_category,
-                                                     smart_centroids=smart_centroids)
+                                                     smart_category=category_selection,
+                                                     smart_centroids=centroids_selection)
 
         if to_cross_validate:
             raise NotImplementedError('Still does not work.')
@@ -48,17 +72,23 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
 
         else:
             loss, acc, n_unique = _benchmark(256, .95)
-            results[category] = {'loss': loss, 'acc': acc, 'n_unique': n_unique}
+            all_accs[category][acc_key] = acc * 100
 
         if plot:
-            results['avg'] = {'loss': np.average([v['loss'] for k, v in results.items()]),
-                              'acc': np.average([v['acc'] for k, v in results.items()]),
-                              'n_unique': np.average([v['n_unique'] for k, v in results.items()])}
+            all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
+                               all_acc_keys}
 
-            df = pd.DataFrame.from_dict(results)
-            df.plot()
+            df = pd.DataFrame.from_dict(all_accs)
+            df.to_pickle('./benchmark.pickle')
+            df.plot(kind='bar')
+
             plt.tight_layout()
-            plt.savefig('./benchmark.png')
+
+            path_format = './benchmark.png'
+            # category_type = 'smart' if smart_category else 'random'
+            # centroids_type = 'random' if smart_centroids == 'random' else 'smart{0}'.format(smart_centroids)
+
+            plt.savefig(path_format)
 
 
 if __name__ == "__main__":
@@ -72,12 +102,14 @@ if __name__ == "__main__":
                         default=1)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
     parser.add_argument('-cv', '--cross_validate', help='whether to do a cross validation', action='store_true')
-    parser.add_argument('-sca', '--smart_category', help='wether to generate with samrt category', action='store_true')
-    parser.add_argument('-sce', '--smart_centroids', help='wether to generate with samrt centroids',
-                        type=str, default='none')
+    parser.add_argument('-sca', '--category_selection', help='type of category selection [smart/random]', type=str,
+                        default='random')
+    parser.add_argument('-sce', '--centroids_selection',
+                        help='type of centriods selection [cosine_both/cosine/norm_both/norm/random]',
+                        type=str, default='random')
     parser.add_argument('-p', '--plot', help='whether to plot the results', action='store_true')
 
     args = parser.parse_args()
 
     main(args.dataset, args.category, args.n_clusters, args.generator_epochs, args.classifier_epochs, args.n_new,
-         args.cross_validate, args.smart_category, args.smart_centroids, args.plot)
+         args.cross_validate, args.category_selection, args.centroids_selection, args.plot)
