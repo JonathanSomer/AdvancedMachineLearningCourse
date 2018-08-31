@@ -2,6 +2,7 @@ import os
 import logger
 import warnings
 import matplotlib as mpl
+import argparse
 
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -64,7 +65,6 @@ class PipeLine:
 
         self.dataset.set_removed_class(class_index=inx, verbose=True)
         self.cls.fit(*self.dataset.into_fit())
-        #results, fpr, tpr = self.evaluate_cls(removed_inx=inx)
         generator = LowShotGenerator(self.cls, self.dataset)
 
         for n_examples in N_GIVEN_EXAMPLES:
@@ -184,7 +184,23 @@ class PipeLine:
         figure_save_name = '%s.png' % figure_name.replace(" ", "_")
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
+DATA_SETS = {'mnist':MnistData}
+CLSES = {'mnist':MnistClassifier}
+
 if __name__ == "__main__":
-    cls = MnistClassifier()
-    d = MnistData(use_data_subset=True)
-    PipeLine(d, cls)
+
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
+    parser.add_argument('-t', '--test', help='is it a test run or not', action='store_true')
+
+    args = parser.parse_args()
+
+    if args.dataset in DATA_SETS and args.dataset in CLSES:
+        dataset = DATA_SETS[args.dataset](use_data_subset=args.test)
+        cls = CLSES[args.dataset]()
+        PipeLine(dataset, cls)
+
+    else:
+        _logger.error('unknown dataset %s' % args.dataset)
