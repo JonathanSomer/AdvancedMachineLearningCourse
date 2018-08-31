@@ -75,7 +75,6 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
             all_accs[category][acc_key] = acc * 100
 
         if plot:
-            all_accs['avg'] = {'acc': np.average([v['acc'] for k, v in results.items()])}
             all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
                                all_acc_keys}
 
