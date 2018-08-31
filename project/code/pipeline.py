@@ -11,8 +11,8 @@ from config import *
 from sklearn.metrics import roc_curve, auc
 from mnist_classifier import *
 from mnist_data import *
-from cifar10_classifier import *
-from cifar10_data import *
+from cifar_classifier import *
+from cifar_data import *
 from generator import *
 import functools
 
