@@ -13,6 +13,7 @@
 
 2. Generate quadruplets:
     ```bash
+    # There should be quadruplets directory in both write and read directories
     cd /some/path/to/project/code/
     python3 collect.py -d {dataset name} -c {number of clusters}
     cd ../data/pickles/write
@@ -28,3 +29,10 @@
     `raw_` should be appended to the left of dataset name i.e. `raw_mnist`.
     
     Those also can be combined i.e. `raw_mnist_3`.
+    
+    **Copy+paste - mnist features:**
+    _verify `quadruplets` directories existance!_
+    ```bash
+    cd /some/path/to/project/code/
+    sh collect_mnist.sh
+    ```
