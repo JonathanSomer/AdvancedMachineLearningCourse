@@ -207,9 +207,9 @@ class LowShotGenerator(object):
 
         def select_couples_of_centroids(category):
             available_centroids = self.centroids[category]
-            if smart_centroids:
-                print('Selecting cosine-closest centroids to project from')
-                print('Selecting cosine-furthest centroids to project to')
+            if smart_centroids in ('1', 'cosine_both'):
+                print('Selecting cosine-closest centroids as sources')
+                print('Selecting cosine-furthest centroids as targets')
                 c1as, c2as = [], []
                 for ϕ in samples:
                     cosine_argsort = np.argsort([cosine(ϕ, c) for c in available_centroids])
@@ -217,6 +217,44 @@ class LowShotGenerator(object):
                     c1as.append(sorted_centroids[:n_new_per_sample])
                     c2as.append(sorted_centroids[-n_new_per_sample:])
                 c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
+
+            elif smart_centroids in ('2', 'cosine'):
+                print('Selecting cosine-closest centroids as sources')
+                print('Selecting target centroids randomally')
+                c1as, c2as = [], []
+                for ϕ in samples:
+                    cosine_argsort = np.argsort([cosine(ϕ, c) for c in available_centroids])
+                    sorted_centroids = available_centroids[cosine_argsort]
+                    c1as.append(sorted_centroids[:n_new_per_sample])
+                    target_options = sorted_centroids[n_new_per_sample:]
+                    idxs = np.random.choice(len(target_options), n_new_per_sample)
+                    c2as.append(target_options[idxs])
+                c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
+
+            elif smart_centroids in ('3', 'norm_both'):
+                print('Selecting norm-closest centroids as sources (NearestNeighbors style)')
+                print('Selecting norm-furthest centroids as targets (NearestNeighbors style)')
+                c1as, c2as = [], []
+                for ϕ in samples:
+                    cosine_argsort = np.argsort([np.linalg.norm(ϕ - c, ord=2) for c in available_centroids])
+                    sorted_centroids = available_centroids[cosine_argsort]
+                    c1as.append(sorted_centroids[:n_new_per_sample])
+                    c2as.append(sorted_centroids[-n_new_per_sample:])
+                c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
+
+            elif smart_centroids in ('4', 'norm'):
+                print('Selecting norm-closest centroids as sources (NearestNeighbors style)')
+                print('Selecting target centroids randomally')
+                c1as, c2as = [], []
+                for ϕ in samples:
+                    cosine_argsort = np.argsort([np.linalg.norm(ϕ - c, ord=2) for c in available_centroids])
+                    sorted_centroids = available_centroids[cosine_argsort]
+                    c1as.append(sorted_centroids[:n_new_per_sample])
+                    target_options = sorted_centroids[n_new_per_sample:]
+                    idxs = np.random.choice(len(target_options), n_new_per_sample)
+                    c2as.append(target_options[idxs])
+                c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
+
             else:  # random choice
                 print('Selecting centroids randomally')
                 idxs = np.random.choice(len(available_centroids), n_new * 2)

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('-cv', '--cross_validate', help='where to do a cross validation', action='store_true')
     parser.add_argument('-sca', '--smart_category', help='wether to generate with samrt category', action='store_true')
     parser.add_argument('-sce', '--smart_centroids', help='wether to generate with samrt centroids',
-                        action='store_true')
+                        type=str, default='none')
 
     args = parser.parse_args()
 
