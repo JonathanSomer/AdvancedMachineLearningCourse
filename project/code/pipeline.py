@@ -106,7 +106,7 @@ class Pipeline(object):
                 if n != N_GIVEN_EXAMPLES[-1]:
                     generated_data = generators_options[option]()
                     if generated_data is not None:
-                    self.dataset.set_generated_data(generated_data)
+                        self.dataset.set_generated_data(generated_data)
 
                 self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
                 results, fpr, tpr = self.evaluate_cls()
