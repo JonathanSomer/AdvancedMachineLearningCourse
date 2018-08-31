@@ -178,7 +178,8 @@ class Pipeline(object):
             accuracy_plot = [low_shot_results[n][option]['accuracy'] for n in N_GIVEN_EXAMPLES]
             plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
 
-        plt.xlabel('number of examples')
+        plt.xlabel('Real examples')
+        plt.xticks([0, 1, 5, 10, 20])
         plt.ylabel('True Positive Rate')
         plt.legend()
         plt.title('%s - base results accuracy %f' % (figure_name, base_results['accuracy']))

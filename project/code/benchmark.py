@@ -47,7 +47,7 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', help='what dataset to use')
-    parser.add_argument('category', help='what category to benchmark on', type=int)
+    parser.add_argument('category', help='what category to benchmark on', type=str)
     parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-ge', '--generator_epochs', help='number of epcohs to train the generator with', type=int,
                         default=2)
