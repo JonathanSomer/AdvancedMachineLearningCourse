@@ -8,6 +8,8 @@ import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 
+plt.switch_backend('agg')
+
 Classifiers = {'mnist': MnistClassifier}
 
 data_obj_getters = {'mnist': MnistData,
@@ -48,17 +50,22 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
 
         else:
             loss, acc, n_unique = _benchmark(256, .95)
-            results[category] = {'loss': loss, 'acc': acc, 'n_unique': n_unique}
+            results[category] = {'acc': acc * 100, 'n_unique': n_unique}
 
         if plot:
-            results['avg'] = {'loss': np.average([v['loss'] for k, v in results.items()]),
-                              'acc': np.average([v['acc'] for k, v in results.items()]),
+            results['avg'] = {'acc': np.average([v['acc'] for k, v in results.items()]),
                               'n_unique': np.average([v['n_unique'] for k, v in results.items()])}
 
             df = pd.DataFrame.from_dict(results)
-            df.plot()
+            df.plot(kind='bar')
+
             plt.tight_layout()
-            plt.savefig('./benchmark.png')
+
+            path_format = './benchmark.{0}_category.{1}_centroids.png'
+            category_type = 'smart' if smart_category else 'random'
+            centroids_type = 'random' if smart_centroids == 'random' else 'smart{0}'.format(smart_centroids)
+
+            plt.savefig(path_format.format(category_type, centroids_type))
 
 
 if __name__ == "__main__":
