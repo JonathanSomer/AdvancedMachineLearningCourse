@@ -113,8 +113,6 @@ class Pipeline(object):
                 self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
                 temp_results, fpr, tpr = self.evaluate_cls()
                 results[n][option] = temp_results[inx]
-                import ipdb
-                ipdb.set_trace()
                 results[n][option]['avarage_rest'] = np.mean([temp_results[x]['accuracy'] for x in temp_results.keys() if x != inx])
 
             self.dataset.set_generated_data(None)
@@ -182,9 +180,10 @@ class Pipeline(object):
             plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
 
         plt.xlabel('Real examples')
-        plt.xticks([0, 1, 5, 10, 20])
+        plt.xticks(N_GIVEN_EXAMPLES)
         plt.ylabel('True Positive Rate')
         plt.legend()
+        plt.grid()
         plt.title('low shot on label index %d - base results accuracy %f' % (inx, base_results['accuracy']))
 
         figure_save_name = 'low_shot_%d.png' % inx
@@ -200,9 +199,10 @@ class Pipeline(object):
             plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
 
         plt.xlabel('Real examples')
-        plt.xticks([0, 1, 5, 10, 20])
+        plt.xticks(N_GIVEN_EXAMPLES)
         plt.ylabel('Avarage accuracy on all classes but %d' % inx)
         plt.legend()
+        plt.grid()
         plt.title('Sanity check for index %d' % inx)
 
         figure_save_name = 'sanity_%d.png' % inx
