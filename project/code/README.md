@@ -35,4 +35,5 @@
     ```bash
     cd /some/path/to/project/code/
     sh collect_mnist.sh
+    sh collect_cifar10.sh
     ```

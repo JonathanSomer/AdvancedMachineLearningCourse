@@ -4,6 +4,7 @@ from keras.optimizers import SGD
 from collections import defaultdict
 from sklearn.preprocessing import OneHotEncoder
 from itertools import product
+from scipy.spatial.distance import cosine
 
 from mnist_classifier import *
 from mnist_data import *
@@ -186,11 +187,13 @@ class LowShotGenerator(object):
         return self.generator.predict(np.array(X))
 
     def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False):
-        n_new_per_sample = (n_total - len(samples)) // len(samples)
+        n_new = n_total - len(samples)
+        n_new_per_sample = n_new // len(samples)
+        samples = [ϕ.flatten() for ϕ in samples]
 
         def select_category():
             if smart_category:
-                'Finding "closest" category to {0}'.format(self.novel_category)
+                print('Selecting classification-closest category to {0}'.format(self.novel_category))
                 preds = self.trained_classifier.predict(np.array(samples))
                 y_preds = np.argmax(preds, axis=1)
                 categories, counts = np.unique(y_preds, return_counts=True)
@@ -198,24 +201,35 @@ class LowShotGenerator(object):
                 return max(categories, key=lambda c: cnt[c])
 
             else:  # random choice
+                print('Selecting category randomally')
                 available_categories = list(self.centroids.keys())
                 return np.random.choice(available_categories)
 
         def select_couples_of_centroids(category):
+            available_centroids = self.centroids[category]
             if smart_centroids:
-                raise NotImplementedError('Under construction')
-            else:
-                available_centroids = self.centroids[category]
-                idxs = np.random.choice(len(available_centroids), n_total * 2)
+                print('Selecting cosine-closest centroids to project from')
+                print('Selecting cosine-furthest centroids to project to')
+                c1as, c2as = [], []
+                for ϕ in samples:
+                    cosine_argsort = np.argsort([cosine(ϕ, c) for c in available_centroids])
+                    sorted_centroids = available_centroids[cosine_argsort]
+                    c1as.append(sorted_centroids[:n_new_per_sample])
+                    c2as.append(sorted_centroids[-n_new_per_sample:])
+                c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
+            else:  # random choice
+                print('Selecting centroids randomally')
+                idxs = np.random.choice(len(available_centroids), n_new * 2)
                 selected_centroids = available_centroids[idxs]
                 c1as, c2as = np.split(selected_centroids, 2)
-                return c1as, c2as
+
+            return c1as, c2as
 
         category = select_category()
         c1as, c2as = select_couples_of_centroids(category)
         triplets = zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as)
 
-        X = [np.concatenate((ϕ.flatten(), c1a, c2a)) for ϕ, c1a, c2a in triplets]
+        X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
         return self.generator.predict(np.array(X))
 
     @staticmethod
@@ -278,7 +292,7 @@ class LowShotGenerator(object):
 
     @staticmethod
     def benchmark_single(Classifier, DataClass, dataset_name, n_clusters=30, λ=.95, n_new=100, epochs=2,
-                         hidden_size=256, classifier_epochs=1, smart_category=False):
+                         hidden_size=256, classifier_epochs=1, smart_category=False, smart_centroids=False):
         """
         runs a benchmark test on the one category from the given dataset.
         :param Classifier: Classifier class (for creating classifiers i.e. MnistClassifier)
@@ -335,7 +349,8 @@ class LowShotGenerator(object):
 
         new_examples = g.generate_from_samples(n_examples,
                                                n_total=n_new + n_real_examples,
-                                               smart_category=smart_category)
+                                               smart_category=smart_category,
+                                               smart_centroids=smart_centroids)
 
         n_unique = len(np.unique(new_examples, axis=0))
 
