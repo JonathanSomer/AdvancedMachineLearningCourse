@@ -78,8 +78,9 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
 
         df = pd.DataFrame.from_dict(all_accs)
         df.to_pickle('./benchmark.pickle')
-        df.plot(kind='bar')
 
+        df.plot(kind='barh', figsize=(10, 10))
+        plt.legend(loc='best')
         plt.tight_layout()
 
         path_format = './benchmark.png'
