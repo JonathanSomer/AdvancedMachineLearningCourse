@@ -101,7 +101,7 @@ class Pipeline(object):
             generators_options = {'baseline': lambda: None,
                                   'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
                                   'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
-                                  'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=n),}
+                                  'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=N_GIVEN_EXAMPLES[-1]),}
 
             for option in generators_options.keys():
                 if n != N_GIVEN_EXAMPLES[-1]:
@@ -125,10 +125,8 @@ class Pipeline(object):
         copied_examples = np.array(examples, copy=True)
 
         while len(copied_examples) < num_examples_to_create:
-            copied_examples = np.repeat(copied_examples, int(num_examples_to_create/len(copied_examples))+1)
+            copied_examples = np.concatenate((copied_examples, examples))
 
-        import ipdb
-        ipdb.set_trace()
         return copied_examples[:num_examples_to_create]
 
     def export_one_shot_learning_result(self, results, inx):
