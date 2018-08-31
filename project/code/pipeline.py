@@ -74,7 +74,7 @@ class Pipeline(object):
         return results, fpr, tpr
 
     def get_low_shot_results(self, inx):
-        low_shot_learning_results = {}
+        results = {}
 
         _logger.info('fit a classifier without label %d' % inx)
         temp_data_object = self.dataset_type(use_features=self.use_features, class_removed=inx)  # TODO -> refactor
@@ -93,7 +93,7 @@ class Pipeline(object):
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
-            low_shot_learning_results[n] = {}
+            results[n] = {}
             self.dataset.set_number_of_samples_to_use(n=n)
             examples = self.dataset.get_n_samples(n)
 
@@ -101,7 +101,8 @@ class Pipeline(object):
             generators_options = {'baseline': lambda: None,
                                   'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
                                   'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
-                                  'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=N_GIVEN_EXAMPLES[-1]),}
+                                  #'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=N_GIVEN_EXAMPLES[-1]),
+                                    }
 
             for option in generators_options.keys():
                 if n != N_GIVEN_EXAMPLES[-1]:
@@ -110,13 +111,16 @@ class Pipeline(object):
                         self.dataset.set_generated_data(generated_data)
 
                 self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
-                results, fpr, tpr = self.evaluate_cls()
-                low_shot_learning_results[n][option] = results[inx]
+                temp_results, fpr, tpr = self.evaluate_cls()
+                results[n][option] = temp_results[inx]
+                import ipdb
+                ipdb.set_trace()
+                results[n][option]['avarage_rest'] = np.mean([temp_results[x]['accuracy'] for x in temp_results.keys() if x != inx])
 
             self.dataset.set_generated_data(None)
 
         _logger.info('export results for %d' % inx)
-        self.export_one_shot_learning_result(low_shot_learning_results, inx)
+        self.export_one_shot_learning_result(results, inx)
 
     def duplicated_generator(self, examples, n_total):
         num_examples_to_create = n_total - len(examples)
@@ -142,7 +146,8 @@ class Pipeline(object):
                                                          results_n_option['accuracy'],
                                                          results_n_option['auc']))
 
-        self.create_low_shot_results_plot(base_inx_results, results, '%d low shot results' % inx)
+        self.create_low_shot_results_plot(base_inx_results, results, inx)
+        self.create_low_shot_sanity_plot(results, inx)
         _logger.info('\n')
 
     def create_cls_roc_plot(self, fpr, tpr, results, figure_name):
@@ -167,7 +172,7 @@ class Pipeline(object):
 
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
-    def create_low_shot_results_plot(self, base_results, low_shot_results, figure_name):
+    def create_low_shot_results_plot(self, base_results, low_shot_results, inx):
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
         generating_options = low_shot_results[N_GIVEN_EXAMPLES[0]].keys()
@@ -180,9 +185,27 @@ class Pipeline(object):
         plt.xticks([0, 1, 5, 10, 20])
         plt.ylabel('True Positive Rate')
         plt.legend()
-        plt.title('%s - base results accuracy %f' % (figure_name, base_results['accuracy']))
+        plt.title('low shot on label index %d - base results accuracy %f' % (inx, base_results['accuracy']))
 
-        figure_save_name = '%s.png' % figure_name.replace(" ", "_")
+        figure_save_name = 'low_shot_%d.png' % inx
+        fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
+
+    def create_low_shot_sanity_plot(self, low_shot_results, inx):
+        fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
+
+        generating_options = low_shot_results[N_GIVEN_EXAMPLES[0]].keys()
+
+        for option in generating_options:
+            accuracy_plot = [low_shot_results[n][option]['avarage_rest'] for n in N_GIVEN_EXAMPLES]
+            plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
+
+        plt.xlabel('Real examples')
+        plt.xticks([0, 1, 5, 10, 20])
+        plt.ylabel('Avarage accuracy on all classes but %d' % inx)
+        plt.legend()
+        plt.title('Sanity check for index %d' % inx)
+
+        figure_save_name = 'sanity_%d.png' % inx
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
 
