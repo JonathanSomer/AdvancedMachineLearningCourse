@@ -37,3 +37,13 @@
     sh collect_mnist.sh
     sh collect_cifar10.sh
     ```
+3. Run the pipeline
+    _verify `results` directory existance and the path is updated in config.py_
+    ```bash
+    # There should be quadruplets directory in both write and read directories
+    cd /some/path/to/project/code/
+    python3 pipeline.py -d
+    ```
+
+    The plots are under the results directory
+    The log file is under `log` directory
