@@ -37,7 +37,7 @@
     sh collect_mnist.sh
     sh collect_cifar10.sh
     ```
-3. Run the pipeline
+3. Run the pipeline:
     _verify `results` directory existance and the path is updated in config.py_
     ```bash
     # There should be quadruplets directory in both write and read directories
