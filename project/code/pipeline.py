@@ -94,17 +94,20 @@ class Pipeline(object):
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
             low_shot_learning_results[n] = {}
+            self.dataset.set_number_of_samples_to_use(n=n)
             examples = self.dataset.get_n_samples(n)
 
             base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=N_GIVEN_EXAMPLES[-1])
             generators_options = {'baseline': lambda: None,
                                   'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
-                                  'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False)}
+                                  'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
+                                  'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=N_GIVEN_EXAMPLES[-1]),}
 
             for option in generators_options.keys():
                 if n != N_GIVEN_EXAMPLES[-1]:
                     generated_data = generators_options[option]()
-                    self.dataset.set_generated_data(generated_data)
+                    if generated_data is not None:
+                        self.dataset.set_generated_data(generated_data)
 
                 self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
                 results, fpr, tpr = self.evaluate_cls()
@@ -114,6 +117,17 @@ class Pipeline(object):
 
         _logger.info('export results for %d' % inx)
         self.export_one_shot_learning_result(low_shot_learning_results, inx)
+
+    def duplicated_generator(self, examples, n_total):
+        num_examples_to_create = n_total - len(examples)
+        if num_examples_to_create <= 0:
+            return None
+        copied_examples = np.array(examples, copy=True)
+
+        while len(copied_examples) < num_examples_to_create:
+            copied_examples = np.concatenate((copied_examples, examples))
+
+        return copied_examples[:num_examples_to_create]
 
     def export_one_shot_learning_result(self, results, inx):
         _logger.info('export results for %d' % inx)
@@ -162,7 +176,8 @@ class Pipeline(object):
             accuracy_plot = [low_shot_results[n][option]['accuracy'] for n in N_GIVEN_EXAMPLES]
             plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
 
-        plt.xlabel('number of examples')
+        plt.xlabel('Real examples')
+        plt.xticks([0, 1, 5, 10, 20])
         plt.ylabel('True Positive Rate')
         plt.legend()
         plt.title('%s - base results accuracy %f' % (figure_name, base_results['accuracy']))

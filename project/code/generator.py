@@ -49,6 +49,9 @@ class LowShotGenerator(object):
         self.decay = decay
         self.data_object = data_object
 
+        self.generated_samples_category_mem = {}
+        self.generated_samples_centroids_mem = {}
+
         x_train, y_classifier, y_generator = [], [], []
 
         for category, quadruplets in self.quadruplets.items():
@@ -189,7 +192,6 @@ class LowShotGenerator(object):
     def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False):
         n_new = n_total - len(samples)
         n_new_per_sample = n_new // len(samples)
-        samples = [ϕ.flatten() for ϕ in samples]
 
         def select_category():
             if smart_category:
@@ -262,6 +264,8 @@ class LowShotGenerator(object):
                 c1as, c2as = np.split(selected_centroids, 2)
 
             return c1as, c2as
+
+        samples = np.array([ϕ.flatten() for ϕ in samples])
 
         category = select_category()
         c1as, c2as = select_couples_of_centroids(category)
