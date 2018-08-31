@@ -48,7 +48,7 @@ class DataObject(object):
         self.number_of_samples_to_use = None
         self.generated_data = None
         
-        self.permutation_for_sample_fetch = np.random.permutation(len(self.x_train))
+        self.permutation_for_sample_fetch = np.random.permutation(200)
 
     def into_fit(self):
         x_train, y_train, x_test, y_test = self._train_test()
