@@ -6,6 +6,7 @@ from keras.layers import Dense, Dropout, Flatten, Input
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
+from sklearn.utils.class_weight import compute_class_weight
 
 class Classifier(object):
 	    
@@ -17,17 +18,19 @@ class Classifier(object):
         self.trainable = True
 
     # must get one hot encoded labels
-    def fit(self, x_train, y_train, x_test, y_test, callbacks=None):
+    def fit(self, x_train, y_train, x_test, y_test, callbacks=None, use_class_weights = True):
         assert len(y_train[0]) == len(y_test[0])
         assert x_train[0].shape == x_test[0].shape
         self.input_shape = x_train[0].shape
         self.model = self._cnn(n_classes = len(y_train[0]))
+        class_weight = self._compute_class_weights(y_train) if use_class_weights else None
         self.model.fit(x_train, y_train,
           batch_size=self.batch_size,
           epochs=self.epochs,
           verbose=1,
           validation_data=(x_test, y_test),
-          callbacks=callbacks)
+          callbacks=callbacks,
+          class_weight=class_weight)
 
     def evaluate(self, x_test, y_test, verbose=True):
         if self.model is None:
@@ -54,3 +57,12 @@ class Classifier(object):
             print('Classifier was set to NOT trainable!')
 
         self._compile()
+
+    # expects a one hot encoded y_train array
+    def _compute_class_weights(self, y_train, as_array=False):
+        y_integers = np.argmax(y_train, axis=1)
+        class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+        if as_array:
+            return class_weights
+        class_weights_dict = dict(enumerate(class_weights))
+        return class_weights_dict
