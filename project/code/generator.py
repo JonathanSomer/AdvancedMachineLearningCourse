@@ -218,6 +218,7 @@ class LowShotGenerator(object):
                     c2as.append(sorted_centroids[-n_new_per_sample:])
                 c1as, c2as = np.concatenate(c1as), np.concatenate(c2as)
             else:  # random choice
+                print('Selecting centroids randomally')
                 idxs = np.random.choice(len(available_centroids), n_new * 2)
                 selected_centroids = available_centroids[idxs]
                 c1as, c2as = np.split(selected_centroids, 2)
