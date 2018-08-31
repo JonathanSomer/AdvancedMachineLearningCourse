@@ -92,6 +92,7 @@ class Pipeline(object):
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
             low_shot_learning_results[n] = {}
+            self.dataset.set_number_of_samples_to_use(n=n)
             examples = self.dataset.get_n_samples(n)
 
             base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=N_GIVEN_EXAMPLES[-1])
@@ -102,6 +103,7 @@ class Pipeline(object):
             for option in generators_options.keys():
                 if n != N_GIVEN_EXAMPLES[-1]:
                     generated_data = generators_options[option]()
+                    if generated_data is not None:
                     self.dataset.set_generated_data(generated_data)
 
                 self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
