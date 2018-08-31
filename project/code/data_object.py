@@ -47,13 +47,15 @@ class DataObject(object):
 
         self.number_of_samples_to_use = None
         self.generated_data = None
+        
+        self.permutation_for_sample_fetch = np.random.permutation(len(self.x_train))
 
     def into_fit(self):
         x_train, y_train, x_test, y_test = self._train_test()
 
         if self.number_of_samples_to_use is not None:
-            n_samples = self.x_class_removed_train[:self.number_of_samples_to_use]
-            n_labels = self.y_class_removed_train[:self.number_of_samples_to_use]
+            n_samples = self.get_n_samples(self.number_of_samples_to_use)
+            n_labels = np.repeat(self.class_removed, self.number_of_samples_to_use)
 
             x_train = np.concatenate((x_train, n_samples))
             y_train = np.concatenate((y_train, n_labels))
@@ -138,8 +140,9 @@ class DataObject(object):
 
         if n == 0 or n is None:
             self.number_of_samples_to_use = None
-            return
-        self.number_of_samples_to_use = n
+        else:
+            self.number_of_samples_to_use = n
+
         self.y_train_one_hot = self._one_hot_encode(self.y_train)
         self.y_test_one_hot = self._one_hot_encode(self.y_test)
 
@@ -155,7 +158,9 @@ class DataObject(object):
         if self.class_removed is None:
             raise Exception(
                 "must run d.set_removed_class(...) in order to get n samples")
-        return self.x_class_removed_train[:n]
+
+        sample_indexes = self.permutation_for_sample_fetch[:n]
+        return self.x_class_removed_train[sample_indexes]
 
     def get_num_classes(self):
         return self.n_classes
