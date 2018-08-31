@@ -194,7 +194,7 @@ class LowShotGenerator(object):
         n_new_per_sample = n_new // len(samples)
 
         def select_category():
-            if smart_category:
+            if smart_category in (True, 'smart'):
                 print('Selecting classification-closest category to {0}'.format(self.novel_category))
                 preds = self.trained_classifier.predict(np.array(samples))
                 y_preds = np.argmax(preds, axis=1)

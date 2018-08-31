@@ -27,11 +27,9 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
     all_accs = defaultdict(dict)
 
     if category_selection == 'all':
-        category_selection_types = (True, False)
-    elif category_selection == 'smart':
-        category_selection_types = (True,)
+        category_selection_types = ('smart', 'random')
     else:
-        category_selection_types = (False,)
+        category_selection_types = (category_selection,)
 
     if centroids_selection == 'all':
         centroids_selection_types = ('random', 'cosine_both', 'cosine', 'norm', 'norm_both')
@@ -74,21 +72,21 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
             loss, acc, n_unique = _benchmark(256, .95)
             all_accs[category][acc_key] = acc * 100
 
-        if plot:
-            all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
-                               all_acc_keys}
+    if plot:
+        all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
+                           all_acc_keys}
 
-            df = pd.DataFrame.from_dict(all_accs)
-            df.to_pickle('./benchmark.pickle')
-            df.plot(kind='bar')
+        df = pd.DataFrame.from_dict(all_accs)
+        df.to_pickle('./benchmark.pickle')
+        df.plot(kind='bar')
 
-            plt.tight_layout()
+        plt.tight_layout()
 
-            path_format = './benchmark.png'
-            # category_type = 'smart' if smart_category else 'random'
-            # centroids_type = 'random' if smart_centroids == 'random' else 'smart{0}'.format(smart_centroids)
+        path_format = './benchmark.png'
+        # category_type = 'smart' if smart_category else 'random'
+        # centroids_type = 'random' if smart_centroids == 'random' else 'smart{0}'.format(smart_centroids)
 
-            plt.savefig(path_format)
+        plt.savefig(path_format)
 
 
 if __name__ == "__main__":
