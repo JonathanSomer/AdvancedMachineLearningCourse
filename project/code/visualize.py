@@ -64,8 +64,8 @@ def main(category, classifier_epochs, generator_epochs):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('category', help='what category to exclude', type=int)
-    parser.add_argument('-ce', '--classifier_epochs', help='n epochs for classifier training', type=int, default=12)
-    parser.add_argument('-ge', '--generator_epochs', help='n epochs for generator training', type=int, default=10)
+    parser.add_argument('-ce', '--classifier_epochs', help='n epochs for classifier training', type=int, default=2)
+    parser.add_argument('-ge', '--generator_epochs', help='n epochs for generator training', type=int, default=2)
 
     args = parser.parse_args()
 
