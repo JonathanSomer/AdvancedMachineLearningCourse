@@ -277,11 +277,11 @@ class Pipeline(object):
     def create_generated_results_plot(self, results, inx):
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
-        generating_options = results[N_GIVEN_EXAMPLES[0]].keys()
+        generating_options = results[N_TOTALS[0]].keys()
 
         for option in generating_options:
             accuracy_plot = [results[n_total][option]['accuracy'] for n_total in N_TOTALS]
-            plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
+            plt.plot(N_TOTALS, accuracy_plot, marker='o', label=option)
 
         plt.xlabel('generated examples')
         plt.xticks(N_TOTALS)
