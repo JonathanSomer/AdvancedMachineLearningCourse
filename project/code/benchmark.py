@@ -19,12 +19,27 @@ data_obj_getters = {'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
 
-def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate,
-         category_selection,
-         centroids_selection, plot):
-    categories = range(data_obj_getters[dataset]().get_num_classes()) if category == 'all' else [category]
+def plotify(data_dict, title=None, name=None):
+    if not name:
+        name = 'benchmark'
 
-    all_accs = defaultdict(dict)
+    df = pd.DataFrame.from_dict(data_dict)
+    df.to_pickle('./{0}.pickle'.format(name))
+
+    df.plot(kind='barh', figsize=(10, 10))
+    plt.legend(loc='best')
+    plt.tight_layout()
+
+    if title:
+        plt.title(title)
+
+    plt.savefig('./{0}.png'.format(name))
+
+
+def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_new, to_cross_validate_hyper,
+         category_selection, centroids_selection, to_plot):
+    dataset_key = dataset.replace('raw_', '')
+    categories = range(data_obj_getters[dataset]().get_num_classes()) if category == 'all' else [category]
 
     if category_selection == 'all':
         category_selection_types = ('smart', 'random')
@@ -36,13 +51,32 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
     else:
         centroids_selection_types = (centroids_selection,)
 
-    all_acc_keys = []
-    for category, category_selection, centroids_selection in product(categories,
-                                                                     category_selection_types,
-                                                                     centroids_selection_types):
-        dataset_key = dataset.replace('raw_', '')
+    if to_cross_validate_hyper:
+        hidden_sizes = (64, 128, 256, 512)
+        lambdas = (.1, .25, .5, .75, .9, .95)
+        hidden_sizes_str = lambdas_str = 'all'
+    else:
+        hidden_sizes = (256,)
+        lambdas = (.95,)
+        hidden_sizes_str = '256'
+        lambdas_str = '0.95'
+
+    name_format = '{0}.category_{1}.category_select_{2}.cendroids_select_{2}.hs_{3}.lambda_{4}'
+    name = name_format.format(dataset,
+                              categories,
+                              category_selection_types,
+                              centroids_selection_types,
+                              hidden_sizes_str,
+                              lambdas_str)
+
+    all_accs, all_acc_keys = defaultdict(dict), []
+    for category, category_selection, centroids_selection, hs, λ in product(categories,
+                                                                            category_selection_types,
+                                                                            centroids_selection_types,
+                                                                            hidden_sizes,
+                                                                            lambdas):
         dataset_name = '{0}_{1}'.format(dataset, category)
-        acc_key = '{0}_category.{1}_centroids'.format(category_selection, centroids_selection)
+        acc_key = '{0}_category.{1}_centroids.hs_{2}.λ_{3}'.format(category_selection, centroids_selection, hs, λ)
         all_acc_keys += [acc_key]
 
         def _benchmark(_hs, _λ):
@@ -58,36 +92,14 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
                                                      smart_category=category_selection,
                                                      smart_centroids=centroids_selection)
 
-        if to_cross_validate:
-            raise NotImplementedError('Still does not work.')
-            hidden_sizes = (64, 128, 256, 512)
-            lambdas = (.1, .25, .5, .75, .9, .95)
+        loss, acc, n_unique = _benchmark(hs, λ)
+        all_accs[category][acc_key] = acc * 100
 
-            losses, accs, n_uniques = {}, {}, {}
-
-            for hs, λ in product(hidden_sizes, lambdas):
-                losses[hs, λ], accs[hs, λ], n_uniques[hs, λ] = _benchmark(hs, λ)
-
-        else:
-            loss, acc, n_unique = _benchmark(256, .95)
-            all_accs[category][acc_key] = acc * 100
-
-    if plot:
+    if to_plot:
         all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
                            all_acc_keys}
 
-        df = pd.DataFrame.from_dict(all_accs)
-        df.to_pickle('./benchmark.pickle')
-
-        df.plot(kind='barh', figsize=(10, 10))
-        plt.legend(loc='best')
-        plt.tight_layout()
-
-        path_format = './benchmark.png'
-        # category_type = 'smart' if smart_category else 'random'
-        # centroids_type = 'random' if smart_centroids == 'random' else 'smart{0}'.format(smart_centroids)
-
-        plt.savefig(path_format)
+        plotify(all_accs, name=name)
 
 
 if __name__ == "__main__":
@@ -100,7 +112,8 @@ if __name__ == "__main__":
     parser.add_argument('-ce', '--classifier_epochs', help='number of epcohs to train the classifier with', type=int,
                         default=1)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
-    parser.add_argument('-cv', '--cross_validate', help='whether to do a cross validation', action='store_true')
+    parser.add_argument('-cv', '--cross_validate_hyper', help='whether to do a cross validation on hyperparams',
+                        action='store_true')
     parser.add_argument('-sca', '--category_selection', help='type of category selection [smart/random]', type=str,
                         default='random')
     parser.add_argument('-sce', '--centroids_selection',
@@ -111,4 +124,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.dataset, args.category, args.n_clusters, args.generator_epochs, args.classifier_epochs, args.n_new,
-         args.cross_validate, args.category_selection, args.centroids_selection, args.plot)
+         args.cross_validate_hyper, args.category_selection, args.centroids_selection, args.plot)
