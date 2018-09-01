@@ -273,7 +273,7 @@ class LowShotGenerator(object):
 
         category = select_category()
         c1as, c2as = select_couples_of_centroids(category)
-        triplets = zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as)
+        triplets = list(zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as))
 
         X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
         preds = self.generator.predict(np.array(X))
