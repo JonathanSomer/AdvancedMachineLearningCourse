@@ -61,11 +61,11 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
         hidden_sizes_str = '256'
         lambdas_str = '0.95'
 
-    name_format = '{0}.category_{1}.category_select_{2}.cendroids_select_{2}.hs_{3}.lambda_{4}'
+    name_format = '{0}.category_{1}.category_select_{2}.cendroids_select_{3}.hs_{4}.lambda_{5}'
     name = name_format.format(dataset,
-                              categories,
-                              category_selection_types,
-                              centroids_selection_types,
+                              categories[0] if len(categories) == 1 else 'all',
+                              category_selection_types[0] if len(category_selection_types) == 1 else 'all',
+                              centroids_selection_types[0] if len(centroids_selection_types) == 1 else 'all',
                               hidden_sizes_str,
                               lambdas_str)
 
