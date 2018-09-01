@@ -186,6 +186,7 @@ def load_quadruplets(n_clusters, categories='all', n_files=12, dataset_name='xra
 
     # filter unwanted categories
     cat_to_centroids = {category: cs for category, cs in cat_to_centroids.items() if category in categories}
+    cat_to_vectors = {category: vs for category, vs in cat_to_vectors.items() if category in categories}
 
     quadruplets = defaultdict(list)
     for a, b in combinations(categories, 2):
