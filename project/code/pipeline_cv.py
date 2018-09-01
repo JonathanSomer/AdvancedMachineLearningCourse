@@ -23,7 +23,7 @@ def run_cv(dataset_type, cls_type, use_data_subset=False, use_features=True, use
 
             new_dir_path = os.path.join(base_dir, '%d_%f'%(hidden_size, λ))
             os.makedirs(new_dir_path)
-            for png_file in glob.glob(base_dir + "\\*.png"):
+            for png_file in glob.glob(os.path.join(base_dir, '*.png')):
                 shutil.copy2(png_file, new_dir_path)
 
 if __name__ == "__main__":
