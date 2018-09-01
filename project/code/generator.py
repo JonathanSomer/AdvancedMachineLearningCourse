@@ -274,10 +274,12 @@ class LowShotGenerator(object):
                 c1as, c2as = [], []
                 for category in categories:
                     available_centroids = self.centroids[category]
-                    idxs = np.random.choice(len(available_centroids), 2)
-                    c1a, c2a = available_centroids[idxs]
-                    c1as += [c1a]
-                    c2as += [c2a]
+                    idxs = np.random.choice(len(available_centroids), n_new_per_sample * 2)
+                    _c1as, _c2as = np.split(available_centroids[idxs], 2)
+                    c1as += [_c1as]
+                    c2as += [_c2as]
+
+                return np.concatenate(c1as), np.concatenate(c2as)
 
             return np.array(c1as), np.array(c2as)
 
