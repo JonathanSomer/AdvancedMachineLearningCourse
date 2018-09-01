@@ -18,7 +18,7 @@ import functools
 
 _logger = logger.get_logger(__name__)
 N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
-N_TOTALS = [20, 50, 100, 200, 300, 500]
+N_TOTALS = [20, 50, 100, 300]
 
 
 class Pipeline(object):
@@ -147,11 +147,10 @@ class Pipeline(object):
             examples = self.dataset.get_n_samples(fixed_number_of_examples)
 
             base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=self.n_total)
-            generators_options = {'baseline': lambda: None, #NOT A BUG - SANITY CHECK!
-                                  'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
-                                  'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
+            generators_options = {'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
+                                  'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False)}
                                   #'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=self.n_total),
-                                    }
+                                  # 'baseline': lambda: None,  # NOT A BUG - SANITY CHECK!}
 
             for option in generators_options.keys():
                 if n_total > fixed_number_of_examples:

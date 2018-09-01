@@ -7,8 +7,8 @@ import shutil
 import glob
 
 _logger = logger.get_logger(__name__)
-hidden_sizes = (64, 128, 256, 512)
-λs = (.1, .25, .5, .75, .9, .95)
+hidden_sizes = (64, 128, 256,)
+λs = (.25, .5, .75,)
 
 
 def run_cv(dataset_type, cls_type, use_data_subset=False, use_features=True, use_class_weights=True,
