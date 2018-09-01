@@ -41,13 +41,13 @@
     _verify `results` directory existance and the path is updated in config.py_
     ```bash
     cd /some/path/to/project/code/
-    python3 pipeline.py -d
+    python3 pipeline.py -d dataset_name
     ```
 
     The plots are under the results directory
     The log file is under `log` directory
     
-    In order to fetch the plots from gloud run:
+    In order to fetch the plots from gcloud run:
     ```bash
     cd your_gcloud_dir/google-cloud-sdk/bin
     gcloud compute scp --zone=us-west1-b your_instance_name:your_results_dir_path_on_cloud/* your_results_path_on_your computer
