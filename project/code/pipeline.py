@@ -18,6 +18,7 @@ import functools
 
 _logger = logger.get_logger(__name__)
 N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
+N_TOTALS = [20, 50, 100, 200, 300, 500]
 
 
 class Pipeline(object):
@@ -47,7 +48,8 @@ class Pipeline(object):
         self.base_results = {}#self._base_results()
         self.low_shot_results = {}
         for i in range(2):
-            self.low_shot_results[i] = self.get_low_shot_results(i)
+            self.low_shot_results[i] = self.low_shot_test(i)
+            self.generated_test(i)
 
     def _base_results(self):
         _logger.info('get base results')
@@ -81,10 +83,8 @@ class Pipeline(object):
 
         return results, fpr, tpr
 
-    def get_low_shot_results(self, inx):
-        results = {}
-
-        _logger.info('fit a classifier without label %d' % inx)
+    def get_generator(self, inx):
+        _logger.info('create generator')
         temp_data_object = self.dataset_type(use_features=self.use_features, class_removed=inx)  # TODO -> refactor
         temp_data_object.set_removed_class(class_index=inx, verbose=True)
         self.dataset.set_removed_class(class_index=inx, verbose=True)
@@ -93,13 +93,19 @@ class Pipeline(object):
         all_but_one_classifier.fit(*temp_data_object.into_fit())
         all_but_one_classifier.set_trainability(is_trainable=False)
 
-        _logger.info('create generator')
+
         generator = LowShotGenerator(all_but_one_classifier.model,
                                      temp_data_object,
                                      epochs=self.generator_epochs,
                                      n_clusters=self.n_clusters,
                                      λ=self.λ,
                                      hidden_size=self.hidden_size)
+        return generator
+
+    def low_shot_test(self, inx):
+        _logger.info('run low shot test for inx %d' % inx)
+        results = {}
+        generator = self.get_generator(inx)
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
@@ -124,6 +130,40 @@ class Pipeline(object):
                 temp_results, fpr, tpr = self.evaluate_cls()
                 results[n][option] = temp_results[inx]
                 results[n][option]['avarage_rest'] = np.mean([temp_results[x]['accuracy'] for x in temp_results.keys() if x != inx])
+
+            self.dataset.set_generated_data(None)
+
+        _logger.info('export results for %d' % inx)
+        self.export_one_shot_learning_result(results, inx)
+
+    def generated_test(self, inx):
+        results = {}
+        _logger.info('run low shot test for inx %d' % inx)
+        generator = self.get_generator(inx)
+        fixed_number_of_examples = 5
+        _logger.info('number of examples is %d' % fixed_number_of_examples)
+
+        for n_total in N_TOTALS:
+            results[n_total] = {}
+            self.dataset.set_number_of_samples_to_use(n=fixed_number_of_examples)
+            examples = self.dataset.get_n_samples(fixed_number_of_examples)
+
+            base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=self.n_total)
+            generators_options = {'baseline': lambda: None, #NOT A BUG - SANITY CHECK!
+                                  'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
+                                  'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
+                                  #'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=self.n_total),
+                                    }
+
+            for option in generators_options.keys():
+                if n_total > fixed_number_of_examples:
+                    generated_data = generators_options[option]()
+                    if generated_data is not None:
+                        self.dataset.set_generated_data(generated_data)
+
+                self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
+                temp_results, fpr, tpr = self.evaluate_cls()
+                results[n_total][option] = temp_results[inx]
 
             self.dataset.set_generated_data(None)
 
@@ -156,6 +196,22 @@ class Pipeline(object):
 
         self.create_low_shot_results_plot(base_inx_results, results, inx)
         self.create_low_shot_sanity_plot(results, inx)
+        _logger.info('\n')
+
+    def export_generated_results(self, results, inx):
+        _logger.info('export generated results for %d' % inx)
+        base_inx_results = self.base_results[inx]
+        _logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
+        generating_options = results[N_TOTALS[0]].keys()
+        for n_total in N_TOTALS:
+            _logger.info('low shot results with %d total examples:' % n_total)
+            for option in generating_options:
+                results_n_option = results[n_total][option]
+                _logger.info('\t%s accuracy %f, auc %f' % (option,
+                                                         results_n_option['accuracy'],
+                                                         results_n_option['auc']))
+
+        self.create_generated_results_plot(results, inx)
         _logger.info('\n')
 
     def create_cls_roc_plot(self, fpr, tpr, results, figure_name):
@@ -218,6 +274,24 @@ class Pipeline(object):
         figure_save_name = 'sanity_%d.png' % inx
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
+    def create_generated_results_plot(self, results, inx):
+        fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
+
+        generating_options = results[N_GIVEN_EXAMPLES[0]].keys()
+
+        for option in generating_options:
+            accuracy_plot = [results[n_total][option]['accuracy'] for n_total in N_TOTALS]
+            plt.plot(N_GIVEN_EXAMPLES, accuracy_plot, marker='o', label=option)
+
+        plt.xlabel('generated examples')
+        plt.xticks(N_TOTALS)
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.grid()
+        plt.title('number of total examples vs accuracy check for index %d' % inx)
+
+        figure_save_name = 'generated_test_%d.png' % inx
+        fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
 DATA_SETS = {'mnist': MnistData,
              'cifar10': Cifar10Data}
