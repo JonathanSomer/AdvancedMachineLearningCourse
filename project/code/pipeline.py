@@ -22,7 +22,9 @@ N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
 
 class Pipeline(object):
     def __init__(self, dataset_type, cls_type, use_data_subset=False, use_features=True, use_class_weights=True,
-                 generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1], hidden_size=256, λ=.95):
+                 generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1],
+                 λ=.95, hidden_size=256):
+
         self.dataset_type = dataset_type
         self.use_data_subset = use_data_subset
         self.use_features = use_features
@@ -34,6 +36,9 @@ class Pipeline(object):
         self.cls_type = cls_type
         self.hidden_size = hidden_size
         self.λ = λ
+
+        self.λ = λ
+        self.hidden_size = hidden_size
 
         self.dataset = dataset_type(use_features=self.use_features, use_data_subset=use_data_subset)
         self.cls = cls_type(use_features=self.use_features, epochs=self.classifier_epochs)
@@ -93,8 +98,13 @@ class Pipeline(object):
                                      temp_data_object,
                                      epochs=self.generator_epochs,
                                      n_clusters=self.n_clusters,
+<<<<<<< HEAD
                                      hidden_size=self.hidden_size,
                                      λ=self.λ)
+=======
+                                     λ=self.λ,
+                                     hidden_size=self.hidden_size)
+>>>>>>> 4f9b05a2666df6c05cd1faa03ea5bc9775dd5f15
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)

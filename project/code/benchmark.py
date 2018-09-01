@@ -26,12 +26,18 @@ def plotify(data_dict, title=None, name=None):
     df = pd.DataFrame.from_dict(data_dict)
     df.to_pickle('./{0}.pickle'.format(name))
 
-    df.plot(kind='barh', figsize=(10, 10))
+    df = df.transpose()
+    df.plot(kind='bar', figsize=(10, 10))
+
+    plt.ylabel('Evaluation accuracy on generated examples')
+    plt.xlabel('Removed category')
+    plt.xticks(rotation=0)
     plt.legend(loc='best')
-    plt.tight_layout()
 
     if title:
         plt.title(title)
+
+    plt.tight_layout()
 
     plt.savefig('./{0}.png'.format(name))
 
@@ -61,11 +67,11 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
         hidden_sizes_str = '256'
         lambdas_str = '0.95'
 
-    name_format = '{0}.category_{1}.category_select_{2}.cendroids_select_{2}.hs_{3}.lambda_{4}'
+    name_format = '{0}.category_{1}.category_select_{2}.cendroids_select_{3}.hs_{4}.lambda_{5}'
     name = name_format.format(dataset,
-                              categories,
-                              category_selection_types,
-                              centroids_selection_types,
+                              categories[0] if len(categories) == 1 else 'all',
+                              category_selection_types[0] if len(category_selection_types) == 1 else 'all',
+                              centroids_selection_types[0] if len(centroids_selection_types) == 1 else 'all',
                               hidden_sizes_str,
                               lambdas_str)
 
@@ -99,6 +105,7 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
         all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
                            all_acc_keys}
 
+        # max_avg_acc = max(list(all_accs['avg'].values()))
         plotify(all_accs, name=name)
 
 
@@ -110,7 +117,7 @@ if __name__ == "__main__":
     parser.add_argument('-ge', '--generator_epochs', help='number of epcohs to train the generator with', type=int,
                         default=2)
     parser.add_argument('-ce', '--classifier_epochs', help='number of epcohs to train the classifier with', type=int,
-                        default=1)
+                        default=12)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
     parser.add_argument('-cv', '--cross_validate_hyper', help='whether to do a cross validation on hyperparams',
                         action='store_true')
