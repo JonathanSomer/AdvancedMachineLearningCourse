@@ -168,7 +168,7 @@ class Pipeline(object):
             self.dataset.set_generated_data(None)
 
         _logger.info('export results for %d' % inx)
-        self.export_one_shot_learning_result(results, inx)
+        self.export_generated_results(results, inx)
 
     def duplicated_generator(self, examples, n_total):
         num_examples_to_create = n_total - len(examples)
