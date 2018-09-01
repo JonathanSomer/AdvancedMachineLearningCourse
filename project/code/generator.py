@@ -28,6 +28,9 @@ class LowShotGenerator(object):
         if self.novel_category is not None:
             self.dataset_name = '{0}_{1}'.format(data_object.name, self.novel_category)
 
+        if not data_object.use_features:
+            self.dataset_name = 'raw_{0}'.format(self.dataset_name)
+
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
                                                     categories='all',  # we work with dataset_name so it's fine
                                                     dataset_name=self.dataset_name)
@@ -189,31 +192,34 @@ class LowShotGenerator(object):
 
         return self.generator.predict(np.array(X))
 
-    def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False):
+    def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False,
+                              return_triplets=False):
         n_new = n_total - len(samples)
         n_new_per_sample = n_new // len(samples)
 
-        def select_category():
+        def select_categories():
             if smart_category in (True, 'smart'):
                 print('Selecting classification-closest category to {0}'.format(self.novel_category))
                 preds = self.trained_classifier.predict(np.array(samples))
                 y_preds = np.argmax(preds, axis=1)
                 categories, counts = np.unique(y_preds, return_counts=True)
                 cnt = dict(zip(categories, counts))
-                return max(categories, key=lambda c: cnt[c])
+                selected = max(categories, key=lambda c: cnt[c])
+                return [selected for _ in samples]
 
             else:  # random choice
                 print('Selecting category randomally')
                 available_categories = list(self.centroids.keys())
-                return np.random.choice(available_categories)
+                return np.random.choice(available_categories, len(samples))
 
-        def select_couples_of_centroids(category):
-            available_centroids = self.centroids[category]
+        def select_couples_of_centroids(categories):
             if smart_centroids in ('1', 'cosine_both'):
                 print('Selecting cosine-closest centroids as sources')
                 print('Selecting cosine-furthest centroids as targets')
                 c1as, c2as = [], []
-                for ϕ in samples:
+                for i, ϕ in enumerate(samples):
+                    category = categories[i]
+                    available_centroids = self.centroids[category]
                     cosine_argsort = np.argsort([cosine(ϕ, c) for c in available_centroids])
                     sorted_centroids = available_centroids[cosine_argsort]
                     c1as.append(sorted_centroids[:n_new_per_sample])
@@ -224,7 +230,9 @@ class LowShotGenerator(object):
                 print('Selecting cosine-closest centroids as sources')
                 print('Selecting target centroids randomally')
                 c1as, c2as = [], []
-                for ϕ in samples:
+                for i, ϕ in enumerate(samples):
+                    category = categories[i]
+                    available_centroids = self.centroids[category]
                     cosine_argsort = np.argsort([cosine(ϕ, c) for c in available_centroids])
                     sorted_centroids = available_centroids[cosine_argsort]
                     c1as.append(sorted_centroids[:n_new_per_sample])
@@ -237,7 +245,9 @@ class LowShotGenerator(object):
                 print('Selecting norm-closest centroids as sources (NearestNeighbors style)')
                 print('Selecting norm-furthest centroids as targets (NearestNeighbors style)')
                 c1as, c2as = [], []
-                for ϕ in samples:
+                for i, ϕ in enumerate(samples):
+                    category = categories[i]
+                    available_centroids = self.centroids[category]
                     cosine_argsort = np.argsort([np.linalg.norm(ϕ - c, ord=2) for c in available_centroids])
                     sorted_centroids = available_centroids[cosine_argsort]
                     c1as.append(sorted_centroids[:n_new_per_sample])
@@ -248,7 +258,9 @@ class LowShotGenerator(object):
                 print('Selecting norm-closest centroids as sources (NearestNeighbors style)')
                 print('Selecting target centroids randomally')
                 c1as, c2as = [], []
-                for ϕ in samples:
+                for i, ϕ in enumerate(samples):
+                    category = categories[i]
+                    available_centroids = self.centroids[category]
                     cosine_argsort = np.argsort([np.linalg.norm(ϕ - c, ord=2) for c in available_centroids])
                     sorted_centroids = available_centroids[cosine_argsort]
                     c1as.append(sorted_centroids[:n_new_per_sample])
@@ -259,20 +271,26 @@ class LowShotGenerator(object):
 
             else:  # random choice
                 print('Selecting centroids randomally')
-                idxs = np.random.choice(len(available_centroids), n_new * 2)
-                selected_centroids = available_centroids[idxs]
-                c1as, c2as = np.split(selected_centroids, 2)
+                c1as, c2as = [], []
+                for category in categories:
+                    available_centroids = self.centroids[category]
+                    idxs = np.random.choice(len(available_centroids), 2)
+                    c1a, c2a = available_centroids[idxs]
+                    c1as += [c1a]
+                    c2as += [c2a]
 
-            return c1as, c2as
+            return np.array(c1as), np.array(c2as)
 
         samples = np.array([ϕ.flatten() for ϕ in samples])
 
-        category = select_category()
-        c1as, c2as = select_couples_of_centroids(category)
-        triplets = zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as)
+        categories = select_categories()
+        c1as, c2as = select_couples_of_centroids(categories)
+        triplets = list(zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as))
 
         X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
-        return self.generator.predict(np.array(X))
+        preds = self.generator.predict(np.array(X))
+
+        return (preds, triplets) if return_triplets else preds
 
     @staticmethod
     def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=256):

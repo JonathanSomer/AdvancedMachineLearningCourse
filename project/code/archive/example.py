@@ -1,13 +1,11 @@
 from generator import LowShotGenerator
 from classifier import Classifier
-from callbacks import CloudCallback
-from train import get_trained_classifier_and_data
+from archive.train import get_trained_classifier_and_data
 
 import numpy as np
 import data_utils as du
 import collect
 import argparse
-import config
 
 '''
 Number of samples per category:
