@@ -183,8 +183,8 @@ class Pipeline(object):
 
     def export_one_shot_learning_result(self, results, inx):
         _logger.info('export results for %d' % inx)
-        base_inx_results = self.base_results[inx]
-        _logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
+        #base_inx_results = self.base_results[inx]
+        #_logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
         generating_options = results[N_GIVEN_EXAMPLES[0]].keys()
         for n_examples in N_GIVEN_EXAMPLES:
             _logger.info('low shot results %d examples:' % n_examples)
@@ -194,14 +194,14 @@ class Pipeline(object):
                                                          results_n_option['accuracy'],
                                                          results_n_option['auc']))
 
-        self.create_low_shot_results_plot(base_inx_results, results, inx)
+        self.create_low_shot_results_plot(results, inx)
         self.create_low_shot_sanity_plot(results, inx)
         _logger.info('\n')
 
     def export_generated_results(self, results, inx):
         _logger.info('export generated results for %d' % inx)
-        base_inx_results = self.base_results[inx]
-        _logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
+        #base_inx_results = self.base_results[inx]
+        #_logger.info('base line accuracy %f, auc %f' % (base_inx_results['accuracy'], base_inx_results['auc']))
         generating_options = results[N_TOTALS[0]].keys()
         for n_total in N_TOTALS:
             _logger.info('low shot results with %d total examples:' % n_total)
@@ -236,7 +236,7 @@ class Pipeline(object):
 
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
 
-    def create_low_shot_results_plot(self, base_results, low_shot_results, inx):
+    def create_low_shot_results_plot(self, low_shot_results, inx):
         fig = plt.figure(figsize=(12, 10), dpi=160, facecolor='w', edgecolor='k')
 
         generating_options = low_shot_results[N_GIVEN_EXAMPLES[0]].keys()
@@ -250,7 +250,7 @@ class Pipeline(object):
         plt.ylabel('True Positive Rate')
         plt.legend()
         plt.grid()
-        plt.title('low shot on label index %d - base results accuracy %f' % (inx, base_results['accuracy']))
+        plt.title('low shot on label index')# %d - base results accuracy %f' % (inx, self.base_results[inx]['accuracy']))
 
         figure_save_name = 'low_shot_%d.png' % inx
         fig.savefig(os.path.join(local_results_dir, figure_save_name), dpi=fig.dpi)
