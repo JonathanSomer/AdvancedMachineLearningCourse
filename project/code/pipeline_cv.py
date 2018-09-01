@@ -6,7 +6,7 @@ import os
 import shutil
 import glob
 
-_logger = logger.get_logger()
+_logger = logger.get_logger(__name__)
 hidden_sizes = (64, 128, 256, 512)
 λs = (.1, .25, .5, .75, .9, .95)
 
