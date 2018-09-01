@@ -19,28 +19,25 @@ data_obj_getters = {'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
 
-def plotify(data_dict, max_avg_acc=None, title=None, name=None):
+def plotify(data_dict, title=None, name=None):
     if not name:
         name = 'benchmark'
 
     df = pd.DataFrame.from_dict(data_dict)
     df.to_pickle('./{0}.pickle'.format(name))
 
-    df.plot(kind='barh', figsize=(10, 10))
+    df = df.transpose()
+    df.plot(kind='bar', figsize=(10, 10))
 
-    plt.xlabel('Evaluation accuracy on generated examples')
+    plt.ylabel('Evaluation accuracy on generated examples')
+    plt.xlabel('Removed category')
+    plt.xticks(rotation=0)
     plt.legend(loc='best')
-    plt.tight_layout()
-
-    xticks = [0., 50.]
-    if max_avg_acc:
-        plt.axvline(x=max_avg_acc, linestyle='--')
-        xticks += [max_avg_acc]
-
-    plt.xticks(xticks)
 
     if title:
         plt.title(title)
+
+    plt.tight_layout()
 
     plt.savefig('./{0}.png'.format(name))
 
@@ -108,8 +105,8 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
         all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
                            all_acc_keys}
 
-        max_avg_acc = max(list(all_accs['avg'].values()))
-        plotify(all_accs, name=name, max_avg_acc=max_avg_acc)
+        # max_avg_acc = max(list(all_accs['avg'].values()))
+        plotify(all_accs, name=name)
 
 
 if __name__ == "__main__":
