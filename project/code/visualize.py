@@ -28,36 +28,45 @@ def add_images_to_figure(vectors, titles, n_cols, width=28, height=28):
     plt.tight_layout()
 
 
-def main(category):
+def main(category, classifier_epochs, generator_epochs):
     data_object = MnistData(use_features=False, class_removed=category)
     data_object.set_removed_class(category)
 
-    classifier = MnistClassifier(use_features=False)
+    classifier = MnistClassifier(use_features=False, epochs=classifier_epochs)
     classifier.fit(*data_object.into_fit())
     classifier.set_trainability(is_trainable=False)
 
-    g = LowShotGenerator(classifier.model, data_object)
+    g = LowShotGenerator(classifier.model, data_object, epochs=generator_epochs)
 
     n_real_examples = 1
-    n_new = 3
+    n_new = 1
     n_examples = data_object.get_n_samples(n=n_real_examples)
 
-    new_examples = g.generate_from_samples(n_examples,
-                                           n_total=n_new + n_real_examples,
-                                           smart_category=False,
-                                           smart_centroids=False)
+    new_examples, triplets = g.generate_from_samples(n_examples,
+                                                     n_total=n_new + n_real_examples,
+                                                     smart_category=False,
+                                                     smart_centroids=False,
+                                                     return_triplets=True)
 
-    add_images_to_figure(vectors=n_examples + new_examples,
-                         titles=['Source'] + ['Hallucination #{0}'.format(i) for i in range(len(new_examples))],
-                         n_cols=n_new+1)
+    original_shape = n_examples[0].shape
+    new_examples = new_examples.reshape((n_new,) + original_shape)
+
+    vectors, titles = [], []
+    for (ϕ, c1a, c2a), new_example in zip(triplets, new_examples):
+        vectors += [ϕ.reshape(original_shape), c1a.reshape(original_shape), c2a.reshape(original_shape), new_example]
+        titles += ['ϕ', r'c^{a}_{1}', r'c^{a}_{2}', 'Generated example']
+
+    add_images_to_figure(vectors=vectors, titles=titles, n_cols=4)
 
     plt.savefig('visualize_{0}.png'.format(category))
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('category', help='what category to exclude')
+    parser.add_argument('category', help='what category to exclude', type=int)
+    parser.add_argument('-ce', '--classifier_epochs', help='n epochs for classifier training', type=int, default=12)
+    parser.add_argument('-ge', '--generator_epochs', help='n epochs for generator training', type=int, default=10)
 
     args = parser.parse_args()
 
-    main(args.category)
+    main(args.category, args.classifier_epochs, args.generator_epochs)

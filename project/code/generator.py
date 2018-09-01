@@ -28,6 +28,9 @@ class LowShotGenerator(object):
         if self.novel_category is not None:
             self.dataset_name = '{0}_{1}'.format(data_object.name, self.novel_category)
 
+        if not data_object.use_features:
+            self.dataset_name = 'raw_{0}'.format(self.dataset_name)
+
         quadruplets_data = collect.load_quadruplets(n_clusters=n_clusters,
                                                     categories='all',  # we work with dataset_name so it's fine
                                                     dataset_name=self.dataset_name)
@@ -189,7 +192,8 @@ class LowShotGenerator(object):
 
         return self.generator.predict(np.array(X))
 
-    def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False):
+    def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False,
+                              return_triplets=False):
         n_new = n_total - len(samples)
         n_new_per_sample = n_new // len(samples)
 
@@ -272,7 +276,9 @@ class LowShotGenerator(object):
         triplets = zip(np.repeat(samples, n_new_per_sample, axis=0), c1as, c2as)
 
         X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
-        return self.generator.predict(np.array(X))
+        preds = self.generator.predict(np.array(X))
+
+        return preds, triplets if return_triplets else preds
 
     @staticmethod
     def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=256):
