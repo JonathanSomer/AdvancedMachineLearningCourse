@@ -54,7 +54,7 @@ def main(category, classifier_epochs, generator_epochs):
     vectors, titles = [], []
     for (ϕ, c1a, c2a), new_example in zip(triplets, new_examples):
         vectors += [ϕ.reshape(original_shape), c1a.reshape(original_shape), c2a.reshape(original_shape), new_example]
-        titles += ['ϕ', r'c^{a}_{1}', r'c^{a}_{2}', 'Generated example']
+        titles += ['ϕ', r'$c^{a}_{1}$', r'$c^{a}_{2}$', 'Generated example']
 
     add_images_to_figure(vectors=vectors, titles=titles, n_cols=4)
 
