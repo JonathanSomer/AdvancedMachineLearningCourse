@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-ww', '--without_weights', help='whether to disable class_weights or not',
                         action='store_true')
     parser.add_argument('-c', '--n_clusters', help='number of clusters to use', type=int, default=30)
-    parser.add_argument('-n', '--n_total', help='number of examples + generated', type=int, default=N_GIVEN_EXAMPLES[-1])
+    parser.add_argument('-n', '--n_total', help='number of examples + generated', type=int, default=pipeline.N_GIVEN_EXAMPLES[-1])
 
     args = parser.parse_args()
 
