@@ -231,6 +231,15 @@ class DataObject(object):
             enc = np.delete(enc, [self.class_removed], axis=1)
         return enc
 
+    def _one_hot_decode(self, one_hot_y):    
+        dec = np.argmax(one_hot_y, axis=1)
+        if len(one_hot_y[0]) == self.n_classes:
+            return dec
+        else:
+            offset_fix = np.greater_equal(dec, self.class_removed)
+            dec = np.add(dec, offset_fix)
+            return dec
+
     def _train_test(self):
         return self.x_train, self.y_train, self.x_test, self.y_test
 
