@@ -250,7 +250,6 @@ def main(dataset_name, n_files, n_clusters, n_jobs, test):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dataset', help='what dataset to use', default='mnist')  # xray is the second one
-    # parser.add_argument('-r', '--raw_data', help='whether to use the raw data (features by default)', action='store_true')
     parser.add_argument('-f', '--n_files', help='number of files to process', type=int, default=12)
     parser.add_argument('-c', '--n_clusters', help='number of clusters to create', type=int, default=30)
     parser.add_argument('-j', '--n_jobs', help='number of jobs to do in parallel', type=int, default=8)
