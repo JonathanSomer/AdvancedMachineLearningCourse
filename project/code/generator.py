@@ -290,7 +290,7 @@ class LowShotGenerator(object):
         X = [np.concatenate((ϕ, c1a, c2a)) for ϕ, c1a, c2a in triplets]
         preds = self.generator.predict(np.array(X))
 
-        return preds, triplets if return_triplets else preds
+        return (preds, triplets) if return_triplets else preds
 
     @staticmethod
     def benchmark(Classifier, data_object, dataset_name, n_clusters, λ, n_new=100, epochs=10, hidden_size=256):
