@@ -48,3 +48,16 @@ class Cifar10Data(DataObject):
         x_test /= 255
 
         return (x_train, y_train), (x_test, y_test)
+
+    def get_class_name_by_index(self, class_index):
+        return { 0 : 'airplane',
+                 1 : 'automobile',
+                 2 : 'bird',
+                 3 : 'cat',
+                 4 : 'deer',
+                 5 : 'dog',
+                 6 : 'frog',
+                 7 : 'horse',
+                 8 : 'ship',
+                 9 : 'truck',
+               }[class_index]
