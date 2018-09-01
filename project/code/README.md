@@ -40,7 +40,6 @@
 3. Run the pipeline:
     _verify `results` directory existance and the path is updated in config.py_
     ```bash
-    # There should be quadruplets directory in both write and read directories
     cd /some/path/to/project/code/
     python3 pipeline.py -d
     ```
