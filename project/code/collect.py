@@ -58,7 +58,7 @@ def get_categories(dataset_name):
 
     dataset_name, category_to_exclude = dataset_name.split('_')
     s = set(range(dataset_to_n_categories[dataset_name]))
-    return list(s - {category_to_exclude})
+    return list(s - {int(category_to_exclude)})
 
 
 def update(msg):
