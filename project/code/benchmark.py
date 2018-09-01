@@ -19,7 +19,7 @@ data_obj_getters = {'mnist': MnistData,
                     'cifar10': Cifar10Data}
 
 
-def plotify(data_dict, title=None, name=None):
+def plotify(data_dict, max_avg_acc=None, title=None, name=None):
     if not name:
         name = 'benchmark'
 
@@ -27,8 +27,17 @@ def plotify(data_dict, title=None, name=None):
     df.to_pickle('./{0}.pickle'.format(name))
 
     df.plot(kind='barh', figsize=(10, 10))
+
+    plt.xlabel('Evaluation accuracy on generated examples')
     plt.legend(loc='best')
     plt.tight_layout()
+
+    xticks = [0., 50.]
+    if max_avg_acc:
+        plt.axvline(x=max_avg_acc, linestyle='--')
+        xticks += [max_avg_acc]
+
+    plt.xticks(xticks)
 
     if title:
         plt.title(title)
@@ -99,7 +108,8 @@ def main(dataset, category, n_clusters, generator_epochs, classifier_epochs, n_n
         all_accs['avg'] = {acc_key: np.average([v[acc_key] for k, v in all_accs.items()]) for acc_key in
                            all_acc_keys}
 
-        plotify(all_accs, name=name)
+        max_avg_acc = max(list(all_accs['avg'].values()))
+        plotify(all_accs, name=name, max_avg_acc=max_avg_acc)
 
 
 if __name__ == "__main__":
@@ -110,7 +120,7 @@ if __name__ == "__main__":
     parser.add_argument('-ge', '--generator_epochs', help='number of epcohs to train the generator with', type=int,
                         default=2)
     parser.add_argument('-ce', '--classifier_epochs', help='number of epcohs to train the classifier with', type=int,
-                        default=1)
+                        default=12)
     parser.add_argument('-n', '--n_new', help='num of new examples to create and evaluate', type=int, default=100)
     parser.add_argument('-cv', '--cross_validate_hyper', help='whether to do a cross validation on hyperparams',
                         action='store_true')
