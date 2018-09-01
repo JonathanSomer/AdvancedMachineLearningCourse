@@ -98,13 +98,8 @@ class Pipeline(object):
                                      temp_data_object,
                                      epochs=self.generator_epochs,
                                      n_clusters=self.n_clusters,
-<<<<<<< HEAD
-                                     hidden_size=self.hidden_size,
-                                     λ=self.λ)
-=======
                                      λ=self.λ,
                                      hidden_size=self.hidden_size)
->>>>>>> 4f9b05a2666df6c05cd1faa03ea5bc9775dd5f15
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
