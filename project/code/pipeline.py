@@ -22,7 +22,7 @@ N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
 
 class Pipeline(object):
     def __init__(self, dataset_type, cls_type, use_data_subset=False, use_features=True, use_class_weights=True,
-                 generator_epochs=2, classifier_epochs=12, n_clusters=30):
+                 generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1]):
         self.dataset_type = dataset_type
         self.use_data_subset = use_data_subset
         self.use_features = use_features
@@ -30,6 +30,7 @@ class Pipeline(object):
         self.generator_epochs = generator_epochs
         self.classifier_epochs = classifier_epochs
         self.n_clusters = n_clusters
+        self.n_total = n_total
         self.cls_type = cls_type
 
         self.dataset = dataset_type(use_features=self.use_features, use_data_subset=use_data_subset)
@@ -97,11 +98,11 @@ class Pipeline(object):
             self.dataset.set_number_of_samples_to_use(n=n)
             examples = self.dataset.get_n_samples(n)
 
-            base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=N_GIVEN_EXAMPLES[-1])
+            base_gen_func = functools.partial(generator.generate_from_samples, examples, n_total=self.n_total)
             generators_options = {'baseline': lambda: None,
                                   'baseline + gen': functools.partial(base_gen_func, smart_category=False, smart_centroids=False),
                                   'smart category': functools.partial(base_gen_func, smart_category=True, smart_centroids=False),
-                                  #'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=N_GIVEN_EXAMPLES[-1]),
+                                  #'duplicated gen': functools.partial(self.duplicated_generator, examples, n_total=self.n_total),
                                     }
 
             for option in generators_options.keys():
@@ -228,6 +229,7 @@ if __name__ == "__main__":
     parser.add_argument('-ww', '--without_weights', help='whether to disable class_weights or not',
                         action='store_true')
     parser.add_argument('-c', '--n_clusters', help='number of clusters to use', type=int, default=30)
+    parser.add_argument('-n', '--n_total', help='number of examples + generated', type=int, default=N_GIVEN_EXAMPLES[-1])
 
     args = parser.parse_args()
 
@@ -239,6 +241,7 @@ if __name__ == "__main__":
                  use_class_weights=not args.without_weights,
                  classifier_epochs=args.classifier_epochs,
                  generator_epochs=args.generator_epochs,
-                 n_clusters=args.n_clusters)
+                 n_clusters=args.n_clusters,
+                 n_total=args.n_total)
     else:
         _logger.error('unknown dataset %s' % args.dataset)
