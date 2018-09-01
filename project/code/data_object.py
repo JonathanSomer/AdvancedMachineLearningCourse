@@ -10,7 +10,7 @@ import numpy as np
 from collections import defaultdict
 from data_utils import *
 from sklearn.externals import joblib
-
+import random
 
 FRACTION_FOR_SUBSET = 0.05
 
@@ -50,7 +50,7 @@ class DataObject(object):
         
         self.permutation_for_sample_fetch = np.random.permutation(200)
 
-    def into_fit(self):
+    def into_fit(self, fix_class_imbalance = False):
         x_train, y_train, x_test, y_test = self._train_test()
 
         if self.number_of_samples_to_use is not None:
@@ -70,6 +70,9 @@ class DataObject(object):
             x_train = np.concatenate((x_train, self.generated_data))
             y_train = np.concatenate((y_train, np.repeat(self.class_removed, len(self.generated_data))))
             x_train, y_train = self._unison_shuffle(x_train, y_train)
+
+        if fix_class_imbalance:
+            x_train, y_train = self._balance(x_train, y_train)
 
         return x_train, self._one_hot_encode(y_train), x_test, self._one_hot_encode(y_test)
 
@@ -245,3 +248,23 @@ class DataObject(object):
     def _features_and_labels(self):
         x_train, y_train, x_test, y_test = self._train_test()
         return np.concatenate((x_train, x_test)), np.concatenate((y_train, y_test))
+
+    # expects integer labels
+    def _balance(self, x, y):
+        labels = np.unique(y)
+        n_labels = len(labels)
+        n_samples_per_label = round((float(len(y)) / (n_labels - 1.0)))
+
+        map_label_to_features = {label : x[y[:] == label] for label in labels}
+
+        balanced_x, balanced_y = [], []
+        
+        for label in labels:
+            for i in range(n_samples_per_label):
+                balanced_x.append(random.choice(map_label_to_features[label]))
+                balanced_y.append(label)
+
+        return self._unison_shuffle(np.array(balanced_x), np.array(balanced_y))
+
+
+

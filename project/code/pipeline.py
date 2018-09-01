@@ -24,7 +24,7 @@ N_TOTALS = [20, 50, 100, 200, 300, 500]
 class Pipeline(object):
     def __init__(self, dataset_type, cls_type, use_data_subset=False, use_features=True, use_class_weights=True,
                  generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1],
-                 λ=.95, hidden_size=256):
+                 λ=.95, hidden_size=256, fix_class_imbalance = False):
 
         self.dataset_type = dataset_type
         self.use_data_subset = use_data_subset
@@ -35,11 +35,9 @@ class Pipeline(object):
         self.n_clusters = n_clusters
         self.n_total = n_total
         self.cls_type = cls_type
-        self.hidden_size = hidden_size
-        self.λ = λ
-
         self.λ = λ
         self.hidden_size = hidden_size
+        self.fix_class_imbalance = fix_class_imbalance
 
         self.dataset = dataset_type(use_features=self.use_features, use_data_subset=use_data_subset)
         self.cls = cls_type(use_features=self.use_features, epochs=self.classifier_epochs)
@@ -126,7 +124,7 @@ class Pipeline(object):
                     if generated_data is not None:
                         self.dataset.set_generated_data(generated_data)
 
-                self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
+                self.cls.fit(*self.dataset.into_fit(self.fix_class_imbalance), use_class_weights=self.use_class_weights)
                 temp_results, fpr, tpr = self.evaluate_cls()
                 results[n][option] = temp_results[inx]
                 results[n][option]['avarage_rest'] = np.mean([temp_results[x]['accuracy'] for x in temp_results.keys() if x != inx])
@@ -161,7 +159,7 @@ class Pipeline(object):
                     if generated_data is not None:
                         self.dataset.set_generated_data(generated_data)
 
-                self.cls.fit(*self.dataset.into_fit(), use_class_weights=self.use_class_weights)
+                self.cls.fit(*self.dataset.into_fit(self.fix_class_imbalance), use_class_weights=self.use_class_weights)
                 temp_results, fpr, tpr = self.evaluate_cls()
                 results[n_total][option] = temp_results[inx]
 
@@ -313,6 +311,7 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('-c', '--n_clusters', help='number of clusters to use', type=int, default=30)
     parser.add_argument('-n', '--n_total', help='number of examples + generated', type=int, default=N_GIVEN_EXAMPLES[-1])
+    parser.add_argument('-fc', '--fix_class_imbalance', help='uniformally sample from classes', action='store_true')
 
     args = parser.parse_args()
 
@@ -325,6 +324,7 @@ if __name__ == "__main__":
                  classifier_epochs=args.classifier_epochs,
                  generator_epochs=args.generator_epochs,
                  n_clusters=args.n_clusters,
-                 n_total=args.n_total)
+                 n_total=args.n_total,
+                 fix_class_imbalance = args.fix_class_imbalance)
     else:
         _logger.error('unknown dataset %s' % args.dataset)
