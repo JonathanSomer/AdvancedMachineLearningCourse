@@ -251,8 +251,6 @@ class DataObject(object):
 
     # expects integer labels
     def _balance(self, x, y):
-        import pdb; pdb.set_trace()
-
         labels = np.unique(y)
         n_labels = len(labels)
         n_samples_per_label = round((float(len(y)) / (n_labels - 1.0)))
