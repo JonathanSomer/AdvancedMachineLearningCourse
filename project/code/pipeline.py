@@ -45,7 +45,7 @@ class Pipeline(object):
         self.n_classes = self.dataset.get_num_classes()
         self.base_results = {}#self._base_results()
         self.low_shot_results = {}
-        for i in range(2):
+        for i in range(4):
             self.low_shot_results[i] = self.low_shot_test(i)
             self.generated_test(i)
 
