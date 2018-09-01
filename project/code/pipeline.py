@@ -22,7 +22,7 @@ N_GIVEN_EXAMPLES = [1, 2, 5, 10, 20]
 
 class Pipeline(object):
     def __init__(self, dataset_type, cls_type, use_data_subset=False, use_features=True, use_class_weights=True,
-                 generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1]):
+                 generator_epochs=2, classifier_epochs=12, n_clusters=30, n_total=N_GIVEN_EXAMPLES[-1], hidden_size=256, λ=.95):
         self.dataset_type = dataset_type
         self.use_data_subset = use_data_subset
         self.use_features = use_features
@@ -32,14 +32,16 @@ class Pipeline(object):
         self.n_clusters = n_clusters
         self.n_total = n_total
         self.cls_type = cls_type
+        self.hidden_size = hidden_size
+        self.λ = λ
 
         self.dataset = dataset_type(use_features=self.use_features, use_data_subset=use_data_subset)
         self.cls = cls_type(use_features=self.use_features, epochs=self.classifier_epochs)
 
         self.n_classes = self.dataset.get_num_classes()
-        self.base_results = self._base_results()
+        self.base_results = {}#self._base_results()
         self.low_shot_results = {}
-        for i in range(self.n_classes):
+        for i in range(2):
             self.low_shot_results[i] = self.get_low_shot_results(i)
 
     def _base_results(self):
@@ -90,7 +92,9 @@ class Pipeline(object):
         generator = LowShotGenerator(all_but_one_classifier.model,
                                      temp_data_object,
                                      epochs=self.generator_epochs,
-                                     n_clusters=self.n_clusters)
+                                     n_clusters=self.n_clusters,
+                                     hidden_size=self.hidden_size,
+                                     λ=self.λ)
 
         for n in N_GIVEN_EXAMPLES:
             _logger.info('number of examples is %d' % n)
