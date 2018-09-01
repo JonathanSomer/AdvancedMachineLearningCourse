@@ -46,3 +46,14 @@
 
     The plots are under the results directory
     The log file is under `log` directory
+    
+    In order to fetch the plots from gloud run:
+    ```bash
+    cd your_gcloud_dir/google-cloud-sdk/bin
+    gcloud compute scp --zone=us-west1-b your_instance_name:your_results_dir_path_on_cloud/* your_results_path_on_your computer
+    ```
+    for example:
+    ```bash
+    gcloud compute scp --zone=us-west1-b instance-2:/home/private/AdvancedMachineLearningCourse/project/results/* .
+    ```
+    
