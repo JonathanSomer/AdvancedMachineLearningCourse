@@ -65,16 +65,17 @@ class DataObject(object):
             y_train = np.concatenate((y_train, n_labels))
             x_train, y_train = self._unison_shuffle(x_train, y_train)
 
-            x_test = np.concatenate((x_test, self.x_class_removed_test))
-            y_test = np.concatenate((y_test, self.y_class_removed_test))
-            x_test, y_test = self._unison_shuffle(x_test, y_test)
-
         if self.generated_data is not None:
             # assert self.number_of_samples_to_use is not None
             x_train = np.concatenate((x_train, self.generated_data))
             y_train = np.concatenate((y_train, np.repeat(self.class_removed, len(self.generated_data))))
             x_train, y_train = self._unison_shuffle(x_train, y_train)
 
+        if self.generated_data is not None or self.number_of_samples_to_use is not None:
+            x_test = np.concatenate((x_test, self.x_class_removed_test))
+            y_test = np.concatenate((y_test, self.y_class_removed_test))
+            x_test, y_test = self._unison_shuffle(x_test, y_test)
+            
         if fix_class_imbalance:
             x_train, y_train = self._balance(x_train, y_train)
 
