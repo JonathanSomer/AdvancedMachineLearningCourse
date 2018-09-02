@@ -156,8 +156,8 @@ class DataObject(object):
 
     def set_generated_data(self, generated_data):
         assert self.class_removed != None
-        if self.number_of_samples_to_use is None:
-            raise Exception("must run d.set_number_of_samples_to_use(...) before setting generated_data")
+        # if self.number_of_samples_to_use is None:
+        #     raise Exception("must run d.set_number_of_samples_to_use(...) before setting generated_data")
         self.generated_data = generated_data
         self.y_train_one_hot = self._one_hot_encode(self.y_train)
         self.y_test_one_hot = self._one_hot_encode(self.y_test)
