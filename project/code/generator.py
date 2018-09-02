@@ -192,6 +192,15 @@ class LowShotGenerator(object):
 
         return self.generator.predict(np.array(X))
 
+    def generate_stupid(self, samples, n_total, smart_category=False, smart_centroids=False, return_triplets=False):
+        n_new = n_total - len(samples)
+        n_new_per_sample = n_new // len(samples)
+
+        if n_new_per_sample > 0:
+            samples, n_total = samples[:n_new], n_new * 2
+
+        return self.generate_from_samples(samples, n_total, smart_category, smart_centroids, return_triplets)
+
     def generate_from_samples(self, samples, n_total=20, smart_category=False, smart_centroids=False,
                               return_triplets=False):
         n_new = n_total - len(samples)
