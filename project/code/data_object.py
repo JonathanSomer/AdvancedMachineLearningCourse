@@ -31,8 +31,12 @@ class DataObject(object):
         self.x_train = x_train
         self.y_train = y_train
 
-        self.x_test = x_test
-        self.y_test = y_test
+        self.x_test = x_test[:-1000]
+        self.y_test = y_test[:-1000]
+
+        self.x_dev = x_test[-1000:]
+        self.y_dev = y_test[-1000:]
+
 
         self.class_removed = None
         self.x_class_removed_train = None
@@ -66,7 +70,7 @@ class DataObject(object):
             x_test, y_test = self._unison_shuffle(x_test, y_test)
 
         if self.generated_data is not None:
-            assert self.number_of_samples_to_use is not None
+            # assert self.number_of_samples_to_use is not None
             x_train = np.concatenate((x_train, self.generated_data))
             y_train = np.concatenate((y_train, np.repeat(self.class_removed, len(self.generated_data))))
             x_train, y_train = self._unison_shuffle(x_train, y_train)
