@@ -79,16 +79,20 @@ Low-Shot-Learning of Diseases in Chest X-Rays via Hallucination
 \end_layout
 
 \begin_layout Author
-Matan Harel, Uri Avron & Jonathan Somer
+Matan Harel 10%, Uri Avron 50% & Jonathan Somer 40%
 \end_layout
 
 \begin_layout Abstract
-One of the promises of the recent advancements in Artificial Intelligence
- is the ability to facilitate high precision computer aided diagnosis (CAD)
- systems and make such high precision diagnosis affordable and highly available.
+
+\series bold
+One of the promises
+\series default
+ of the recent advancements in Artificial Intelligence is the ability to
+ facilitate high precision computer aided diagnosis (CAD) systems and make
+ such high precision diagnosis affordable and highly available.
  Medical imaging is one area where current deep learning and computer vision
  methods could possibly be applied.
- These methods utilize large sets of labelled images in order to acheive
+ These methods utilize large sets of labelled images in order to achieve
  high accuracy.
  High quality labelled data is difficult to obtain due to a variety of factors.
  
@@ -120,8 +124,8 @@ learning proposed by Bharath Hariharan and Ross Girshick from Facebook AI
 
 .
  During this process we have also attempted to answer some questions that
- remained open while reading their innovative original paper and we will
- show some novel methods for evaluating this low-shot-learning setting.
+ remained open while reading their innovative original paper and we  show
+ some novel methods for evaluating this low-shot-learning setting.
 \end_layout
 
 \begin_layout Section
@@ -138,8 +142,12 @@ The ability to learn from
  
 \series default
 very few examples is a hallmark of human visual intelligence.
- Classical Machine Learning approaches fail to generalize from few examples
- so new techniques are required for performing Low-Shot-Learning.
+ 
+\series bold
+Classical Machine Learning approaches fail to generalize[add reference]
+\series default
+ from few examples so new techniques are required for performing Low-Shot-Learni
+ng.
 \begin_inset Newline newline
 \end_inset
 
@@ -161,8 +169,8 @@ The setting for low-shot-learning is composed of two phases.
 \begin_inset Newline newline
 \end_inset
 
-We evaluate the new classfier's accuracy over both the base and novel classes
- in order to see that higher accuracy was acheived on the novel classes
+We evaluate the new classifier's accuracy over both the base and novel classes
+ in order to see that higher accuracy was achieved on the novel classes
  but also that accuracy was not impaired for the base classes.
 \begin_inset Newline newline
 \end_inset
@@ -172,10 +180,10 @@ We evaluate the new classfier's accuracy over both the base and novel classes
 \end_inset
 
 Low-Shot-Learning is a great challenge particularly in our setting as learning
- in a medical setting carries many unique challenges: Each disease category
- contains great intra-class variation: patients have varying anatomies,
- there are different methods of performing each examination, variation might
- be induced by different equipment and so on.
+ in a medical setting carries many unique challenges.
+ Each disease category contains great intra-class variation: patients have
+ varying anatomies, there are different methods of performing each examination,
+ variation might be induced by different equipment and so on.
  Thus, very large labelled datasets are needed in order to capture this
  great variation.
  Obtaining high quality labelled datasets as such is very difficult.
@@ -184,7 +192,11 @@ Low-Shot-Learning is a great challenge particularly in our setting as learning
  does not get logged.
  In the dataset we chose to work with the researches who gathered the data
  employed a NLP text mining solution to procure labels from physicians written
- reports, a process which adds further noise to the labelling.
+ reports, a process which 
+\series bold
+possibly adds further noise[how much exactly + ref.]
+\series default
+ to the labelling.
  
 \begin_inset Newline newline
 \end_inset
@@ -198,17 +210,24 @@ Thus, high quality labelled data is difficult to obtain and the ability
 \end_layout
 
 \begin_layout Subsection
-Our Approach - High Level
+Our Approach - High Level Glance
 \end_layout
 
 \begin_layout Standard
-As noted our approach is primarily based on the paper by Bharath Hariharan
- and Ross Girshick.
- At a very high level the method is as follows: given only a few images
- of a novel class, we train a Generator network to generate many new 'hallucinat
-ed' examples for this same class.
- We then use those new generated images, as well as those that were given
- to us, in order to train a nother Neural Network to perform the classification
+As noted, our approach is primarily based on the paper by Bharath Hariharan
+ and Ross Girshick, 2016 
+\begin_inset Formula $[1]$
+\end_inset
+
+.
+ At a very high level, the method is as follows: given
+\series bold
+ only few
+\series default
+ samples of a novel class, we train a generator network to generate many
+ new 'hallucinated' examples for this same class.
+ We then use those new generated examples, as well as those that were given
+ to us, in order to train another neural network to perform the classification
  task.
 \begin_inset Newline newline
 \end_inset
@@ -220,7 +239,7 @@ ed' examples for this same class.
 The method for generating new training examples is based on the insight
  that variation within one category might be transferable to another category.
  For instance, a certain variation in anatomy may impact the chest images
- similarly regardless of the disease.
+ similarly, regardless of the disease.
 \begin_inset Newline newline
 \end_inset
 
@@ -228,8 +247,8 @@ The method for generating new training examples is based on the insight
 \begin_inset Newline newline
 \end_inset
 
-As we dive into the details of the method we will elaborate on the points
- in which we implemented novel solutions and advancements.
+We  elaborate on the points in which we implemented novel solutions and
+ advancements as we dive into the details of the method .
 \begin_inset Newline newline
 \end_inset
 
@@ -237,7 +256,7 @@ As we dive into the details of the method we will elaborate on the points
 \end_layout
 
 \begin_layout Section
-Our Method:
+Our Approach
 \end_layout
 
 \begin_layout Standard
@@ -249,7 +268,11 @@ Feature representation learning
 \end_layout
 
 \begin_layout Enumerate
-Training an Example Generator
+Training a generator
+\end_layout
+
+\begin_layout Enumerate
+Generating data using the generator
 \end_layout
 
 \begin_layout Enumerate
@@ -257,8 +280,8 @@ Training a classifier using the generated data
 \end_layout
 
 \begin_layout Standard
-We will first introduce the datasets we used and then describe the method
- in detail.
+We first introduce the datasets we used and then describe the method in
+ detail.
 \end_layout
 
 \begin_layout Subsection
@@ -268,7 +291,7 @@ Datasets used
 \begin_layout Standard
 We tested our results on 3 different datasets.
  The first 2 are the well researched MNIST and CIFAR10 datasets.
- The third is a new chest X-Ray image dataset.
+ The third is a new chest X-ray image dataset.
 \begin_inset Newline newline
 \end_inset
 
@@ -276,7 +299,7 @@ We tested our results on 3 different datasets.
 \begin_inset Newline newline
 \end_inset
 
-In May 2017 the "ChestX-ray8" dataset was presented by a team of researchers
+In May 2017, the "ChestX-ray8" dataset was presented by a team of researchers
  from the NIH 
 \begin_inset Formula $[2]$
 \end_inset
@@ -295,8 +318,8 @@ In May 2017 the "ChestX-ray8" dataset was presented by a team of researchers
 \end_layout
 
 \begin_layout Itemize
-Each image is labeled with one or more of these, or 'Normal'.
- 
+Each image is labeled with 'Normal' or labelled with more of the 8 disease
+ labels, or 
 \end_layout
 
 \begin_layout Itemize
@@ -306,13 +329,22 @@ Labeling: classes are very imbalanced.
 \end_layout
 
 \begin_layout Itemize
-Image sizes are 1024 by 1024 pixels.
- (big images, around 40GB of space for them all)
+Image sizes are 
+\begin_inset Formula $1024\times1024$
+\end_inset
+
+ pixels.
+ These are relatively large images, recall MNIST images are 
+\begin_inset Formula $28\times28$
+\end_inset
+
+.
+ The entire dataset takes around 40GB of space.
 \end_layout
 
 \begin_layout Standard
 Along with the data, they also provide a benchmark for the task of classifying
- diseases using a DCNN they have trained.
+ diseases using a deep convolutional neural network (DCNN) they have trained.
 \begin_inset Newline newline
 \end_inset
 
@@ -324,11 +356,11 @@ Feature Representation Learning
 \end_layout
 
 \begin_layout Standard
-For the xray data set we used a ResNet50 DCNN pretrained on the very large
- and diverse imagenet dataset, without the last dense layer, in order to
+For the X-ray dataset we used a ResNet50 DCNN pre-trained on the very large
+ and diverse ImageNet dataset, without the last dense layer, in order to
  generate the features for the images.
  This method was used in the chest x-ray paper in order to train a classifier
- on the data and implementing the same method enabled us to first reach
+ on the data and implementing the same method enabled us to first recreate
  their results and continue from there onto low shot learning.
 \begin_inset Newline newline
 \end_inset
@@ -337,7 +369,7 @@ For the xray data set we used a ResNet50 DCNN pretrained on the very large
 \begin_inset Newline newline
 \end_inset
 
-For the mnist and cifar datasets we trained two different CNNs which acheived
+For the MNIST and CIFAR10 datasets we trained two different CNNs which achieved
  ~99% and ~90% accuracy on the datasets respectively.
  In the low-shot-learning setting we do not have access to data from the
  novel class during representation learning.
@@ -353,8 +385,8 @@ For the mnist and cifar datasets we trained two different CNNs which acheived
 \end_inset
 
 There is a significant difference between the two methods.
- In our method (the second), representation learning is performed ad hoc
- for the specific setting - 
+ In our method, representation learning is performed ad hoc for the specific
+ setting, intuitively - 
 \begin_inset Quotes eld
 \end_inset
 
@@ -362,16 +394,21 @@ we learn to represent digits by learning to recognize digits
 \begin_inset Quotes erd
 \end_inset
 
-, whereas in the first setting a generic network is used to generate features
+.
+ Whereas, in the first setting a generic network is used to generate features
  for images from a very specific domain.
- As further research we propose to train a DCNN from scratch on the X-Ray
- dataset and compare the two methods.
+ 
+\series bold
+As further research we propose to train a DCNN from scratch on the X-Ray
+ dataset and compare the two methods
+\series default
+.
  We presume that features learnt from data that is close to the domain at
  hand will be better than those obtained by generic models.
 \end_layout
 
 \begin_layout Subsection
-Learning to Generate new Examples
+Learning to Generate New Examples
 \end_layout
 
 \begin_layout Standard
@@ -416,7 +453,7 @@ solve analogies
 \begin_inset Formula $b_{1},b_{2}$
 \end_inset
 
- are two images from the same base class and 
+ are two samples from the same base class and 
 \begin_inset Formula $x$
 \end_inset
 
@@ -426,7 +463,7 @@ solve analogies
 \end_inset
 
  will output a vector who solves the analogy 
-\begin_inset Formula $b_{1}:b_{2}\Rightarrow x:?$
+\begin_inset Formula $b_{1}:b_{2}\Rightarrow x:\ ?$
 \end_inset
 
  Thus applying to 
@@ -438,7 +475,7 @@ solve analogies
 \end_inset
 
  transformation.
- Note the the 
+ Note that the 
 \begin_inset Formula $b_{1}\rightarrow b_{2}$
 \end_inset
 
@@ -450,7 +487,12 @@ solve analogies
 \begin_inset Formula $x$
 \end_inset
 
- a transformation that does not result in an element of another class.
+ a transformation that does not result in an element of a different class
+ than 
+\begin_inset Formula $x$
+\end_inset
+
+.
  
 \begin_inset Newline newline
 \end_inset
@@ -459,11 +501,7 @@ solve analogies
 \begin_inset Newline newline
 \end_inset
 
-The method for training 
-\begin_inset Formula $G$
-\end_inset
 
- is as follows: 
 \begin_inset Formula $G$
 \end_inset
 
@@ -505,6 +543,7 @@ The method for training
 
  is minimized.
  Concatenating the 4 centroids results in one element in the dataset.
+ 
 \begin_inset Newline newline
 \end_inset
 
@@ -516,7 +555,7 @@ For each quadruplet
 \begin_inset Formula $\langle c_{1}^{A},c_{2}^{A},c_{1}^{B},c_{2}^{B}\rangle$
 \end_inset
 
- we feed the triplet: 
+, we feed the triplet: 
 \begin_inset Formula $\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle$
 \end_inset
 
@@ -541,7 +580,7 @@ For each quadruplet
  In order to do so we minimize the loss function: 
 \begin_inset Formula 
 \[
-\lambda MSE(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),c_{2}^{B})+L_{cls_{BASE}}(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),B)
+\lambda MSE(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),c_{2}^{B})+(1-\lambda)L_{cls_{BASE}}(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),B)
 \]
 
 \end_inset
@@ -550,8 +589,8 @@ For each quadruplet
 \begin_inset Formula $MSE$
 \end_inset
 
- the mean square error between the generator's output and the true target.
- And 
+ the mean square error between the generator's output and the true target
+ and 
 \begin_inset Formula $L_{cls_{BASE}}$
 \end_inset
 
@@ -564,16 +603,15 @@ For each quadruplet
 \end_inset
 
 
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-One main concern we had while reading the paper was the following: we train
- the generator on one set of classes, but then use it to generate data for
- new classes.
- 
-\series bold
-Does this method really generalize?
-\series default
+\begin_layout Subsubsection
+Evaluating the Generalization Capacity of the Generator
+\end_layout
+
+\begin_layout Standard
+We train the generator on one set of classes, but then use it to generate
+ data for new classes.
  Does a generator trained to perform transformations that stay within one
  set of classes respect this constraint on a novel class it has never seen
  before? 
