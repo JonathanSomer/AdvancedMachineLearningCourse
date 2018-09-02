@@ -52,7 +52,7 @@ class DataObject(object):
         self.number_of_samples_to_use = None
         self.generated_data = None
         
-        self.permutation_for_sample_fetch = np.random.permutation(200)
+        self.permutation_for_sample_fetch = np.random.permutation(3000)
 
     def into_fit(self, fix_class_imbalance = False):
         x_train, y_train, x_test, y_test = self._train_test()
@@ -282,6 +282,5 @@ class DataObject(object):
                 balanced_y.append(label)
 
         return self._unison_shuffle(np.array(balanced_x), np.array(balanced_y))
-
 
 
