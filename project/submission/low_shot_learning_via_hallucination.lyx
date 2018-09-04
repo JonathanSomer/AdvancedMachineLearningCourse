@@ -57,6 +57,7 @@
 \shortcut idx
 \color #008000
 \end_index
+\topmargin 0.5cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -107,19 +108,11 @@ ac.il>, Matan Harel <matan.harel.mh@gmail.com>
 \end_layout
 
 \begin_layout Abstract
-
-\series bold
-One of the promises
-\series default
- of the recent advancements in Artificial Intelligence is the ability to
- facilitate high precision computer aided diagnosis (CAD) systems and make
- such high precision diagnosis affordable and highly available.
- Medical imaging is one area where current deep learning and computer vision
- methods could possibly be applied.
- These methods utilize large sets of labelled images in order to achieve
- high accuracy.
- High quality labelled data is difficult to obtain due to a variety of factors.
- 
+One of the promises of the recent advancements in Artificial Intelligence
+ is the ability to facilitate high precision computer aided diagnosis (CAD)
+ systems and make such high precision diagnosis affordable and highly available.
+ These methods utilize large labelled datasets in order to achieve high
+ accuracy, but such labelled data is difficult to obtain.
 \begin_inset Newline newline
 \end_inset
 
@@ -140,16 +133,12 @@ Our objective is to answer whether we can use an existing large set of X-Ray
 \begin_inset Newline newline
 \end_inset
 
-We have implemented, extended and re-evaluated a method for performing low-shot-
-learning proposed by Bharath Hariharan and Ross Girshick from Facebook AI
- research, 2016 
+We have implemented and extended a method for performing low-shot-learning
+ proposed in 
 \begin_inset Formula $[1]$
 \end_inset
 
-.
- During this process we have also attempted to answer some questions that
- remained open while reading their innovative original paper and we  show
- some novel methods for evaluating this low-shot-learning setting.
+ and we  show some novel methods for evaluating this low-shot-learning setting.
 \end_layout
 
 \begin_layout Section
@@ -161,24 +150,6 @@ Low-Shot-Learning
 \end_layout
 
 \begin_layout Standard
-The ability to learn from
-\series bold
- 
-\series default
-very few examples is a hallmark of human visual intelligence.
- 
-\series bold
-Classical Machine Learning approaches fail to generalize[add reference]
-\series default
- from few examples so new techniques are required for performing Low-Shot-Learni
-ng.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
 The setting for low-shot-learning is composed of two phases.
  The first is a representation learning phase: the learner tunes its feature
  representation on an available set of base classes that have many training
@@ -186,6 +157,9 @@ The setting for low-shot-learning is composed of two phases.
  In the low-shot learning phase, the learner is exposed to a set of novel
  classes with only a few examples per class and must learn a classifier
  over the joint label space of base and novel classes.
+ We evaluate the new classifier's accuracy over both the base and novel
+ classes in order to see that higher accuracy was achieved on the novel
+ classes but also that accuracy was not impaired for the base classes.
 \begin_inset Newline newline
 \end_inset
 
@@ -193,43 +167,27 @@ The setting for low-shot-learning is composed of two phases.
 \begin_inset Newline newline
 \end_inset
 
-We evaluate the new classifier's accuracy over both the base and novel classes
- in order to see that higher accuracy was achieved on the novel classes
- but also that accuracy was not impaired for the base classes.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-Low-Shot-Learning is a great challenge particularly in our setting as learning
- in a medical setting carries many unique challenges.
- Each disease category contains great intra-class variation: patients have
- varying anatomies, there are different methods of performing each examination,
- variation might be induced by different equipment and so on.
+Low-Shot-Learning is a great challenge particularly in the medical setting.
+ Patients have varying anatomies, there are different methods of performing
+ each examination, variation might be induced by different equipment and
+ so on.
  Thus, very large labelled datasets are needed in order to capture this
  great variation.
  Obtaining high quality labelled datasets as such is very difficult.
  In addition, even if labelled data is obtained, the physician's diagnosis
  can be incorrect and in many cases is not validated or such validation
  does not get logged.
- In the dataset we chose to work with the researches who gathered the data
+ The researchers who gathered the chest X-ray dataset 
+\begin_inset Formula $[2]$
+\end_inset
+
  employed a NLP text mining solution to procure labels from physicians written
- reports, a process which 
+ reports, a process which
 \series bold
-possibly adds further noise[how much exactly + ref.]
-\series default
- to the labelling.
  
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-Thus, high quality labelled data is difficult to obtain and the ability
+\series default
+adds further noise to the labelling.
+ Thus, high quality labelled data is difficult to obtain and the ability
  to learn from little data is highly valuable.
 \end_layout
 
@@ -238,19 +196,13 @@ Our Approach - High Level Glance
 \end_layout
 
 \begin_layout Standard
-As noted, our approach is primarily based on the paper by Bharath Hariharan
- and Ross Girshick, 2016 
-\begin_inset Formula $[1]$
-\end_inset
-
-.
- At a very high level, the method is as follows: given
+Given
 \series bold
- only few
+ 
 \series default
- samples of a novel class, we train a generator network to generate many
- new 'hallucinated' examples for this same class.
- We then use those new generated examples, as well as those that were given
+only few samples of a novel class, we train a generator network to generate
+ many new 'hallucinated' examples for this same class.
+ We then use those generated examples, as well as those that were given
  to us, in order to train another neural network to perform the classification
  task.
 \begin_inset Newline newline
@@ -264,34 +216,10 @@ The method for generating new training examples is based on the insight
  that variation within one category might be transferable to another category.
  For instance, a certain variation in anatomy may impact the chest images
  similarly, regardless of the disease.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-We  elaborate on the points in which we implemented novel solutions and
- advancements as we dive into the details of the method .
-\begin_inset Newline newline
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
 Our Approach
-\end_layout
-
-\begin_layout Subsection
-Resources
-\end_layout
-
-\begin_layout Standard
-We utilized 3 google cloud instances, equipped with Nvidia Tesla V100 GPUs.
- This setup enabled us to parallelize cross validation and brought down
- computation time from days to hours for some tasks.
- 
 \end_layout
 
 \begin_layout Subsection
@@ -302,101 +230,46 @@ Datasets used
 We tested our results on 3 different datasets.
  The first 2 are the well researched MNIST and CIFAR10 datasets.
  The third is a new chest X-ray image dataset.
-\begin_inset Newline newline
+ In May 2017, the "ChestX-ray8" dataset, which contains over 
+\begin_inset Formula $100K$
 \end_inset
 
-
-\begin_inset Newline newline
+ 
+\begin_inset Formula $1024\times1024$
 \end_inset
 
-In May 2017, the "ChestX-ray8" dataset was presented by a team of researchers
- from the NIH 
+ resolution images, was presented by a team of researchers from the NIH
+ 
 \begin_inset Formula $[2]$
 \end_inset
 
 .
- In the paper they present the methods used to generate the data.
- A short summary of the data is as follows:
-\end_layout
-
-\begin_layout Itemize
-108,948 images of 32,717 patients.
-\end_layout
-
-\begin_layout Itemize
-8 disease labels text-mined from radiological reports.
-\end_layout
-
-\begin_layout Itemize
-Each image is labeled with 'Normal' or labelled with more of the 8 disease
- labels, or 
-\end_layout
-
-\begin_layout Itemize
-Labeling: classes are very imbalanced.
- For example: 84K images were tagged 'Normal' and around 1K were tagged
- with 'Cardiomegaly '.
-\end_layout
-
-\begin_layout Itemize
-Image sizes are 
-\begin_inset Formula $1024\times1024$
-\end_inset
-
- pixels.
- These are relatively large images, recall CIFAR images are 
-\begin_inset Formula $32\times32$
+ In the paper they present the methods used to generate the data along with
+ a benchmark for the task of classifying diseases using a deep convolutional
+ neural network (DCNN) they have trained.
+ A succinct summary of this dataset is provided in appendix 
+\begin_inset Formula $5.1$
 \end_inset
 
 .
- The entire dataset takes around 40GB of space.
-\end_layout
-
-\begin_layout Standard
-Along with the data, they also provide a benchmark for the task of classifying
- diseases using a deep convolutional neural network (DCNN) they have trained.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-The method we used is composed of 4 parts:
-\end_layout
-
-\begin_layout Enumerate
-Feature representation learning
-\end_layout
-
-\begin_layout Enumerate
-Training a generator
-\end_layout
-
-\begin_layout Enumerate
-Generating data using the generator
-\end_layout
-
-\begin_layout Enumerate
-Training a classifier using the generated data
-\end_layout
-
-\begin_layout Standard
-We first introduce the datasets we used and then describe the method in
- detail.
 \end_layout
 
 \begin_layout Subsection
-Feature Representation Learning
+Phase 1 - Feature Representation Learning
 \end_layout
 
 \begin_layout Standard
-For the X-ray dataset we used a ResNet50 DCNN pre-trained on the very large
- and diverse ImageNet dataset, without the last dense layer, in order to
- generate the features for the images.
- This method was used in the chest x-ray paper in order to train a classifier
- on the data and implementing the same method enabled us to first recreate
- their results and continue from there onto low shot learning.
+The method we used is composed of 4 phases we describe now.For the X-ray
+ dataset we used a ResNet50 DCNN pre-trained on the very large and diverse
+ ImageNet dataset, without the last dense layer, in order to generate the
+ features for the images.
+ This method was used in 
+\begin_inset Formula $[2]$
+\end_inset
+
+ in order to train a classifier on the data and implementing the same method
+ enabled us to first recreate their results and continue from there onto
+ low shot learning.
 \begin_inset Newline newline
 \end_inset
 
@@ -432,18 +305,14 @@ we learn to represent digits by learning to recognize digits
 .
  Whereas, in the first setting a generic network is used to generate features
  for images from a very specific domain.
- 
-\series bold
-As further research we propose to train a DCNN from scratch on the X-Ray
- dataset and compare the two methods
-\series default
-.
+ As further research we propose to train a DCNN from scratch on the X-Ray
+ dataset and compare the two methods.
  We presume that features learnt from data that is close to the domain at
  hand will be better than those obtained by generic models.
 \end_layout
 
 \begin_layout Subsection
-Learning to Generate New Examples
+Phase 2 - Learning to Generate New Examples
 \end_layout
 
 \begin_layout Standard
@@ -452,19 +321,7 @@ We now train a generator
 \end_inset
 
  for hallucinating images for novel classes.
- As we have noted, the method for generating new training examples is based
- on the insight that variation within one category might be transferable
- to another category.
- We want to use the knowledge of the intra-class variation of one class
- in order to generate a diverse set of examples for the novel class.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-We train 
+ We train 
 \begin_inset Formula $G$
 \end_inset
 
@@ -544,7 +401,7 @@ solve analogies
 \begin_inset Formula $G$
 \end_inset
 
- will be a 3 layer multi-layer-perceptron.
+ will be a 3 layer MLP.
  The training data for 
 \begin_inset Formula $G$
 \end_inset
@@ -582,15 +439,7 @@ solve analogies
 
  is minimized.
  Concatenating the 4 centroids results in one element in the dataset.
- 
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-For each quadruplet 
+ For each quadruplet 
 \begin_inset Formula $\langle c_{1}^{A},c_{2}^{A},c_{1}^{B},c_{2}^{B}\rangle$
 \end_inset
 
@@ -642,7 +491,7 @@ For each quadruplet
 \end_layout
 
 \begin_layout Subsection
-Generating New Examples for a Novel Class
+Phase 3 - Generating New Examples for a Novel Class
 \end_layout
 
 \begin_layout Standard
@@ -655,7 +504,7 @@ Assume we have received
 \begin_inset Formula $\phi(x)$
 \end_inset
 
-, choosing a a base class 
+, choosing a base class 
 \begin_inset Formula $A$
 \end_inset
 
@@ -665,7 +514,7 @@ Assume we have received
 
 .
  We then apply the generator to this triplet and use 
-\begin_inset Formula $G(c_{1}^{A},c_{2}^{A},\langle\phi(x))$
+\begin_inset Formula $G(\langle c_{1}^{A},c_{2}^{A},\phi(x)\rangle)$
 \end_inset
 
  as a new example.
@@ -676,8 +525,11 @@ Assume we have received
 \begin_inset Newline newline
 \end_inset
 
-In the paper, the choice of category and centroids was performed uniformly
- at random.
+In 
+\begin_inset Formula $[1]$
+\end_inset
+
+, the choice of category and centroids was performed uniformly at random.
  Recall that our goal is to compensate for the lack of intra-class variation
  contained within the samples of the novel class.
  Thus, we would like to generate this variation utilizing other classes.
@@ -693,18 +545,7 @@ r over the base classes.
  We suggest that by applying this classifier on the novel data we will gain
  some insight into which classes might possibly carry greater transferability
  to the novel class.
- To illustrate this: when treating the 
-\begin_inset Quotes eld
-\end_inset
-
-cat
-\begin_inset Quotes erd
-\end_inset
-
- class in the CIFAR data set as a novel class, the classifier used in the
- feature extraction phase was trained over the remaining classes: [airplane,
- automobile, bird, deer, dog, frog, horse, ship, truck].
- Applying this classifier to predict the class of a 
+ For instance, applying the CIFAR classifier to predict the class of a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -721,22 +562,26 @@ dog
 \end_inset
 
  in many cases.
- It is very likely that the variation in the dog class is much highly relevant
- to the cat class than for instance the variation in the airplane class.
- Dogs and cats appear in similar conditions whereas (we hope..) that airplanes
- and cats do not.
+ It is very likely that the variation in the dog class is much more relevant
+ to the cat class than for instance the variation in the airplane class,
+ as dogs and cats should appear in similar conditions whereas airplanes
+ and cats should not.
  
 \end_layout
 
 \begin_layout Subsection
-Training a Classifier on Generated Data
+Phase 4 - Training a Classifier on Generated Data
 \end_layout
 
 \begin_layout Standard
 The main consideration here is that the low-shot setting creates a significant
  class imbalance.
- In order to fix this we follow the paper and sample the training data uniformly
- over classes and uniformly within classes.
+ In order to fix this we follow 
+\begin_inset Formula $[1]$
+\end_inset
+
+ and sample the training data uniformly over classes and uniformly within
+ classes.
  
 \end_layout
 
@@ -755,22 +600,563 @@ One of the assumptions behind this model is that clustering over feature
  Recall that K-Means produces centroids that are not necessarily in the
  original set of points.
  So in order to test if these centroids capture a variation in the data
- we plotted for first found for each centroid the 4 examples (features)
- closes to it.
+ we plotted for first found for each centroid the 4 features closest to
+ it.
  We then plotted the 4 images who resulted in these 4 examples.
  Figures 1 and 2 validate the assumption that the clustering grasps the
  intra class variation.
- Note the total number of clusters was 30 and we randomly chose 4 to display.
- The results in figures 1,2 also served as a validation that our feature
- extractor captured features that are also meaningful in 
+ Note that the total number of clusters was 30 and we randomly chose 4 to
+ display.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Clusters in Feature Space Capture Intra-class Variation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features tabularvalignment="top">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_1.png
+	width 3.5cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_2.png
+	width 3.5cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_4.png
+	width 3.5cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_3.png
+	width 3.5cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Connection Between Number of Clusters Used in Training and Test Accuracy
+ Achieved
+\end_layout
+
+\begin_layout Standard
+Our generator is intended to perform transformations which move 
 \begin_inset Quotes eld
 \end_inset
 
-human
+one centroid to another
 \begin_inset Quotes erd
 \end_inset
 
- terms.
+, thus creating samples with greater variability for the novel class.
+ There is an underlying assumption here that we must have data from different
+ clusters in order to capture the variation and perform well on the test
+ data.
+ We wanted to test this assumption before testing the use of generated data.
+ We first plot for each dataset the accuracy achieved by the number of unique
+ samples used for training.
+ Figure 3 in the appendix shows that the growth is logarithmic in the number
+ of samples.
+ We now fix the sample size and test how the number of clusters from which
+ the training data is taken affects the accuracy.
+ We chose to use 256 samples as we have seen that the growth in accuracy
+ diminishes from that point forward.
+ Figures 5 and 6 show that taking data from more centroids does indeed increase
+ the model's capacity to generalize on the test set.
+ All results are averaged over 5 runs.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Achieved by Number of Clusters Data is Sampled From - CIFAR (Fixed
+ Number of Unique Samples)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/acc_by_num_clusters.png
+	display false
+	width 7cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Evaluating the Performance of the Generator
+\end_layout
+
+\begin_layout Subsubsection
+Task 1: Transformations Generate new Instances of the Same Class 
+\end_layout
+
+\begin_layout Standard
+In essence, the generator must perform well on two distinct tasks.
+ Given a sample from a novel class the generator must generate samples which
+ are from the same class.
+ This is non-trivial since it has never trained on data from this class.
+ There is an underlying assumption that training the generator to perform
+ transformations which leave the base classes in the same class will result
+ in the generator performing similarly on the novel class.
+ As the generated examples do not correspond with real images, we devised
+ the following test to check if they are from the correct class: we first
+ train a classifier on all examples of the base and novel classes, this
+ classifier serves as our 
+\begin_inset Quotes eld
+\end_inset
+
+oracle
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We expect that this classifier will recognize the generated images from
+ samples of the novel class as instances of the novel class, with high probabili
+ty.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+At this point we also provide a comparison between the standard method of
+ generating data - choosing a category at random, and our 
+\begin_inset Quotes eld
+\end_inset
+
+smart selection
+\begin_inset Quotes erd
+\end_inset
+
+ of a category.
+ We show that this new method provides some improvement over the standard
+ method of generation.
+ Figure 5 plots this comparison - random category selection in blue and
+ 
+\begin_inset Quotes eld
+\end_inset
+
+smart selection
+\begin_inset Quotes erd
+\end_inset
+
+ in orange.
+ The 
+\begin_inset Formula $X$
+\end_inset
+
+ axis corresponds with the class removed while training the generator -
+ this is the novel class.
+ Note the rightmost column which depicts the average accuracy over all categorie
+s.
+ We also provide the parameters we used: The number of neurons used for
+ the generators hidden layers: 
+\begin_inset Formula $256$
+\end_inset
+
+, and the parameter 
+\begin_inset Formula $\lambda=0.95$
+\end_inset
+
+ used in the loss function.
+ These were discovered via cross validation.
+ We fix these parameters from here on.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Acheived on Generated Data + Comparison of Methods - MNIST
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/accuracy_on_generated_MNIST.png
+	width 4cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Task 2: Samples Generated have Significant Variation
+\end_layout
+
+\begin_layout Standard
+Notice that this first task could be achieved trivially by returning the
+ sample received as it is.
+ If the 
+\begin_inset Quotes eld
+\end_inset
+
+oracle
+\begin_inset Quotes erd
+\end_inset
+
+ classifier recognizes this sample to be from its correct class, this trivial
+ method will achieve 100% accuracy in the previous test we provided.
+ This will not provide for any additional capacity for generalization.
+ 
+\begin_inset Newline newline
+\end_inset
+
+Thus, we must also evaluate the generators ability to induce variation in
+ the generated samples.
+ We do this by clustering all of the novel class's data and assigning each
+ generated example to a cluster.
+ As we have seen before, using data from more clusters provides for better
+ generalization capacity.
+ We now perform the following test, using the MNIST dataset: from each of
+ the clusters we draw a single sample, we then generate 
+\begin_inset Formula $256$
+\end_inset
+
+ new samples from it using our generator.
+ We then count the number of clusters these samples came from.
+ As a sanity check we also re-evaluated the accuracy achieved by the "oracle"
+ classifier and ensured that it was sufficiently high as before.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The average number of unique clusters the data came from was 
+\begin_inset Formula $5.84$
+\end_inset
+
+ for the standard method of random category selection and 
+\begin_inset Formula $5.62$
+\end_inset
+
+ for our 
+\begin_inset Quotes eld
+\end_inset
+
+smart
+\begin_inset Quotes erd
+\end_inset
+
+ category selection.
+ We conclude that the generator does indeed supply variance in the generated
+ data.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Comparing the Generator's Performance on the Different Datasets
+\end_layout
+
+\begin_layout Standard
+At this point, after long hours of trying out different hyper-parameters
+ we could not arrive at significant accuracy on generated samples from the
+ X-ray dataset.
+ Furthermore, we have noticed that the generator trained on the X-ray dataset
+ generated the same point no matter what input it received.
+ We attribute this to the generator's lack of ability to discover any underlying
+ patterns in this noisy data, at which point it 
+\begin_inset Quotes eld
+\end_inset
+
+settled
+\begin_inset Quotes erd
+\end_inset
+
+ for some mid-point which minimizes expected loss.
+ Note that our architecture was able to achieve high accuracies with both
+ the MNIST dataset and the CIFAR10 dataset.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+We attribute this difference to the noisy labels of the X-ray dataset.
+ We could not train a DCNN to achieve an accuracy of higher than 25% on
+ this data.
+ This is probably due to the image size, the similarity between the disease
+ conditions and the methods of gathering this data's labels (described in
+ section 
+\begin_inset Formula $2.1$
+\end_inset
+
+).
+ We conclude that achieving a sufficient accuracy on the base categories
+ is a pre-requisite to performing low-shot learning on a dataset.
+ Training the generator using the loss from the classifier trained on the
+ base classes in this case simply adds noise to the training.
+\end_layout
+
+\begin_layout Subsection
+Training A Classifier On Generated Data
+\end_layout
+
+\begin_layout Standard
+We first perform the following experiment from 
+\begin_inset Formula $[1]$
+\end_inset
+
+: for each 
+\begin_inset Formula $n$
+\end_inset
+
+ in 
+\begin_inset Formula $\{1,2,5,10,20\}$
+\end_inset
+
+ we generate 
+\begin_inset Formula $20-n$
+\end_inset
+
+ new samples and plot the accuracy achieved.
+ We were able to recreate the results achieved in 
+\begin_inset Formula $[1]$
+\end_inset
+
+ - improvement for small 
+\begin_inset Formula $n$
+\end_inset
+
+ (in 
+\begin_inset Formula $[1]$
+\end_inset
+
+ only for 
+\begin_inset Formula $n=1,2$
+\end_inset
+
+).
+ Figure 6 in the appendix shows the results from 
+\begin_inset Formula $[1]$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Note that in the paper they have used top-5 accuracy so the exact accuracy
+ we achieved is in a different order of magnitude.
+ Figure 7 shows the results of this experiment for a single class from CIFAR10.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Over number of Original Samples Given
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/WhatsApp Image 2018-09-04 at 21.40.55.jpeg
+	width 6cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+We decided to implement yet another test.
+ What we believe to be the most significant for a production setting is
+ achieving the maximum accuracy possible for a given constant number of
+ examples given.
+ We plotted this exactly, using a constant number of 
+\begin_inset Formula $5$
+\end_inset
+
+ examples.
+ Figure 8 in the appendix shows the results.
+ We see an initial increase using both methods, followed by a decrease.
+ We believe that the generated data is noisy and from some amount of generated
+ samples, the proportion of true samples to generated samples becomes such
+ that accuracy is impaired.
+ 
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+We started this project with the goal of achieving high precision low-shot
+ learning on a large-scale, high resolution medical dataset.
+ As we progressed we have found that our focus moved to coming up with novel
+ ways to evaluate and visualize this method of low-shot-learning.
+ Given the results we have achieved we conclude that many of the underlying
+ assumptions for this model are indeed correct.
+ We also suggest that some alternative architectures be considered for the
+ generator as it fails to generate data that is of high enough quality to
+ learn from.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+One of the most interesting insights we have found is that there exists
+ a significant gap between the ability of data to be recognizable as part
+ of some class (by a classifier trained on that class) and data that can
+ be used to learn a new class.
+ We have seen that our "oracle" classifier can generate examples that can
+ be recognized as elements of a class with great consistency, but a new
+ classifier, trained on these instances does not generalize well.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "low_show_learning"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Appendix
+\end_layout
+
+\begin_layout Subsection
+Accuracy as Function of the Number of Samples used For Training
 \end_layout
 
 \begin_layout Standard
@@ -778,7 +1164,94 @@ human
 placement H
 wide false
 sideways false
-status open
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Achieved by Number of Unique Samples Trained On - CIFAR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/mnist_acc_by_num_samples.png
+	display false
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Chest X-Ray8 Dataset Summary
+\end_layout
+
+\begin_layout Itemize
+108,948 images of 32,717 patients.
+\end_layout
+
+\begin_layout Itemize
+8 disease labels text-mined from radiological reports.
+\end_layout
+
+\begin_layout Itemize
+Each image is labeled with 'Normal' or labelled with more of the 8 disease
+ labels, or 
+\end_layout
+
+\begin_layout Itemize
+Labeling: classes are very imbalanced.
+ For example: 84K images were tagged 'Normal' and around 1K were tagged
+ with 'Cardiomegaly '.
+\end_layout
+
+\begin_layout Itemize
+Image sizes are 
+\begin_inset Formula $1024\times1024$
+\end_inset
+
+ pixels.
+ These are relatively large images, recall CIFAR images are 
+\begin_inset Formula $32\times32$
+\end_inset
+
+.
+ The entire dataset takes around 40GB of space.
+\end_layout
+
+\begin_layout Subsection
+Resources
+\end_layout
+
+\begin_layout Standard
+We utilized 3 google cloud instances, equipped with Nvidia Tesla V100 GPUs.
+ This setup enabled us to parallelize cross validation and brought down
+ computation time from days to hours for some tasks.
+ 
+\end_layout
+
+\begin_layout Subsection
+Clustering Over Feature Space - Results for MNIST
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -853,447 +1326,8 @@ Cluster4:
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Clustering over Feature Space Captures Intra-class Variation - Cats
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-Cluster1: 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/clustered_cats_1.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-Cluster2: 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/clustered_cats_2.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-Cluster3: 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/clustered_cats_4.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-Cluster4: 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/clustered_cats_3.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
-Connection Between Number of Clusters Used in Training and Test Accuracy
- Achieved
-\end_layout
-
-\begin_layout Standard
-Our generator is intended to perform transformations which move 
-\begin_inset Quotes eld
-\end_inset
-
-one centroid to another
-\begin_inset Quotes erd
-\end_inset
-
-, thus creating samples with greater variability for the novel class.
- There is an underlying assumption here that we must have data from different
- clusters in order to capture the variation and perform well on the test
- data.
- We wanted to test this assumption before testing the use of generated data.
- We first plot for each dataset the accuracy achieved by number of unique
- samples used for training.
- Figures 3 and 4 show that the growth is logarithmic in the number of samples.
- We now fix the sample size and test how the number of clusters from which
- the training data is taken affects the accuracy.
- We chose to use 256 samples as we have seen that the returns in accuracy
- are diminishing from that point forward.
- Figures 5 and 6 show that taking data from more centroids does indeed increase
- the models capacity to generalize on the test set.
- All results are averaged over 5 runs.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Accuracy Achieved by Number of Unique Samples Trained On - CIFAR
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/mnist_acc_by_num_samples.png
-	display false
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Accuracy Achieved by Number of Clusters Data is Sampled From - CIFAR (Fixed
- Number of Unique Samples)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/acc_by_num_clusters.png
-	display false
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Evaluating the Performance of the Generator
-\end_layout
-
-\begin_layout Standard
-In essence, the generator must perform well on two distinct tasks.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Task 1: Transformations Generate new Instances of the Same Class 
-\end_layout
-
-\begin_layout Standard
-Given a sample from a novel class the generator must generate samples which
- are from the same class.
- This is non-trivial since it has never trained on data from this class.
- There is an underlying assumption that training the generator to perform
- transformations which leave the base classes in the same class will result
- in the generator performing similarly on the novel class.
- As the generated examples do not correspond with real images, we devised
- the following test to check if they are from the correct class: we first
- train a classifier on all examples of the base and novel classes, this
- classifier serves as our oracle.
- We expect that this classifier will recognize the generated images from
- samples of the novel class as instances of the novel class, with high probabili
-ty.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-At this point we also provide a comparison between the standard method of
- generating data - choosing a category at random, and our 
-\begin_inset Quotes eld
-\end_inset
-
-smart selection
-\begin_inset Quotes erd
-\end_inset
-
- of a category.
- We show that this new method provides some improvement over the standard
- method of generation.
- Figure 5 plots this comparison - random category selection in blue and
- 
-\begin_inset Quotes eld
-\end_inset
-
-smart selection
-\begin_inset Quotes erd
-\end_inset
-
- in orange.
- The 
-\begin_inset Formula $X$
-\end_inset
-
- axis corresponds with the class removed while training the generator -
- this is the novel class.
- Note the rightmost column which depicts the average accuracy over all categorie
-s.
- We also provide the parameters we used: The number of neurons used for
- the generators hidden layers: 
-\begin_inset Formula $256$
-\end_inset
-
-, and the parameter 
-\begin_inset Formula $\lambda=0.95$
-\end_inset
-
- used in the loss function.
- These were discovered via cross validation.
- We fix these parameters from here on
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Accuracy Acheived on Generated Data + Comparison of Methods - MNIST
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename images/accuracy_on_generated_MNIST.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Task 2: Samples Generated have Significant Variation
-\end_layout
-
-\begin_layout Standard
-Notice that this first task could be achieved trivially by returning the
- sample received as it is.
- If the oracle classifier recognizes this sample to be from its correct
- class, this trivial method will achieve 100% accuracy in the previous test
- we provided.
- Of course this will not provide for any additional capacity for generalization.
- 
-\begin_inset Newline newline
-\end_inset
-
-Thus, we must also evaluate the generators ability to induce variation in
- the generated samples.
- We do this by clustering all of the novel class's data and assigning each
- generated example to a cluster.
- As we have seen before, using data from more clusters provides for better
- generalization capacity.
- We now perform the following test, using the MNIST dataset: from each of
- the clusters we draw a single sample, we then generate 
-\begin_inset Formula $256$
-\end_inset
-
- new samples from it using our generator.
- We then count the number of clusters these samples came from.
- As a sanity check we also re-evaluated the accuracy achieved by the oracle
- classifier and ensured that it was sufficiently high as before.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-The average number of unique clusters the data came from was:
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $5.84$
-\end_inset
-
- for the standard method of random category selection.
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $5.62$
-\end_inset
-
- for our 
-\begin_inset Quotes eld
-\end_inset
-
-smart
-\begin_inset Quotes erd
-\end_inset
-
- category selection.
-\end_layout
-
-\begin_layout Standard
-We conclude that the generator does indeed supply variance in the generated
- data.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Comparing the Generator's Performance on the Different Datasets
-\end_layout
-
-\begin_layout Standard
-At this point, after long hours of trying out different hyper-parameters
- we could not arrive at significant accuracy on generated samples from the
- X-ray dataset.
- Note that our architecture was able to achieve high accuracies with both
- the MNIST dataset and the CIFAR10 dataset.
- 
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-We attribute this difference to the noisy labels of the X-ray dataset.
- We could not train a DCNN to achieve an accuracy of higher than 25% on
- this data.
- This is probably due to the image size, the similarity between the disease
- conditions and the methods of gathering this data's labels (described in
- section 
-\begin_inset Formula $2.1$
-\end_inset
-
-).
- We conclude that achieving a sufficient accuracy on the base categories
- is a pre-requisite to performing low-shot learning on a dataset.
- Training the generator using the loss from the classifier trained on the
- base classes in this case simply adds noise to the training.
-\end_layout
-
-\begin_layout Subsection
-Training A Classifier On Generated Data
-\end_layout
-
-\begin_layout Standard
-We first performed the experiment we have seen in the original paper: for
- each 
-\begin_inset Formula $n$
-\end_inset
-
- in 
-\begin_inset Formula $\{1,2,5,10,20\}$
-\end_inset
-
- we generate 
-\begin_inset Formula $20-n$
-\end_inset
-
- new samples and plot the accuracy achieved.
- We were able to recreate the results achieved in the paper - improvement
- for small 
-\begin_inset Formula $n$
-\end_inset
-
- (in the paper only for 
-\begin_inset Formula $n=1,2$
-\end_inset
-
-).
- Figure 6 shows these results.
+Results From the Original Paper
 \end_layout
 
 \begin_layout Standard
@@ -1330,67 +1364,13 @@ Accuracy for Novel Class by Number of Samples Given
 
 \end_layout
 
-\begin_layout Standard
-Note that in the paper they have used top-5 accuracy so the exact accuracy
- we achieved is in a different order of magnitude.
- Figure 7 shows the results of this experiment for a single class from CIFAR10.
- 
+\begin_layout Subsection
+Accuracy by Number of Examples Generated
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 placement H
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Accuracy Over number of Original Samples Given
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /Users/jonathan.somer/School/Advanced ML/AdvancedMachineLearningCourse/project/results/cifar_overnight_2.9_9:35/128_0.500000/low_shot_1.png
-	width 8cm
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
- 
-\begin_inset Newline newline
-\end_inset
-
-We decided to implement yet another test.
- What we believe to be the most significant for a production setting is
- achieving the maximum accuracy possible for a given constant number of
- examples given.
- We plotted this exactly, using a constant number of 
-\begin_inset Formula $5$
-\end_inset
-
- examples.
- Figure 8 shows the results.
- We see an initial increase using both methods, followed by a decrease.
- We believe that the generated data is noisy and from some amount of generated
- samples, the proportion of true samples to generated samples becomes such
- that accuracy is impaired.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
 wide false
 sideways false
 status collapsed
@@ -1409,59 +1389,13 @@ Accuracy for Novel Class by Number of Samples Generated
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename /Users/jonathan.somer/School/Advanced ML/AdvancedMachineLearningCourse/project/results/cifar_overnight_2.9_9:35/128_0.500000/generated_test_1.png
+	filename images/generated_test_1.png
 	width 8cm
 
 \end_inset
 
 
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-Conclusion
-\end_layout
-
-\begin_layout Standard
-We started this project with the goal of achieving high precision low-shot
- learning on a large-scale, high resolution medical dataset.
- As we progressed we have found that our focus moved to coming up with novel
- ways to evaluate and visualize this method of low-shot-learning.
- Given the results we have achieved we conclude that many of the underlying
- assumptions for this model are indeed correct.
- We also suggest that some alternative architectures be considered for the
- generator as it fails to generate data that is of high enough quality to
- learn from.
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-One of the most interesting insights we have found is that there exists
- a significant gap between the ability of data to be recognizable as part
- of some class (by a classifier trained on that class) and data that can
- be used to learn a new class.
- We have seen that our oracle classifier can generate examples that can
- be recognized as elements of a class with great consistency, but a new
- classifier, trained on these instances does not generalize well.
-\begin_inset Newline newline
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset bibtex
-LatexCommand bibtex
-btprint "btPrintAll"
-bibfiles "low_show_learning"
-options "plain"
 
 \end_inset
 
