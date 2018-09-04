@@ -79,7 +79,31 @@ Low-Shot-Learning of Diseases in Chest X-Rays via Hallucination
 \end_layout
 
 \begin_layout Author
-Matan Harel 10%, Uri Avron 50% & Jonathan Somer 40%
+Matan Harel
+\begin_inset space \quad{}
+\end_inset
+
+Uri Avron
+\begin_inset space \quad{}
+\end_inset
+
+Jonathan Somer
+\begin_inset space \quad{}
+\end_inset
+
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Tel Aviv University, Tel Aviv, Israel.
+ Correspondence to: Uri Avron <uriavron@gmail.com>, Jontahan Somer <somer@mail.tau.
+ac.il>, Matan Harel <matan.harel.mh@gmail.com>
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -260,7 +284,7 @@ Our Approach
 \end_layout
 
 \begin_layout Standard
-The method is composed of 3 parts:
+The method is composed of 4 parts:
 \end_layout
 
 \begin_layout Enumerate
@@ -334,8 +358,8 @@ Image sizes are
 \end_inset
 
  pixels.
- These are relatively large images, recall MNIST images are 
-\begin_inset Formula $28\times28$
+ These are relatively large images, recall CIFAR images are 
+\begin_inset Formula $32\times32$
 \end_inset
 
 .
@@ -492,7 +516,11 @@ solve analogies
 \begin_inset Formula $x$
 \end_inset
 
-.
+ (see part 
+\begin_inset Formula $3.3$
+\end_inset
+
+ for further evaluation of the generator's performance).
  
 \begin_inset Newline newline
 \end_inset
@@ -579,9 +607,10 @@ For each quadruplet
 .
  In order to do so we minimize the loss function: 
 \begin_inset Formula 
-\[
-\lambda MSE(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),c_{2}^{B})+(1-\lambda)L_{cls_{BASE}}(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),B)
-\]
+\begin{align*}
+\lambda MSE(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),c_{2}^{B})\\
++(1-\lambda)L_{cls_{BASE}}(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),B)
+\end{align*}
 
 \end_inset
 
@@ -599,62 +628,545 @@ For each quadruplet
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection
+Generating New Examples for a Novel Class
+\end_layout
+
+\begin_layout Standard
+Assume we have received 
+\begin_inset Formula $n$
+\end_inset
+
+ examples of some novel category.
+ Generating a new example is done by sampling one of these examples - 
+\begin_inset Formula $\phi(x)$
+\end_inset
+
+, choosing a a base class 
+\begin_inset Formula $A$
+\end_inset
+
+ , and from it two centroids - 
+\begin_inset Formula $c_{1}^{A},c_{2}^{A}$
+\end_inset
+
+.
+ We then apply the generator to this triplet and use 
+\begin_inset Formula $G(c_{1}^{A},c_{2}^{A},\langle\phi(x))$
+\end_inset
+
+ as a new example.
 \begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+In the paper, the choice of category and centroids was performed uniformly
+ at random.
+ Recall that our goal is to compensate for the lack of intra-class variation
+ contained within the samples of the novel class.
+ Thus, we would like to generate this variation utilizing other classes.
+ We propose a novel way of performing this selection.
+ We attempt to increase the likelihood that the variation within the chosen
+ base class 
+\begin_inset Formula $A$
+\end_inset
+
+ will be transferable to the novel class.
+ Recall that during the feature representation phase we have trained a classifie
+r over the base classes.
+ We suggest that by applying this classifier on the novel data we will gain
+ some insight into which classes might possibly carry greater transferability
+ to the novel class.
+ To illustrate this: when treating the 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ class in the CIFAR data set as a novel class, the classifier used in the
+ feature extraction phase was trained over the remaining classes: [airplane,
+ automobile, bird, deer, dog, frog, horse, ship, truck].
+ Applying this classifier to predict the class of a 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ example results in 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ in many cases.
+ It is very likely that the variation in the dog class is much highly relevant
+ to the cat class than for instance the variation in the airplane class.
+ Dogs and cats appear in similar conditions whereas (we hope..) that airplanes
+ and cats do not.
+ 
+\end_layout
+
+\begin_layout Subsection
+Training a Classifier on Generated Data
+\end_layout
+
+\begin_layout Standard
+The main consideration here is that the low-shot setting creates a significant
+ class imbalance.
+ In order to fix this we follow the paper and sample the training data uniformly
+ over classes and uniformly within classes.
+ 
+\end_layout
+
+\begin_layout Section
+Experiments
+\end_layout
+
+\begin_layout Subsection
+Evaluating Clustering over Feature Space
+\end_layout
+
+\begin_layout Standard
+One of the assumptions behind this model is that clustering over feature
+ space results in capturing the variation in the data.
+ We used the K-Means algorithm in order to cluster the data.
+ Recall that K-Means produces centroids that are not necessarily in the
+ original set of points.
+ So in order to test if these centroids capture a variation in the data
+ we plotted for first found for each centroid the 4 examples (features)
+ closes to it.
+ We then plotted the 4 images who resulted in these 4 examples.
+ Figures 1 and 2 validate the assumption that the clustering grasps the
+ intra class variation.
+ Note the total number of clusters was 30 and we randomly chose 4 to display.
+ The results in figures 1,2 also served as a validation that our feature
+ extractor captured features that are also meaningful in 
+\begin_inset Quotes eld
+\end_inset
+
+human
+\begin_inset Quotes erd
+\end_inset
+
+ terms.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Clustering over Feature Space Captures Intra-class Variation - Digits
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster1: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_1_1.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster2: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_1s_2.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster3: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_1s_3.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster4: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_1s_4.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Clustering over Feature Space Captures Intra-class Variation - Cats
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster1: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_1.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster2: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_2.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster3: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_4.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Cluster4: 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/clustered_cats_3.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Connection Between Number of Clusters Used in Training and Test Accuracy
+ Achieved
+\end_layout
+
+\begin_layout Standard
+Our generator is intended to perform transformations which move 
+\begin_inset Quotes eld
+\end_inset
+
+one centroid to another
+\begin_inset Quotes erd
+\end_inset
+
+, thus creating samples with greater variability for the novel class.
+ There is an underlying assumption here that we must have data from different
+ clusters in order to capture the variation and perform well on the test
+ data.
+ We wanted to test this assumption before testing the use of generated data.
+ We first plot for each dataset the accuracy achieved by number of unique
+ samples used for training.
+ Figures 3 and 4 show that the growth is logarithmic in the number of samples.
+ We now fix the sample size and test how the number of clusters from which
+ the training data is taken affects the accuracy.
+ We chose to use 256 samples as we have seen that the returns in accuracy
+ are diminishing from that point forward.
+ Figures 5 and 6 show that taking data from more centroids does indeed increase
+ the models capacity to generalize on the test set.
+ All results are averaged over 5 runs.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Achieved by Number of Unique Samples Trained On - CIFAR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/mnist_acc_by_num_samples.png
+	display false
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Achieved by Number of Clusters Data is Sampled From - CIFAR (Fixed
+ Number of Unique Samples)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/acc_by_num_clusters.png
+	display false
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Evaluating the Performance of the Generator
+\end_layout
+
+\begin_layout Standard
+In essence, the generator must perform well on two distinct tasks.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Task 1: Transformations Generate new Instances of the Same Class 
+\end_layout
+
+\begin_layout Standard
+Given a sample from a novel class the generator must generate samples which
+ are from the same class.
+ This is non-trivial since it has never trained on data from this class.
+ There is an underlying assumption that training the generator to perform
+ transformations which leave the base classes in the same class will result
+ in the generator performing similarly on the novel class.
+ As the generated examples do not correspond with real images, we devised
+ the following test to check if they are from the correct class: we first
+ train a classifier on all examples of the base and novel classes, this
+ classifier serves as our oracle.
+ We expect that this classifier will recognize the generated images from
+ samples of the novel class as instances of the novel class.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+At this point we also provide a comparison between the standard method of
+ generating data - choosing a category at random, and our 
+\begin_inset Quotes eld
+\end_inset
+
+smart selection
+\begin_inset Quotes erd
+\end_inset
+
+ of a category.
+ We show that this new method provides some improvement over the standard
+ method of generation.
+ Figure 5 plots this comparison - random category selection in blue and
+ 
+\begin_inset Quotes eld
+\end_inset
+
+smart selection
+\begin_inset Quotes erd
+\end_inset
+
+ in orange.
+ The 
+\begin_inset Formula $X$
+\end_inset
+
+ axis corresponds with the class removed while training the generator -
+ this is the novel class.
+ Note the rightmost column which depicts the average accuracy over all categorie
+s.
+ We also provide the parameters we used: The number of neurons used for
+ the generators hidden layers: 
+\begin_inset Formula $256$
+\end_inset
+
+, and the parameter 
+\begin_inset Formula $\lambda=0.95$
+\end_inset
+
+ used in the loss function.
+ These were discovered via cross validation.
+ We fix these parameters from here on
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Accuracy Acheived on Generated Data + Comparison of Methods - MNIST
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/accuracy_on_generated_MNIST.png
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
 \end_layout
 
 \begin_layout Subsubsection
-Evaluating the Generalization Capacity of the Generator
+Task 2: Samples Generated have Significant Variation
 \end_layout
 
 \begin_layout Standard
-We train the generator on one set of classes, but then use it to generate
- data for new classes.
- Does a generator trained to perform transformations that stay within one
- set of classes respect this constraint on a novel class it has never seen
- before? 
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-The authors of the paper in which this concept is presented do not address
- this issue directly and we wished to test this explicitly.
- In order to do so we trained another - 
-\begin_inset Quotes eld
-\end_inset
-
-all knowing
-\begin_inset Quotes erd
-\end_inset
-
- classifier.
- This classifier was trained on the feature vectors of all classes including
- many examples of the novel class.
- We assume that if the generator generalizes well, then the transformations
- it performs on an example from a novel class it has never seen before the
- output will also remain within the same class.
- 
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-The results show that this is indeed the case:
-\end_layout
-
-\begin_layout Quote
-++BENCHMARK PLOT++
-\end_layout
-
-\begin_layout Section
-Experiments
+Notice that this first task could be achieved trivially by returning the
+ sample received as it is.
+ If the oracle classifier recognizes this sample to be from its correct
+ class, this trivial method will achieve 100% accuracy in the previous test
+ we provided.
+ Of course this will not provide for any additional capacity for generalization.
+ Thus, we must also evaluate the generators ability to induce variation
+ in the generated samples.
+ We do this by clustering all of the novel class's data and assigning each
+ generated example to a cluster.
+ As we have seen before, using data from more clusters provides for better
+ generalization capacity.
 \end_layout
 
 \begin_layout Enumerate
@@ -668,22 +1180,12 @@ figures and results.
  
 \end_layout
 
-\begin_layout Bibliography
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-label "Low-shot Visual Recognition by Shrinking and Hallucinating Features"
-key "key-1"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Bibliography
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-label "ChestX-ray8: Hospital-scale Chest X-ray Database and Benchmarks "
-key "key-2"
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "low_show_learning"
+options "plain"
 
 \end_inset
 
