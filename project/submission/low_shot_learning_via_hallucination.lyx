@@ -603,7 +603,7 @@ One of the assumptions behind this model is that clustering over feature
  we plotted for first found for each centroid the 4 features closest to
  it.
  We then plotted the 4 images who resulted in these 4 examples.
- Figures 1 and 2 validate the assumption that the clustering grasps the
+ Figures 1 and 6 validate the assumption that the clustering grasps the
  intra class variation.
  Note that the total number of clusters was 30 and we randomly chose 4 to
  display.
@@ -727,14 +727,14 @@ one centroid to another
  We wanted to test this assumption before testing the use of generated data.
  We first plot for each dataset the accuracy achieved by the number of unique
  samples used for training.
- Figure 3 in the appendix shows that the growth is logarithmic in the number
+ Figure 5 in the appendix shows that the growth is logarithmic in the number
  of samples.
  We now fix the sample size and test how the number of clusters from which
  the training data is taken affects the accuracy.
  We chose to use 256 samples as we have seen that the growth in accuracy
  diminishes from that point forward.
- Figures 5 and 6 show that taking data from more centroids does indeed increase
- the model's capacity to generalize on the test set.
+ Figures 2 and ??? show that taking data from more centroids does indeed
+ increase the model's capacity to generalize on the test set.
  All results are averaged over 5 runs.
 \end_layout
 
@@ -823,7 +823,7 @@ smart selection
  of a category.
  We show that this new method provides some improvement over the standard
  method of generation.
- Figure 5 plots this comparison - random category selection in blue and
+ Figure 3 plots this comparison - random category selection in blue and
  
 \begin_inset Quotes eld
 \end_inset
@@ -1040,7 +1040,7 @@ We first perform the following experiment from
 \end_inset
 
 ).
- Figure 6 in the appendix shows the results from 
+ Figure 7 in the appendix shows the results from 
 \begin_inset Formula $[1]$
 \end_inset
 
@@ -1050,7 +1050,8 @@ We first perform the following experiment from
 \begin_layout Standard
 Note that in the paper they have used top-5 accuracy so the exact accuracy
  we achieved is in a different order of magnitude.
- Figure 7 shows the results of this experiment for a single class from CIFAR10.
+ Figure ??? shows the results of this experiment for a single class from
+ CIFAR10.
  
 \end_layout
 
