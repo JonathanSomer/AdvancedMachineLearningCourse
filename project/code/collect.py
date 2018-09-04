@@ -86,7 +86,7 @@ def preprocess(dataset_name, n_files, verbose=False):
         save_name = '{0}_for_collection'.format(dataset_name)
 
     read_path = du.read_pickle_path(save_name)
-    if os.path.exists(read_path):
+    if os.path.exists(read_path) and False:
         if verbose:
             update('Loaded dataset from file')
         return joblib.load(read_path)
