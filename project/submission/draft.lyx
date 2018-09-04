@@ -1,0 +1,432 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{icml2018}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Low-Shot-Learning of Diseases in Chest X-Rays via Example Hallucination
+\end_layout
+
+\begin_layout Author
+Matan Harel, Uri Avron & Jonathan Somer
+\end_layout
+
+\begin_layout Abstract
+Around the world, as a part of performing a medical diagnosis, physicians
+ and radiologists analyze millions of MRI, CT and X-Ray images.
+ The accuracy 
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Classifying images into categories is a classical Machine Learning task.
+ In this project we classify Chest X-Ray images into diseases.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Our objective is to answer whether we can use an existing large set of images
+ of healthy patients as well as a large of set of images of patients with
+ some diseases, in order to improve the learning accuracy of new diseases
+ for which we have only a few example images to learn from.
+ This is called Low-Shot-Learning.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The ability to learn from
+\series bold
+ 
+\series default
+very few examples is a hallmark of human visual intelligence.
+ Classical Machine Learning approaches fail to generalize from few examples
+ so new techniques are required for performing Low-Shot-Learning.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Further studies in this direction may lead to significant results that can
+ assist clinicians, who will be able to diagnose rare diseases or diseases
+ for which we don't have large datasets.
+\end_layout
+
+\begin_layout Section*
+Method
+\end_layout
+
+\begin_layout Subsection*
+At a high level:
+\end_layout
+
+\begin_layout Standard
+Given only a few images of a new disease, we use an Artifical Neural Network
+ to generate many new examples for this same disease.
+ We then use those new generated images, as well as those that were given
+ to us, in order to train another Artificial Neural Network to perform the
+ classification task.
+ This second network uses classical Machine Learning Methods which generally
+ rely on large amounts of data.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The method for generating new training examples is based on the insight
+ that variation within one category might be transferable to another category.
+ For instance, a certain variation in anatomy may impact the chest images
+ similarly regardless of the disease.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This method is based on a 2016 paper by Bharath Hariharan and Ross Girshick
+ 
+\begin_inset Formula $[1]$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+The Details:
+\end_layout
+
+\begin_layout Subsubsection*
+Dataset:
+\end_layout
+
+\begin_layout Standard
+In May 2017 the "ChestX-ray8" dataset was presented by a team of researchers
+ from the NIH 
+\begin_inset Formula $[2]$
+\end_inset
+
+.
+ In the paper they present the methods used to generate the data which has
+ the following properties:
+\end_layout
+
+\begin_layout Itemize
+108,948 images of 32,717 patients.
+\end_layout
+
+\begin_layout Itemize
+8 disease labels text-mined from radiological reports.
+\end_layout
+
+\begin_layout Itemize
+Each image is labeled with one or more of these, or 'Normal'.
+ 
+\end_layout
+
+\begin_layout Itemize
+Labeling: classes are very imbalanced.
+ For example: 84K images were tagged 'Normal' and around 1K were tagged
+ with 'Cardiomegaly '.
+\end_layout
+
+\begin_layout Itemize
+Image sizes are 1024 by 1024 pixels.
+\end_layout
+
+\begin_layout Standard
+Along with the data, they also provide a benchmark for the task of classifying
+ diseases using a DCNN they have trained.
+\end_layout
+
+\begin_layout Subsubsection*
+Feature Representation of Images:
+\end_layout
+
+\begin_layout Standard
+Start with a set of base classes of diseases for which we have a relatively
+ large amount of data for each class.
+ We then extract features for the images using the ResNet50 network pre-trained
+ on the imagenet dataset (leaving out the last fully connected layers).
+ Then we train a classifier on the set of base classes, denot this classifier
+ by 
+\begin_inset Formula $cls_{BASE}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Training the Generator:
+\end_layout
+
+\begin_layout Standard
+We now train a generator 
+\begin_inset Formula $G$
+\end_inset
+
+ for hallucinating images for novel classes.
+ We train 
+\begin_inset Formula $G$
+\end_inset
+
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+solve analogies
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula $G$
+\end_inset
+
+ will receive as input the concatenated feature vectors 
+\begin_inset Formula $\langle\phi(b_{1}),\phi(b_{2}),\phi(x)\rangle$
+\end_inset
+
+ where 
+\begin_inset Formula $b_{1},b_{2}$
+\end_inset
+
+ are two images from the same base class and 
+\begin_inset Formula $x$
+\end_inset
+
+ is a novel image.
+ For this input 
+\begin_inset Formula $G$
+\end_inset
+
+ will output a vector who solves the analogy 
+\begin_inset Formula $b_{1}:b_{2}\Rightarrow x:?$
+\end_inset
+
+ Thus applying some transformation that stays within class 
+\begin_inset Formula $B$
+\end_inset
+
+ to the new image 
+\begin_inset Formula $x$
+\end_inset
+
+, hopefully resulting in some vector that with high probability will be
+ classified as the same class as 
+\begin_inset Formula $x$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+The method for training 
+\begin_inset Formula $G$
+\end_inset
+
+ is as follows: 
+\begin_inset Formula $G$
+\end_inset
+
+ will be a 3 layer multi-layer-perceptron.
+ The training data for 
+\begin_inset Formula $G$
+\end_inset
+
+ is generated by creating completed analogies - quadruplets of feature vectors,
+ from the base classes by clustering each of the base classes into 
+\begin_inset Formula $k$
+\end_inset
+
+ clusters.
+ Then for each two classes 
+\begin_inset Formula $A,B$
+\end_inset
+
+, for each pair of centroids, 
+\begin_inset Formula $c_{1}^{A},c_{2}^{A}$
+\end_inset
+
+ from class 
+\begin_inset Formula $A$
+\end_inset
+
+ we find the pair 
+\begin_inset Formula $c_{1}^{B},c_{2}^{B}$
+\end_inset
+
+ such that the cosine distance between 
+\begin_inset Formula $c_{1}^{A}-c_{2}^{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{1}^{B}-c_{2}^{B}$
+\end_inset
+
+ is minimized.
+ 
+\begin_inset Newline newline
+\end_inset
+
+For each quadruplet 
+\begin_inset Formula $\langle c_{1}^{A},c_{2}^{A},c_{1}^{B},c_{2}^{B}\rangle$
+\end_inset
+
+ we feed the triplet: 
+\begin_inset Formula $\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle$
+\end_inset
+
+ into 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ We want 
+\begin_inset Formula $G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle)$
+\end_inset
+
+ to be as close as possible to 
+\begin_inset Formula $c_{2}^{B}$
+\end_inset
+
+ and also remain within the class 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ In order to do so we minimize the loss function: 
+\begin_inset Formula 
+\[
+\lambda MSE(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),c_{2}^{B})+L_{cls_{BASE}}(G(\langle c_{1}^{A},c_{2}^{A},c_{1}^{B}\rangle),B)
+\]
+
+\end_inset
+
+ Where we have 
+\begin_inset Formula $MSE$
+\end_inset
+
+ the mean square error between the generator's output and the true target.
+ And 
+\begin_inset Formula $L_{cls_{BASE}}$
+\end_inset
+
+ the log-loss of the classifier w.r.t the true class of 
+\begin_inset Formula $c_{2}^{B}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Generating Data:
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Low-shot Visual Recognition by Shrinking and Hallucinating Features"
+key "key-1"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "ChestX-ray8: Hospital-scale Chest X-ray Database and Benchmarks "
+key "key-2"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
