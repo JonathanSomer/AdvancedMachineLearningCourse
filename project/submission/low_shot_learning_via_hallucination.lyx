@@ -1402,5 +1402,24 @@ Accuracy for Novel Class by Number of Samples Generated
 
 \end_layout
 
+\begin_layout Subsection
+Code For the Project
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/JonathanSomer/AdvancedMachineLearningCourse/tree/master/projec
+t/code
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document
