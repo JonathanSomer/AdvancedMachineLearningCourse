@@ -283,29 +283,15 @@ We  elaborate on the points in which we implemented novel solutions and
 Our Approach
 \end_layout
 
-\begin_layout Standard
-The method is composed of 4 parts:
-\end_layout
-
-\begin_layout Enumerate
-Feature representation learning
-\end_layout
-
-\begin_layout Enumerate
-Training a generator
-\end_layout
-
-\begin_layout Enumerate
-Generating data using the generator
-\end_layout
-
-\begin_layout Enumerate
-Training a classifier using the generated data
+\begin_layout Subsection
+Resources
 \end_layout
 
 \begin_layout Standard
-We first introduce the datasets we used and then describe the method in
- detail.
+We utilized 3 google cloud instances, equipped with Nvidia Tesla V100 GPUs.
+ This setup enabled us to parallelize cross validation and brought down
+ computation time from days to hours for some tasks.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -373,6 +359,31 @@ Along with the data, they also provide a benchmark for the task of classifying
 \end_inset
 
 
+\begin_inset Newline newline
+\end_inset
+
+The method we used is composed of 4 parts:
+\end_layout
+
+\begin_layout Enumerate
+Feature representation learning
+\end_layout
+
+\begin_layout Enumerate
+Training a generator
+\end_layout
+
+\begin_layout Enumerate
+Generating data using the generator
+\end_layout
+
+\begin_layout Enumerate
+Training a classifier using the generated data
+\end_layout
+
+\begin_layout Standard
+We first introduce the datasets we used and then describe the method in
+ detail.
 \end_layout
 
 \begin_layout Subsection
