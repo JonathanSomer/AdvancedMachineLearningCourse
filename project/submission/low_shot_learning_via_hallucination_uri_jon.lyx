@@ -6,6 +6,7 @@
 \origin unavailable
 \textclass article
 \begin_preamble
+\date{}
 \usepackage{icml2018}
 \end_preamble
 \use_default_options true
